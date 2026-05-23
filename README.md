@@ -17,7 +17,7 @@ Kommerzielle Marine-IO-Systeme kosten Hunderte Euro und sind geschlossene Black 
 BoatOpenIO kostet einen Bruchteil und jeder kann es anpassen, erweitern und verbessern.
 
 ```
-Sensor → Klemme → Mini-Platine → MUX → ADS1115 → ESP32 → MQTT → BoatOS
+Sensor → Mini-Platinen-Gehäuse → JST → Hauptplatine → MUX → ADS1115 → ESP32 → MQTT → BoatOS
 ```
 
 ---
@@ -35,24 +35,40 @@ Sensor → Klemme → Mini-Platine → MUX → ADS1115 → ESP32 → MQTT → Bo
 
 **Alles auf Sockeln** – kein Bauteil ist fest verlötet. Defekter ESP32? Neuen aufstecken. Fertig.
 
-### 16 Sensorklemmen
+### Gehäuse-Konzept
 
-Jede Klemme hat:
-- 1x Eingang (Signal vom Sensor)
-- 1x 4-Pin-Sockel für Mini-Platine
-- Verbindung zum MUX-Eingang
+Hauptplatine und Mini-Platinen sind in **separaten Gehäusen** untergebracht:
 
-**4-Pin-Sockel Belegung:**
+- **Hauptgehäuse:** ESP32, MUX, ADS1115, MPU6050 – geschlossen, geschützt
+- **Mini-Platinen-Gehäuse:** je Kanal eines – außen am Hauptgehäuse steckbar
+- **Verbindung:** JST 2-Pin Stecker – einfach abziehen, tauschen, fertig
 
+### 16 Kanäle – Stecker-Belegung
+
+**Signal-Stecker: JST 2-Pin** (×16, je Kanal):
 ```
-Pin 1: Signal IN   → Eingang vom Sensor
-Pin 2: Signal OUT  → Ausgang zum MUX
-Pin 3: GND
-Pin 4: VCC         → 3.3V oder 5V (per Jumper wählbar)
+Pin 1: Signal IN   → Eingang vom Sensor (roh, kann 12V sein)
+Pin 2: Signal OUT  → Aufbereitetes Signal zum MUX (max. 3.3V)
 ```
 
-Passive Mini-Platinen (VT, PD, OPT) bestücken nur Pin 1–3, Pin 4 bleibt frei.
-Aktive Mini-Platinen (ISP mit Arduino/ESP01) nutzen alle 4 Pins.
+**VCC-Leisten am Hauptgehäuse** (nur für aktive Mini-Platinen):
+```
+Leiste A: JST 2-Pin → GND + 3.3V  (für ESP01-Boards)
+Leiste B: JST 2-Pin → GND + 5V    (für Arduino Nano Boards)
+```
+
+**Wer braucht was:**
+
+| Mini-Platine | Signal JST | VCC JST |
+|---|---|---|
+| DIR Jumper | ✅ 2-Pin | – |
+| VT Spannungsteiler | ✅ 2-Pin | Leiste A/B (VCC blind) |
+| PD/PU Pull-down/-up | ✅ 2-Pin | Leiste A/B (VCC blind) |
+| OPT Optokoppler | ✅ 2-Pin | Leiste A/B (VCC blind) |
+| ISP Arduino Nano | ✅ 2-Pin | Leiste B (5V) |
+| ISP ESP01 | ✅ 2-Pin | Leiste A (3.3V) |
+
+Maximal 2 Stecker pro Kanal, minimal 1. Passive Mini-Platinen die nur GND brauchen nutzen Leiste A oder B mit blindem VCC-Pin.
 
 ### Mini-Platinen (steckbar)
 
@@ -61,7 +77,8 @@ Aktive Mini-Platinen (ISP mit Arduino/ESP01) nutzen alle 4 Pins.
 | Spannungsteiler | VT | 12V VDO-Sensoren → 3.3V |
 | Pull-down | PD | Digitale Sensoren, Schalter |
 | Pull-up | PU | Open-Collector Ausgänge |
-| Impuls-Board | ISP | Drehzahl, Durchfluss (Arduino/ESP01) |
+| Schmitt-Trigger | ST | Magnetische Pickup-Sensoren, 50Hz Generatoren |
+| Impuls-Board | ISP | Drehzahl, Durchfluss (Arduino Nano / ESP01) |
 | Optokoppler | OPT | Galvanische Trennung |
 | Jumper / Direkt | DIR | 3.3V Signale direkt |
 
@@ -135,15 +152,15 @@ Kompatibel mit **[BoatOS](https://github.com/bigbrainlabs/BoatOS)** – alle Top
 
 Für Drehzahl und Durchfluss – Signale die schnelle Impulszählung brauchen – gibt es steckbare Impuls-Boards.
 
-Ein Arduino Nano oder ESP01 sitzt auf der Mini-Platine, zählt Impulse, berechnet den Wert und gibt ihn als analoge Spannung an den MUX weiter.
+Ein Arduino Nano oder ESP01 sitzt im Mini-Platinen-Gehäuse, zählt Impulse, berechnet den Wert und gibt ihn als analoge Spannung an den MUX weiter.
 
 ```
-Klemme (Rohimpuls) → Arduino Nano (ISP) → berechneter Wert → MUX → ADS1115 → ESP32
+Sensor (Rohimpuls) → ISP-Gehäuse (Arduino Nano) → berechneter Wert → JST → MUX → ADS1115 → ESP32
 ```
 
 **Vorteil:** Der ESP32 wird nicht durch Interrupts belastet. Timing-kritische Aufgaben werden ausgelagert.
 
-Eigene ISP-Boards für andere Impulsquellen: Pull Request willkommen.
+Eigene ISP-Boards für andere Impulsquellen (z.B. 50Hz Generator, magnetischer Pickup): Pull Request willkommen.
 
 ---
 
@@ -156,6 +173,8 @@ Eigene ISP-Boards für andere Impulsquellen: Pull Request willkommen.
 | VDO Tankgeber | Potentiometer | VT |
 | Batteriespannung 12V | Spannung | VT |
 | Drehzahl (W-Klemme) | Impuls | ISP |
+| Drehzahl (magnetischer Pickup) | AC-Signal | ST + ISP |
+| 50Hz Generator | AC-Signal | ST + ISP |
 | Kraftstoffdurchfluss | Impuls | ISP |
 | Bilgensensor | Digital | PD |
 | Türkontakt | Digital | PD |
@@ -172,8 +191,9 @@ Eigene ISP-Boards für andere Impulsquellen: Pull Request willkommen.
 | CD74HC4067 MUX | ~1€ |
 | ADS1115 (4x) | ~8€ |
 | MPU6050 | ~2€ |
-| Sockel, Klemmen, Platine | ~10€ |
-| **Gesamt** | **~26€** |
+| JST 2-Pin Stecker (×16 + Leisten) | ~3€ |
+| Sockel, Gehäuse, Platine | ~10€ |
+| **Gesamt** | **~29€** |
 
 Kommerzielle Marine-IO-Systeme: 200–500€.
 
@@ -189,6 +209,8 @@ BoatOpenIO/
 │   ├── mini-platinen/
 │   │   ├── VT-spannungsteiler/
 │   │   ├── PD-pulldown/
+│   │   ├── PU-pullup/
+│   │   ├── ST-schmitt-trigger/
 │   │   ├── ISP-impuls/
 │   │   ├── OPT-optokoppler/
 │   │   └── DIR-direkt/
@@ -215,10 +237,10 @@ BoatOpenIO/
 BoatOpenIO ist eine offene Plattform. Jeder kann eigene Mini-Platinen entwerfen und einreichen.
 
 **Anforderungen:**
-- 4-Pin-Sockel: Signal IN (1), Signal OUT (2), GND (3), VCC (4)
-- Passive Platinen: nur Pin 1–3 bestücken, Pin 4 einfach weglassen
-- Aktive Platinen (ISP): alle 4 Pins bestücken
-- VCC per Jumper auf Hauptplatine wählbar: 3.3V oder 5V
+- JST 2-Pin Signal-Stecker: Signal IN (Pin 1), Signal OUT (Pin 2)
+- GND und VCC optional von den Leisten am Hauptgehäuse
+- Passive Platinen: nur Signal JST nötig, ggf. GND von Leiste
+- Aktive Platinen (ISP): Signal JST + VCC JST von Leiste A (3.3V) oder B (5V)
 
 **Einreichen:**
 1. KiCad-Dateien in `hardware/mini-platinen/DEIN-TYP/`
