@@ -1,274 +1,296 @@
 # BoatOpenIO
 
-**Universelles Marine-IO-System – Open Source, modular, vollständig konfigurierbar**
+**Universal Marine IO System – Open Source, modular, fully configurable**
 
-> *„Steck rein, konfiguriere, fertig."*
+> *"Plug in, configure, done."*
 
-BoatOpenIO ist eine offene Hardware-Plattform für die Sensoranbindung auf Booten. Jede der 16 Sensorklemmen kann per Software frei einem der bis zu 16 Eingangskanäle zugewiesen werden. Steckbare Mini-Platinen übernehmen die Signalaufbereitung – ohne Löten, ohne Umbau.
+BoatOpenIO is an open hardware platform for sensor integration on boats. Each of the 16 sensor terminals can be freely assigned to any of the up to 16 input channels via software. Pluggable mini-boards handle signal conditioning — no soldering, no rewiring.
 
-Teil der **[Logbuch ohne Pose](https://github.com/bigbrainlabs/logbuch-ohne-pose)** Serie.
-
----
-
-## Das Konzept
-
-Kommerzielle Marine-IO-Systeme kosten Hunderte Euro und sind geschlossene Black Boxes.
-
-BoatOpenIO kostet einen Bruchteil und jeder kann es anpassen, erweitern und verbessern.
-
-```
-Sensor → Mini-Platinen-Gehäuse → JST → Hauptplatine → MUX → ADS1115 → ESP32 → MQTT → BoatOS
-```
+Part of the **[Logbuch ohne Pose](https://github.com/bigbrainlabs/logbuch-ohne-pose)** series.
 
 ---
 
-## Hardware-Architektur
+## Concept
 
-### Hauptplatine
+Commercial marine IO systems cost hundreds of euros and are closed black boxes.
 
-| Komponente | Beschreibung | Sockel |
-|------------|-------------|--------|
-| ESP32 WROOM-32 | Mikrocontroller, WLAN, I2C, MUX-Steuerung | ✅ |
-| CD74HC4067 | 16:1 Analog-Multiplexer | ✅ |
-| ADS1115 (1–4x) | 16-bit ADC, I2C, Adressen 0x48–0x4B | ✅ |
-| MPU6050 | 6-DOF IMU, Neigung/Beschleunigung | ✅ |
+BoatOpenIO costs a fraction of that — and anyone can adapt, extend, and improve it.
 
-**Alles auf Sockeln** – kein Bauteil ist fest verlötet. Defekter ESP32? Neuen aufstecken. Fertig.
-
-### Gehäuse-Konzept
-
-Hauptplatine und Mini-Platinen sind in **separaten Gehäusen** untergebracht:
-
-- **Hauptgehäuse:** ESP32, MUX, ADS1115, MPU6050 – geschlossen, geschützt
-- **Mini-Platinen-Gehäuse:** je Kanal eines – außen am Hauptgehäuse steckbar
-- **Verbindung:** JST 2-Pin Stecker – einfach abziehen, tauschen, fertig
-
-### 16 Kanäle – Stecker-Belegung
-
-**Signal-Stecker: JST 2-Pin** (×16, je Kanal):
 ```
-Pin 1: Signal IN   → Eingang vom Sensor (roh, kann 12V sein)
-Pin 2: Signal OUT  → Aufbereitetes Signal zum MUX (max. 3.3V)
+Sensor → Mini-Board Housing → JST → Main Board → MUX → ADS1115 → ESP32 → MQTT → BoatOS
 ```
 
-**VCC-Leisten am Hauptgehäuse** (nur für aktive Mini-Platinen):
+---
+
+## Hardware Architecture
+
+### Main Board
+
+| Component | Description | Socketed |
+|-----------|-------------|----------|
+| ESP32 WROOM-32 | Microcontroller, WiFi, I2C, MUX control | ✅ |
+| CD74HC4067 | 16:1 analog multiplexer | ✅ |
+| ADS1115 (1–4×) | 16-bit ADC, I2C, addresses 0x48–0x4B | ✅ |
+| MPU6050 | 6-DOF IMU, tilt/acceleration | ✅ |
+
+**Everything socketed** — no component is soldered directly. Faulty ESP32? Swap it out. Done.
+
+### Housing Concept
+
+Main board and mini-boards are housed in **separate enclosures**:
+
+- **Main housing:** ESP32, MUX, ADS1115, MPU6050 — closed, protected
+- **Mini-board housing:** one per channel — pluggable on the outside of the main housing
+- **Connection:** JST 2-pin connector — just unplug, swap, done
+
+### 16 Channels – Connector Layout
+
+**Signal connector: JST 2-pin** (×16, one per channel):
 ```
-Leiste A: JST 2-Pin → GND + 3.3V  (für ESP01-Boards)
-Leiste B: JST 2-Pin → GND + 5V    (für Arduino Nano Boards)
+Pin 1: Signal IN   → input from sensor (raw, can be 12V)
+Pin 2: Signal OUT  → conditioned signal to MUX (max. 3.3V)
 ```
 
-**Wer braucht was:**
+**VCC rails on main housing** (only for active mini-boards):
+```
+Rail A: JST 2-pin → GND + 3.3V  (for ESP01 boards)
+Rail B: JST 2-pin → GND + 5V    (for Arduino Nano boards)
+```
 
-| Mini-Platine | Signal JST | VCC JST |
+**Who needs what:**
+
+| Mini-Board | Signal JST | VCC JST |
 |---|---|---|
-| DIR Jumper | ✅ 2-Pin | – |
-| VT Spannungsteiler | ✅ 2-Pin | Leiste A/B (VCC blind) |
-| PD/PU Pull-down/-up | ✅ 2-Pin | Leiste A/B (VCC blind) |
-| OPT Optokoppler | ✅ 2-Pin | Leiste A/B (VCC blind) |
-| ISP Arduino Nano | ✅ 2-Pin | Leiste B (5V) |
-| ISP ESP01 | ✅ 2-Pin | Leiste A (3.3V) |
+| DIR Direct | ✅ 2-pin | – |
+| VT Voltage divider | ✅ 2-pin | Rail A/B (VCC blind) |
+| PD/PU Pull-down/-up | ✅ 2-pin | Rail A/B (VCC blind) |
+| OPT Optocoupler | ✅ 2-pin | Rail A/B (VCC blind) |
+| ISP Arduino Nano | ✅ 2-pin | Rail B (5V) |
+| ISP ESP01 | ✅ 2-pin | Rail A (3.3V) |
 
-Maximal 2 Stecker pro Kanal, minimal 1. Passive Mini-Platinen die nur GND brauchen nutzen Leiste A oder B mit blindem VCC-Pin.
+Maximum 2 connectors per channel, minimum 1. Passive mini-boards that only need GND use Rail A or B with a blind VCC pin.
 
-### Mini-Platinen (steckbar)
+### Mini-Boards (pluggable)
 
-| Typ | Kürzel | Verwendung |
-|-----|--------|------------|
-| Spannungsteiler | VT | 12V VDO-Sensoren → 3.3V |
-| Pull-down | PD | Digitale Sensoren, Schalter |
-| Pull-up | PU | Open-Collector Ausgänge |
-| Schmitt-Trigger | ST | Magnetische Pickup-Sensoren, 50Hz Generatoren |
-| Impuls-Board | ISP | Drehzahl, Durchfluss (Arduino Nano / ESP01) |
-| Optokoppler | OPT | Galvanische Trennung |
-| Jumper / Direkt | DIR | 3.3V Signale direkt |
+| Type | Code | Use case |
+|------|------|----------|
+| Voltage divider | VT | 12V VDO sensors → 3.3V |
+| Pull-down | PD | Digital sensors, switches |
+| Pull-up | PU | Open-collector outputs |
+| Schmitt trigger | ST | Magnetic pickup sensors, 50Hz generators |
+| Pulse board | ISP | RPM, flow (Arduino Nano / ESP01) |
+| Optocoupler | OPT | Galvanic isolation |
+| Direct / jumper | DIR | 3.3V signals directly |
 
-**Eigene Mini-Platinen entwerfen und einreichen** – Pull Requests willkommen!
+**Design and submit your own mini-boards** — pull requests welcome!
 
-### Multiplexer-Logik
+### Multiplexer Logic
 
-Der CD74HC4067 hat 16 Eingänge und einen gemeinsamen SIG-Ausgang.
+The CD74HC4067 has 16 inputs and a shared SIG output.
 
-4 Steuerpins (S0–S3) vom ESP32 wählen per Binärcode den aktiven Kanal:
+4 control pins (S0–S3) from the ESP32 select the active channel via binary code:
 
 ```
-S3 S2 S1 S0 → aktiver Kanal
- 0  0  0  0 → Klemme 1
- 0  0  0  1 → Klemme 2
+S3 S2 S1 S0 → active channel
+ 0  0  0  0 → terminal 1
+ 0  0  0  1 → terminal 2
  ...
- 1  1  1  1 → Klemme 16
+ 1  1  1  1 → terminal 16
 ```
 
-Der SIG-Pin geht an alle ADS1115-Eingänge parallel. Per Software wählt man welchen ADS-Kanal man liest.
+The SIG pin is connected to all ADS1115 inputs in parallel. Software selects which ADS channel to read.
 
-### Bis zu 4x ADS1115
+### Up to 4× ADS1115
 
 ```
-ADS1 @ I2C 0x48  →  A0, A1, A2, A3  (4 Kanäle)
-ADS2 @ I2C 0x49  →  A0, A1, A2, A3  (4 Kanäle)
-ADS3 @ I2C 0x4A  →  A0, A1, A2, A3  (4 Kanäle)
-ADS4 @ I2C 0x4B  →  A0, A1, A2, A3  (4 Kanäle)
-                                      = 16 Ziele
+ADS1 @ I2C 0x48  →  A0, A1, A2, A3  (4 channels)
+ADS2 @ I2C 0x49  →  A0, A1, A2, A3  (4 channels)
+ADS3 @ I2C 0x4A  →  A0, A1, A2, A3  (4 channels)
+ADS4 @ I2C 0x4B  →  A0, A1, A2, A3  (4 channels)
+                                      = 16 targets
 ```
 
 ---
 
-## Software-Konfiguration
+## Software Configuration
 
-Jede Klemme wird in einer JSON-Konfiguration einem ADS-Kanal und Sensortyp zugewiesen:
+Each terminal is assigned to an ADS channel and sensor type via a JSON config:
 
 ```json
 {
   "kanaele": [
-    {"klemme": 1, "ads": 1, "pin": "A0", "typ": "spannungsteiler", "sensor": "batterie1", "einheit": "V"},
-    {"klemme": 2, "ads": 2, "pin": "A3", "typ": "ntc", "sensor": "oeltemperatur", "einheit": "°C"},
-    {"klemme": 3, "ads": 1, "pin": "A1", "typ": "linear", "sensor": "oeldruck", "einheit": "bar"},
-    {"klemme": 4, "ads": 3, "pin": "A0", "typ": "spannungsteiler", "sensor": "tank", "einheit": "%"},
-    {"klemme": 5, "ads": 2, "pin": "A1", "typ": "impuls", "sensor": "drehzahl", "einheit": "rpm"}
+    {"klemme": 1, "ads": 1, "pin": "A0", "sensor": "battery1",     "einheit": "V"},
+    {"klemme": 2, "ads": 2, "pin": "A3", "sensor": "oil_temp",     "einheit": "°C"},
+    {"klemme": 3, "ads": 1, "pin": "A1", "sensor": "oil_pressure", "einheit": "bar"},
+    {"klemme": 4, "ads": 3, "pin": "A0", "sensor": "tank",         "einheit": "%"},
+    {"klemme": 5, "ads": 2, "pin": "A1", "sensor": "rpm",          "einheit": "rpm"}
   ]
 }
 ```
 
-Konfiguration ändern → neu flashen → fertig. Kein Umbau, kein Löten.
+Change configuration → reflash → done. No rewiring, no soldering.
 
 ---
 
-## MQTT-Topics
+## MQTT Topics
 
-Jeder Kanal bekommt automatisch ein eigenes MQTT-Topic:
+Every channel automatically gets its own MQTT topic:
 
 ```
-boat/io/batterie1       → 12.43
-boat/io/oeltemperatur   → 87
-boat/io/oeldruck        → 3.2
-boat/io/tank            → 48
-boat/io/drehzahl        → 1450
+boat/io/battery1       → 12.43
+boat/io/oil_temp       → 87
+boat/io/oil_pressure   → 3.2
+boat/io/tank           → 48
+boat/io/rpm            → 1450
+boat/io/pitch          → 1.2
+boat/io/roll           → -0.5
+boatopenio/status      → online
+boatopenio/uptime      → 3600
 ```
 
-Kompatibel mit **[BoatOS](https://github.com/bigbrainlabs/BoatOS)** – alle Topics werden automatisch erkannt und im Dashboard angezeigt.
+Compatible with **[BoatOS](https://github.com/bigbrainlabs/BoatOS)** — all topics are auto-discovered and shown in the dashboard.
 
 ---
 
-## Impuls-Boards (ISP)
+## Firmware Features
 
-Für Drehzahl und Durchfluss – Signale die schnelle Impulszählung brauchen – gibt es steckbare Impuls-Boards.
+| Feature | Description |
+|---------|-------------|
+| Web UI | Configuration portal at `192.168.4.1`, bilingual DE/EN |
+| Captive Portal | Auto-opens on mobile when connecting to the AP |
+| WiFi AP+STA | Always-on access point + optional router connection |
+| MQTT | Publish all sensor values, LWT, auth support |
+| OTA | Over-the-air firmware updates via ArduinoOTA |
+| mDNS | Reachable as `boatopenio.local` on the local network |
+| Test mode | Simulated sensor data for commissioning without hardware |
+| IMU calibration | Gyro bias at boot + mounting offset via web UI |
+| ADS diagnostics | Live raw voltage readout for all 16 ADC inputs |
+| Watchdog | Automatic restart on firmware hang |
+| Factory reset | GPIO0 hold at boot clears all settings |
 
-Ein Arduino Nano oder ESP01 sitzt im Mini-Platinen-Gehäuse, zählt Impulse, berechnet den Wert und gibt ihn als analoge Spannung an den MUX weiter.
+---
+
+## Pulse Boards (ISP)
+
+For RPM and flow — signals that require fast pulse counting — there are pluggable pulse boards.
+
+An Arduino Nano or ESP01 sits in the mini-board housing, counts pulses, calculates the value and outputs it as an analog voltage to the MUX.
 
 ```
-Sensor (Rohimpuls) → ISP-Gehäuse (Arduino Nano) → berechneter Wert → JST → MUX → ADS1115 → ESP32
+Sensor (raw pulse) → ISP housing (Arduino Nano) → calculated value → JST → MUX → ADS1115 → ESP32
 ```
 
-**Vorteil:** Der ESP32 wird nicht durch Interrupts belastet. Timing-kritische Aufgaben werden ausgelagert.
+**Advantage:** The ESP32 is not burdened by interrupts. Timing-critical tasks are offloaded.
 
-Eigene ISP-Boards für andere Impulsquellen (z.B. 50Hz Generator, magnetischer Pickup): Pull Request willkommen.
-
----
-
-## Unterstützte Sensoren
-
-| Sensor | Typ | Mini-Platine |
-|--------|-----|-------------|
-| VDO Temperatur (NTC) | Widerstand | VT |
-| VDO Öldruck | Widerstand linear | VT |
-| VDO Tankgeber | Potentiometer | VT |
-| Batteriespannung 12V | Spannung | VT |
-| Drehzahl (W-Klemme) | Impuls | ISP |
-| Drehzahl (magnetischer Pickup) | AC-Signal | ST + ISP |
-| 50Hz Generator | AC-Signal | ST + ISP |
-| Kraftstoffdurchfluss | Impuls | ISP |
-| Bilgensensor | Digital | PD |
-| Türkontakt | Digital | PD |
-| Temperatursensor DS18B20 | Digital 1-Wire | eigene Platine |
-| ... | ... | eigene Platine |
+Custom ISP boards for other pulse sources (e.g. 50Hz generator, magnetic pickup): pull request welcome.
 
 ---
 
-## Kosten
+## Supported Sensors
 
-| Komponente | Preis |
-|------------|-------|
-| ESP32 WROOM-32 | ~5€ |
-| CD74HC4067 MUX | ~1€ |
-| ADS1115 (4x) | ~8€ |
-| MPU6050 | ~2€ |
-| JST 2-Pin Stecker (×16 + Leisten) | ~3€ |
-| Sockel, Gehäuse, Platine | ~10€ |
-| **Gesamt** | **~29€** |
-
-Kommerzielle Marine-IO-Systeme: 200–500€.
+| Sensor | Type | Mini-Board |
+|--------|------|------------|
+| VDO temperature (NTC) | Resistance | VT |
+| VDO oil pressure | Linear resistance | VT |
+| VDO tank sender | Potentiometer | VT |
+| Battery voltage 12V | Voltage | VT |
+| RPM (W-terminal) | Pulse | ISP |
+| RPM (magnetic pickup) | AC signal | ST + ISP |
+| 50Hz generator | AC signal | ST + ISP |
+| Fuel flow | Pulse | ISP |
+| Bilge sensor | Digital | PD |
+| Door contact | Digital | PD |
+| DS18B20 temperature | Digital 1-Wire | custom board |
+| ... | ... | custom board |
 
 ---
 
-## Verzeichnisstruktur
+## Cost
+
+| Component | Price |
+|-----------|-------|
+| ESP32 WROOM-32 | ~€5 |
+| CD74HC4067 MUX | ~€1 |
+| ADS1115 (4×) | ~€8 |
+| MPU6050 | ~€2 |
+| JST 2-pin connectors (×16 + rails) | ~€3 |
+| Sockets, housing, PCB | ~€10 |
+| **Total** | **~€29** |
+
+Commercial marine IO systems: €200–500.
+
+---
+
+## Directory Structure
 
 ```
 BoatOpenIO/
 ├── README.md
+├── README_de.md           ← German version
+├── LICENSE
+├── firmware_src/
+│   ├── firmware_src.ino   ← main firmware
+│   ├── webui.h            ← web UI & captive portal
+│   └── data/
+│       └── config.json    ← channel configuration (LittleFS)
 ├── hardware/
-│   ├── hauptplatine/          ← KiCad-Dateien
+│   ├── hauptplatine/      ← KiCad files
 │   ├── mini-platinen/
-│   │   ├── VT-spannungsteiler/
+│   │   ├── VT-voltage-divider/
 │   │   ├── PD-pulldown/
 │   │   ├── PU-pullup/
 │   │   ├── ST-schmitt-trigger/
-│   │   ├── ISP-impuls/
-│   │   ├── OPT-optokoppler/
-│   │   └── DIR-direkt/
+│   │   ├── ISP-pulse/
+│   │   ├── OPT-optocoupler/
+│   │   └── DIR-direct/
 │   └── images/
-├── firmware/
-│   ├── src/
-│   │   ├── main.cpp
-│   │   ├── mux.cpp
-│   │   ├── ads.cpp
-│   │   └── mqtt.cpp
-│   ├── config/
-│   │   └── kanaele.json       ← Kanal-Konfiguration
-│   └── platformio.ini
 └── docs/
-    ├── aufbau.md
-    ├── kalibrierung.md
-    └── mini-platinen.md       ← Anleitung eigene Platinen
+    ├── setup.md
+    ├── calibration.md
+    └── mini-boards.md     ← guide for custom boards
 ```
 
 ---
 
-## Eigene Mini-Platinen
+## Custom Mini-Boards
 
-BoatOpenIO ist eine offene Plattform. Jeder kann eigene Mini-Platinen entwerfen und einreichen.
+BoatOpenIO is an open platform. Anyone can design and submit custom mini-boards.
 
-**Anforderungen:**
-- JST 2-Pin Signal-Stecker: Signal IN (Pin 1), Signal OUT (Pin 2)
-- GND und VCC optional von den Leisten am Hauptgehäuse
-- Passive Platinen: nur Signal JST nötig, ggf. GND von Leiste
-- Aktive Platinen (ISP): Signal JST + VCC JST von Leiste A (3.3V) oder B (5V)
+**Requirements:**
+- JST 2-pin signal connector: Signal IN (pin 1), Signal OUT (pin 2)
+- GND and VCC optionally from the rails on the main housing
+- Passive boards: only signal JST required, GND from rail if needed
+- Active boards (ISP): signal JST + VCC JST from Rail A (3.3V) or B (5V)
 
-**Einreichen:**
-1. KiCad-Dateien in `hardware/mini-platinen/DEIN-TYP/`
-2. Kurze Beschreibung in `docs/mini-platinen.md`
-3. Pull Request
+**Submission:**
+1. KiCad files in `hardware/mini-platinen/YOUR-TYPE/`
+2. Short description in `docs/mini-boards.md`
+3. Pull request
 
 ---
 
-## Integration mit BoatOS
+## Integration with BoatOS
 
-BoatOpenIO sendet alle Werte per MQTT. BoatOS erkennt neue Topics automatisch (Auto-Discovery) und zeigt sie im Dashboard an.
+BoatOpenIO sends all values via MQTT. BoatOS auto-discovers new topics and displays them in the dashboard.
 
-Kein manuelles Konfigurieren nötig. Sensor anschließen, MQTT läuft, Dashboard zeigt an.
+No manual configuration needed. Connect the sensor, MQTT runs, dashboard shows.
 
 **➡️ BoatOS: [github.com/bigbrainlabs/BoatOS](https://github.com/bigbrainlabs/BoatOS)**
 
 ---
 
-## Lizenz
+## License
 
-**Hardware & Software:** MIT License – frei nutzbar, modifizierbar, verteilbar, auch kommerziell.
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+You are free to use, modify, and distribute this software and hardware designs, provided that any derivative work is also released under the GPL-3.0. See the [LICENSE](LICENSE) file for the full license text.
 
 ---
 
-## Teil der Serie
+## Part of the Series
 
-**Logbuch ohne Pose** – authentische DIY-Projekte rund ums Boot.
+**Logbuch ohne Pose** — authentic DIY projects around boating.
 
-> *„Selbstgemacht ist wissen was drin ist und bezahlbar."*
+> *"Build it yourself and you know what's in it — and what it cost."*
 
-📖 [Buchreihe auf Amazon](https://www.amazon.de/s?k=logbuch+ohne+pose) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · 📡 [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO)
+📖 [Book series on Amazon](https://www.amazon.de/s?k=logbuch+ohne+pose) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · 📡 [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO)
