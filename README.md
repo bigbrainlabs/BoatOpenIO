@@ -226,28 +226,25 @@ Commercial marine IO systems: €200–500.
 ```
 BoatOpenIO/
 ├── README.md
-├── README_de.md           ← German version
+├── README_de.md                        ← German version
 ├── LICENSE
+├── .gitignore
+├── boatopenio_final_architektur.svg    ← architecture diagram
+├── images/                             ← board photos
+│   ├── IMG_20260604_112443.jpg
+│   ├── IMG_20260604_133528.jpg
+│   ├── IMG_20260604_133741.jpg
+│   └── IMG_20260604_133746.jpg
 ├── firmware_src/
-│   ├── firmware_src.ino   ← main firmware
-│   ├── webui.h            ← web UI & captive portal
+│   ├── firmware_src.ino                ← main firmware (v2.2)
+│   ├── webui.h                         ← web UI, captive portal, REST API
 │   └── data/
-│       └── config.json    ← channel configuration (LittleFS)
-├── hardware/
-│   ├── hauptplatine/      ← KiCad files
-│   ├── mini-platinen/
-│   │   ├── VT-voltage-divider/
-│   │   ├── PD-pulldown/
-│   │   ├── PU-pullup/
-│   │   ├── ST-schmitt-trigger/
-│   │   ├── ISP-pulse/
-│   │   ├── OPT-optocoupler/
-│   │   └── DIR-direct/
-│   └── images/
+│       └── config.json                 ← default channel config (LittleFS)
 └── docs/
-    ├── setup.md
-    ├── calibration.md
-    └── mini-boards.md     ← guide for custom boards
+    ├── setup.md                        ← setup guide (EN)
+    ├── setup_de.md                     ← setup guide (DE)
+    ├── configuration.md                ← config reference (EN)
+    └── configuration_de.md             ← config reference (DE)
 ```
 
 ---

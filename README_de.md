@@ -204,30 +204,25 @@ Kommerzielle Marine-IO-Systeme: 200–500€.
 ```
 BoatOpenIO/
 ├── README.md
-├── hardware/
-│   ├── hauptplatine/          ← KiCad-Dateien
-│   ├── mini-platinen/
-│   │   ├── VT-spannungsteiler/
-│   │   ├── PD-pulldown/
-│   │   ├── PU-pullup/
-│   │   ├── ST-schmitt-trigger/
-│   │   ├── ISP-impuls/
-│   │   ├── OPT-optokoppler/
-│   │   └── DIR-direkt/
-│   └── images/
-├── firmware/
-│   ├── src/
-│   │   ├── main.cpp
-│   │   ├── mux.cpp
-│   │   ├── ads.cpp
-│   │   └── mqtt.cpp
-│   ├── config/
-│   │   └── kanaele.json       ← Kanal-Konfiguration
-│   └── platformio.ini
+├── README_de.md                        ← Deutsche Version
+├── LICENSE
+├── .gitignore
+├── boatopenio_final_architektur.svg    ← Architekturschema
+├── images/                             ← Platinenfotos
+│   ├── IMG_20260604_112443.jpg
+│   ├── IMG_20260604_133528.jpg
+│   ├── IMG_20260604_133741.jpg
+│   └── IMG_20260604_133746.jpg
+├── firmware_src/
+│   ├── firmware_src.ino                ← Haupt-Firmware (v2.2)
+│   ├── webui.h                         ← Web-UI, Captive Portal, REST-API
+│   └── data/
+│       └── config.json                 ← Standard-Kanalkonfiguration (LittleFS)
 └── docs/
-    ├── aufbau.md
-    ├── kalibrierung.md
-    └── mini-platinen.md       ← Anleitung eigene Platinen
+    ├── setup.md                        ← Einrichtungsanleitung (EN)
+    ├── setup_de.md                     ← Einrichtungsanleitung (DE)
+    ├── configuration.md                ← Konfigurationsreferenz (EN)
+    └── configuration_de.md             ← Konfigurationsreferenz (DE)
 ```
 
 ---
