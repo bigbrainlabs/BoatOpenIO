@@ -76,13 +76,21 @@ void handleSetup() {
     "<input name='pu' value='admin' required>"
     "<label>Password / Passwort</label>"
     "<input type='password' name='pp' required minlength='6' placeholder='min. 6 characters'>"
-    "<label>Confirm Password / Passwort bestätigen</label>"
+    "<label>Confirm Password / Passwort best&auml;tigen</label>"
     "<input type='password' name='pp2' required minlength='6' placeholder='repeat'>"
     "<h2 style='margin-top:16px'>AP Credentials / AP-Zugangsdaten</h2>"
     "<label>AP Name (SSID)</label>"
-    "<input name='as' value='" + String(ap_ssid) + "' required>"
+    "<input name='as' value='"
+  );
+  webServer.sendContent(ap_ssid);
+  webServer.sendContent(
+    "' required>"
     "<label>AP Password / AP-Passwort (min. 8 characters)</label>"
-    "<input type='password' name='ap' value='" + String(ap_pass) + "' required minlength='8'>"
+    "<input type='password' name='ap' value='"
+  );
+  webServer.sendContent(ap_pass);
+  webServer.sendContent(
+    "' required minlength='8'>"
     "<button type='submit'>Complete Setup / Einrichtung abschlie&szlig;en</button>"
     "</form></div>"
     "</body></html>"
@@ -169,6 +177,8 @@ void handleRoot() {
         "imu_hint:'Boot auf ruhigem Wasser ausrichten, dann Null setzen.',"
         "imu_raw:'Rohwert (Gyro-Bias korr.)',imu_corr:'Korrigiert',imu_off:'Offset',"
         "imu_bias:'Gyro-Bias (rad/s)',imu_btn:'Jetzt Null setzen',imu_saved:'Offset gespeichert',"
+        "imu_inv_pitch:'Pitch invertieren',imu_inv_roll:'Roll invertieren',"
+        "imu_inv_save:'Invertierung speichern',imu_inv_saved:'Gespeichert',"
         "sec_ap:'AP-Zugangsdaten',sec_portal:'Portal-Zugangsdaten',"
         "l_ap_ssid:'AP Name (SSID)',l_ap_pass:'AP Passwort (min. 8 Zeichen)',"
         "l_pu:'Portal Benutzer',l_pp:'Portal Passwort (min. 6 Zeichen)',"
@@ -195,6 +205,8 @@ void handleRoot() {
         "imu_hint:'Level the boat on calm water, then set zero.',"
         "imu_raw:'Raw (gyro bias corrected)',imu_corr:'Corrected',imu_off:'Offset',"
         "imu_bias:'Gyro Bias (rad/s)',imu_btn:'Set Zero Now',imu_saved:'Offset saved',"
+        "imu_inv_pitch:'Invert Pitch',imu_inv_roll:'Invert Roll',"
+        "imu_inv_save:'Save Inversion',imu_inv_saved:'Saved',"
         "sec_ap:'AP Credentials',sec_portal:'Portal Credentials',"
         "l_ap_ssid:'AP Name (SSID)',l_ap_pass:'AP Password (min. 8 chars)',"
         "l_pu:'Portal User',l_pp:'Portal Password (min. 6 chars)',"
@@ -404,6 +416,17 @@ void handleRoot() {
     "<div id='imu_table'><small data-i18n='loading'>Lade...</small></div>"
     "<button class='cal' onclick='doCalibrate()' data-i18n='imu_btn'>Jetzt Null setzen</button>"
     "<div id='cal_status'></div>"
+    "<div style='margin-top:10px;padding-top:8px;border-top:1px solid #2a2a4a'>"
+    "<label style='display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer'>"
+    "<input type='checkbox' id='pitch_inv'>"
+    "<span data-i18n='imu_inv_pitch'>Pitch invertieren</span></label>"
+    "<label style='display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer'>"
+    "<input type='checkbox' id='roll_inv'>"
+    "<span data-i18n='imu_inv_roll'>Roll invertieren</span></label>"
+    "<button class='save' onclick='saveInvert()' style='margin-top:6px'"
+    " data-i18n='imu_inv_save'>Invertierung speichern</button>"
+    "<div id='inv_status' style='font-size:.85em;color:#0f8;margin-top:4px;min-height:1em'></div>"
+    "</div>"
     "<script>"
     "function reloadIMU(){"
       "fetch('/api/imu').then(function(r){return r.json();}).then(function(d){"
@@ -423,7 +446,25 @@ void handleRoot() {
         "s+='<small style=\"color:#555;margin-top:4px;display:block\">"
              "'+t.imu_bias+': X='+d.bias_x.toFixed(4)+' Y='+d.bias_y.toFixed(4)+' Z='+d.bias_z.toFixed(4)+'</small>';"
         "document.getElementById('imu_table').innerHTML=s;"
+        "var pi=document.getElementById('pitch_inv');"
+        "var ri=document.getElementById('roll_inv');"
+        "if(pi)pi.checked=!!d.pitch_invert;"
+        "if(ri)ri.checked=!!d.roll_invert;"
       "}).catch(function(){});"
+    "}"
+    "function saveInvert(){"
+      "var fd=new FormData();"
+      "if(document.getElementById('pitch_inv').checked)fd.append('pi','1');"
+      "if(document.getElementById('roll_inv').checked)fd.append('ri','1');"
+      "fetch('/setinvert',{method:'POST',body:fd})"
+        ".then(function(r){return r.json();})"
+        ".then(function(d){"
+          "if(d.ok){"
+            "var s=document.getElementById('inv_status');"
+            "s.textContent=T[curLang].imu_inv_saved;"
+            "setTimeout(function(){s.textContent='';},3000);"
+          "}"
+        "}).catch(function(){});"
     "}"
     "function doCalibrate(){"
       "fetch('/calibrate',{method:'POST'}).then(function(r){return r.json();}).then(function(d){"
@@ -440,20 +481,28 @@ void handleRoot() {
 
   // ─ Sicherheit ────────────────────────────────────────────
   webServer.sendContent(
-    String("<div class='card'>"
+    "<div class='card'>"
     "<h2 data-i18n='h_sec'>Sicherheit</h2>"
     "<form method='POST' action='/savesec'>"
     "<b data-i18n='sec_ap'>AP-Zugangsdaten</b><br><br>"
     "<label data-i18n='l_ap_ssid'>AP Name (SSID)</label>"
-    "<input name='as' value='" + ap_ssid + "'>" +
+    "<input name='as' value='"
+  );
+  webServer.sendContent(ap_ssid);
+  webServer.sendContent(
+    "'>"
     "<label data-i18n='l_ap_pass'>AP Passwort (min. 8 Zeichen)</label>"
     "<input type='password' name='ap' placeholder='...' minlength='8'>"
     "<br><b data-i18n='sec_portal'>Portal-Zugangsdaten</b><br><br>"
     "<label data-i18n='l_pu'>Portal Benutzer</label>"
-    "<input name='pu' value='" + portal_user + "'>" +
+    "<input name='pu' value='"
+  );
+  webServer.sendContent(portal_user);
+  webServer.sendContent(
+    "'>"
     "<label data-i18n='l_pp'>Portal Passwort (min. 6 Zeichen)</label>"
     "<input type='password' name='pp' placeholder='...' minlength='6'>"
-    "<label data-i18n='l_pp2'>Passwort bestätigen</label>"
+    "<label data-i18n='l_pp2'>Passwort best&auml;tigen</label>"
     "<input type='password' name='pp2' placeholder='...' minlength='6'>"
     "<button class='sec' type='submit' data-i18n='sec_save'>Speichern &amp; Neustart</button>"
     "</form></div>"
@@ -582,8 +631,8 @@ void handleValues() {
     }
     doc[kanaele[i].sensor] = roundf((voltage * kanaele[i].faktor + kanaele[i].offset) * 100.f) / 100.f;
   }
-  doc["pitch"] = roundf((pitch - pitch_offset) * 10.f) / 10.f;
-  doc["roll"]  = roundf((roll  - roll_offset)  * 10.f) / 10.f;
+  doc["pitch"] = roundf((pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f) * 10.f) / 10.f;
+  doc["roll"]  = roundf((roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f) * 10.f) / 10.f;
   String out;
   serializeJson(doc, out);
   webServer.send(200, "application/json", out);
@@ -611,16 +660,39 @@ void handleRaw() {
 
 // ── IMU KALIBRIERUNG API ─────────────────────────────────────
 void handleIMU() {
+  float pc = (pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f);
+  float rc = (roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f);
   StaticJsonDocument<256> doc;
   doc["pitch_raw"]    = roundf(pitch * 100.f) / 100.f;
   doc["roll_raw"]     = roundf(roll  * 100.f) / 100.f;
-  doc["pitch_corr"]   = roundf((pitch - pitch_offset) * 100.f) / 100.f;
-  doc["roll_corr"]    = roundf((roll  - roll_offset)  * 100.f) / 100.f;
+  doc["pitch_corr"]   = roundf(pc * 100.f) / 100.f;
+  doc["roll_corr"]    = roundf(rc * 100.f) / 100.f;
   doc["pitch_offset"] = roundf(pitch_offset * 100.f) / 100.f;
   doc["roll_offset"]  = roundf(roll_offset  * 100.f) / 100.f;
+  doc["pitch_invert"] = pitch_invert;
+  doc["roll_invert"]  = roll_invert;
   doc["bias_x"]       = roundf(gyroBiasX * 10000.f) / 10000.f;
   doc["bias_y"]       = roundf(gyroBiasY * 10000.f) / 10000.f;
   doc["bias_z"]       = roundf(gyroBiasZ * 10000.f) / 10000.f;
+  String out;
+  serializeJson(doc, out);
+  webServer.send(200, "application/json", out);
+}
+
+// ── INVERTIERUNG SETZEN ───────────────────────────────────────
+void handleSetInvert() {
+  if (!requireAuth()) return;
+  pitch_invert = webServer.hasArg("pi") && webServer.arg("pi") == "1";
+  roll_invert  = webServer.hasArg("ri") && webServer.arg("ri") == "1";
+  Preferences prefs;
+  prefs.begin("boatopenio", false);
+  prefs.putBool("pitch_inv", pitch_invert);
+  prefs.putBool("roll_inv",  roll_invert);
+  prefs.end();
+  StaticJsonDocument<64> doc;
+  doc["ok"]           = true;
+  doc["pitch_invert"] = pitch_invert;
+  doc["roll_invert"]  = roll_invert;
   String out;
   serializeJson(doc, out);
   webServer.send(200, "application/json", out);
@@ -661,6 +733,7 @@ void setupWebServer() {
   webServer.on("/api/raw",    HTTP_GET,  handleRaw);
   webServer.on("/api/imu",    HTTP_GET,  handleIMU);
   webServer.on("/calibrate",  HTTP_POST, handleCalibrate);
+  webServer.on("/setinvert",  HTTP_POST, handleSetInvert);
 
   webServer.onNotFound([]() {
     if (setupRequired()) sendRedirect("http://192.168.4.1/setup");

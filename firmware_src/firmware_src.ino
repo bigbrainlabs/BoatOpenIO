@@ -92,6 +92,8 @@ const unsigned long IMPACT_DECAY   = 8000;
 float gyroBiasX = 0.0f, gyroBiasY = 0.0f, gyroBiasZ = 0.0f;
 // Montage-Offset (via Web-UI kalibriert, in NVS gespeichert)
 float pitch_offset = 0.0f, roll_offset = 0.0f;
+// Achsen-Invertierung
+bool  pitch_invert = false, roll_invert = false;
 
 // ── TIMING ──────────────────────────────────────────────────
 unsigned long lastChannelRead = 0;
@@ -265,8 +267,10 @@ void loadNetConfig() {
   String mu  = preferences.getString("mqtt_user",  "");
   String mpw = preferences.getString("mqtt_pass",  "");
   testMode     = preferences.getBool("testmode",  true);
-  pitch_offset = preferences.getFloat("pitch_off", 0.0f);
-  roll_offset  = preferences.getFloat("roll_off",  0.0f);
+  pitch_offset = preferences.getFloat("pitch_off",  0.0f);
+  roll_offset  = preferences.getFloat("roll_off",   0.0f);
+  pitch_invert = preferences.getBool("pitch_inv",  false);
+  roll_invert  = preferences.getBool("roll_inv",   false);
   String aps  = preferences.getString("ap_ssid",    AP_DEFAULT_SSID);
   String app  = preferences.getString("ap_pass",    AP_DEFAULT_PASS);
   String pu   = preferences.getString("portal_user","admin");
@@ -295,6 +299,8 @@ void saveNetConfig() {
   preferences.putBool("testmode",     testMode);
   preferences.putFloat("pitch_off",    pitch_offset);
   preferences.putFloat("roll_off",     roll_offset);
+  preferences.putBool("pitch_inv",     pitch_invert);
+  preferences.putBool("roll_inv",      roll_invert);
   preferences.putString("ap_ssid",     ap_ssid);
   preferences.putString("ap_pass",     ap_pass);
   preferences.putString("portal_user", portal_user);
@@ -566,8 +572,10 @@ void loop() {
     else        fakeIMU();
     if (mqtt.connected()) {
       char buf[10];
-      dtostrf(pitch - pitch_offset, 5, 1, buf); mqtt.publish("boat/io/pitch", buf, true);
-      dtostrf(roll  - roll_offset,  5, 1, buf); mqtt.publish("boat/io/roll",  buf, true);
+      float pitchOut = (pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f);
+      float rollOut  = (roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f);
+      dtostrf(pitchOut, 5, 1, buf); mqtt.publish("boat/io/pitch", buf, true);
+      dtostrf(rollOut,  5, 1, buf); mqtt.publish("boat/io/roll",  buf, true);
     }
   }
 
