@@ -1,0 +1,189 @@
+<svg width="680" viewBox="0 0 680 620" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>BoatOpenIO Gehäuse Draufsicht</title>
+<desc>Draufsicht des BoatOpenIO Gehäuses mit Anschluss-Positionen</desc>
+
+<style>
+  text { font-family: sans-serif; fill: #333; }
+  .th { font-size: 14px; font-weight: 500; }
+  .ts { font-size: 11px; }
+</style>
+
+<!-- Gehäuse Rahmen -->
+<rect x="100" y="80" width="540" height="500" rx="10" fill="none" stroke="#333" stroke-width="2"/>
+<text class="th" x="370" y="30" text-anchor="middle">BoatOpenIO – Gehäuse Draufsicht</text>
+<text class="ts" x="370" y="75" text-anchor="middle" fill="#888">OBEN</text>
+<text class="ts" x="370" y="598" text-anchor="middle" fill="#888">UNTEN</text>
+<text class="ts" x="18" y="330" text-anchor="middle" fill="#888">LINKS</text>
+<text class="ts" x="665" y="330" text-anchor="middle" fill="#888">RECHTS</text>
+
+<!-- ═══ OBEN: SIG IN/OUT Stiftleisten (2x16) zentriert ═══ -->
+<rect x="140" y="82" width="420" height="46" rx="4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/>
+<text class="th" x="350" y="100" text-anchor="middle" fill="#085041">SIG IN / SIG OUT Stiftleisten</text>
+<text class="ts" x="350" y="118" text-anchor="middle" fill="#0F6E56">2 Reihen x 16 Pins – nach oben raus</text>
+<g fill="#0F6E56">
+  <circle cx="150" cy="90" r="3"/> <circle cx="175" cy="90" r="3"/> <circle cx="200" cy="90" r="3"/>
+  <circle cx="225" cy="90" r="3"/> <circle cx="250" cy="90" r="3"/> <circle cx="275" cy="90" r="3"/>
+  <circle cx="300" cy="90" r="3"/> <circle cx="325" cy="90" r="3"/> <circle cx="350" cy="90" r="3"/>
+  <circle cx="375" cy="90" r="3"/> <circle cx="400" cy="90" r="3"/> <circle cx="425" cy="90" r="3"/>
+  <circle cx="450" cy="90" r="3"/> <circle cx="475" cy="90" r="3"/> <circle cx="500" cy="90" r="3"/>
+  <circle cx="525" cy="90" r="3"/>
+  <circle cx="150" cy="106" r="3"/> <circle cx="175" cy="106" r="3"/> <circle cx="200" cy="106" r="3"/>
+  <circle cx="225" cy="106" r="3"/> <circle cx="250" cy="106" r="3"/> <circle cx="275" cy="106" r="3"/>
+  <circle cx="300" cy="106" r="3"/> <circle cx="325" cy="106" r="3"/> <circle cx="350" cy="106" r="3"/>
+  <circle cx="375" cy="106" r="3"/> <circle cx="400" cy="106" r="3"/> <circle cx="425" cy="106" r="3"/>
+  <circle cx="450" cy="106" r="3"/> <circle cx="475" cy="106" r="3"/> <circle cx="500" cy="106" r="3"/>
+  <circle cx="525" cy="106" r="3"/>
+</g>
+<text class="ts" x="150" y="82" text-anchor="middle" fill="#0F6E56">K1</text>
+<text class="ts" x="525" y="82" text-anchor="middle" fill="#0F6E56">K16</text>
+
+<!-- ═══ LINKS: VCC/GND JST 2-Pin nach oben raus, untereinander ═══ -->
+<!-- 10x JST 2-Pin, je Pin1=VCC, Pin2=GND, nach oben rausschauend -->
+<!-- Physisch an der linken Seite, 10 Stecker untereinander -->
+
+<!-- Hintergrund Leiste -->
+<rect x="100" y="140" width="40" height="380" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.8"/>
+<text class="th" x="120" y="133" text-anchor="middle" fill="#333">VCC/GND</text>
+
+<!-- 10x JST 2-Pin: Pin1=VCC (links), Pin2=GND (rechts) nach oben zeigend -->
+<!-- Stecker 1-5: 3.3V -->
+<g>
+  <!-- K1: 3.3V -->
+  <rect x="104" y="148" width="32" height="30" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+  <circle cx="114" cy="158" r="4" fill="#3B6D11"/>
+  <circle cx="126" cy="158" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="188" text-anchor="middle" fill="#3B6D11">3V3</text>
+  <text class="ts" x="126" y="188" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K2: 3.3V -->
+  <rect x="104" y="185" width="32" height="30" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+  <circle cx="114" cy="195" r="4" fill="#3B6D11"/>
+  <circle cx="126" cy="195" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="225" text-anchor="middle" fill="#3B6D11">3V3</text>
+  <text class="ts" x="126" y="225" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K3: 3.3V -->
+  <rect x="104" y="222" width="32" height="30" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+  <circle cx="114" cy="232" r="4" fill="#3B6D11"/>
+  <circle cx="126" cy="232" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="262" text-anchor="middle" fill="#3B6D11">3V3</text>
+  <text class="ts" x="126" y="262" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K4: 3.3V -->
+  <rect x="104" y="259" width="32" height="30" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+  <circle cx="114" cy="269" r="4" fill="#3B6D11"/>
+  <circle cx="126" cy="269" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="299" text-anchor="middle" fill="#3B6D11">3V3</text>
+  <text class="ts" x="126" y="299" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K5: 3.3V -->
+  <rect x="104" y="296" width="32" height="30" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+  <circle cx="114" cy="306" r="4" fill="#3B6D11"/>
+  <circle cx="126" cy="306" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="336" text-anchor="middle" fill="#3B6D11">3V3</text>
+  <text class="ts" x="126" y="336" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K6: 5V -->
+  <rect x="104" y="333" width="32" height="30" rx="2" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+  <circle cx="114" cy="343" r="4" fill="#854F0B"/>
+  <circle cx="126" cy="343" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="373" text-anchor="middle" fill="#854F0B">5V</text>
+  <text class="ts" x="126" y="373" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K7: 5V -->
+  <rect x="104" y="370" width="32" height="30" rx="2" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+  <circle cx="114" cy="380" r="4" fill="#854F0B"/>
+  <circle cx="126" cy="380" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="410" text-anchor="middle" fill="#854F0B">5V</text>
+  <text class="ts" x="126" y="410" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K8: 5V -->
+  <rect x="104" y="407" width="32" height="30" rx="2" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+  <circle cx="114" cy="417" r="4" fill="#854F0B"/>
+  <circle cx="126" cy="417" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="447" text-anchor="middle" fill="#854F0B">5V</text>
+  <text class="ts" x="126" y="447" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K9: 5V -->
+  <rect x="104" y="444" width="32" height="30" rx="2" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+  <circle cx="114" cy="454" r="4" fill="#854F0B"/>
+  <circle cx="126" cy="454" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="484" text-anchor="middle" fill="#854F0B">5V</text>
+  <text class="ts" x="126" y="484" text-anchor="middle" fill="#185FA5">G</text>
+
+  <!-- K10: 5V -->
+  <rect x="104" y="481" width="32" height="30" rx="2" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+  <circle cx="114" cy="491" r="4" fill="#854F0B"/>
+  <circle cx="126" cy="491" r="4" fill="#185FA5"/>
+  <text class="ts" x="114" y="521" text-anchor="middle" fill="#854F0B">5V</text>
+  <text class="ts" x="126" y="521" text-anchor="middle" fill="#185FA5">G</text>
+</g>
+
+<!-- ═══ RECHTS: 16 Schraubklemmen ═══ -->
+<rect x="598" y="140" width="40" height="395" rx="4" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+<text class="th" x="618" y="133" text-anchor="middle" fill="#633806">Klemmen</text>
+<text class="ts" x="618" y="162" text-anchor="middle" fill="#854F0B">K1</text>
+<text class="ts" x="618" y="330" text-anchor="middle" fill="#854F0B">...</text>
+<text class="ts" x="618" y="510" text-anchor="middle" fill="#854F0B">K16</text>
+<g fill="#854F0B">
+  <circle cx="638" cy="155" r="3"/> <circle cx="638" cy="179" r="3"/>
+  <circle cx="638" cy="203" r="3"/> <circle cx="638" cy="227" r="3"/>
+  <circle cx="638" cy="251" r="3"/> <circle cx="638" cy="275" r="3"/>
+  <circle cx="638" cy="299" r="3"/> <circle cx="638" cy="323" r="3"/>
+  <circle cx="638" cy="347" r="3"/> <circle cx="638" cy="371" r="3"/>
+  <circle cx="638" cy="395" r="3"/> <circle cx="638" cy="419" r="3"/>
+  <circle cx="638" cy="443" r="3"/> <circle cx="638" cy="467" r="3"/>
+  <circle cx="638" cy="491" r="3"/> <circle cx="638" cy="515" r="3"/>
+</g>
+
+<!-- ═══ UNTEN: Stromeingang ═══ -->
+<rect x="260" y="545" width="160" height="33" rx="4" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+<text class="th" x="340" y="560" text-anchor="middle" fill="#27500A">Stromeingang 5V</text>
+<text class="ts" x="340" y="573" text-anchor="middle" fill="#3B6D11">JST 2-Pin</text>
+
+<!-- ═══ INNEN: Komponenten ═══ -->
+<rect x="155" y="155" width="150" height="60" rx="6" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text class="th" x="230" y="178" text-anchor="middle" fill="#712B13">ESP32</text>
+<text class="ts" x="230" y="194" text-anchor="middle" fill="#993C1D">auf Sockel</text>
+<text class="ts" x="230" y="208" text-anchor="middle" fill="#993C1D">WLAN · I2C · S0–S3</text>
+
+<rect x="325" y="155" width="130" height="60" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text class="th" x="390" y="178" text-anchor="middle" fill="#085041">MPU6050</text>
+<text class="ts" x="390" y="194" text-anchor="middle" fill="#0F6E56">auf Sockel</text>
+<text class="ts" x="390" y="208" text-anchor="middle" fill="#0F6E56">IMU · I2C</text>
+
+<rect x="155" y="240" width="300" height="44" rx="6" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text class="th" x="305" y="260" text-anchor="middle" fill="#0C447C">4x ADS1115 SMD</text>
+<text class="ts" x="305" y="276" text-anchor="middle" fill="#185FA5">0x48 · 0x49 · 0x4A · 0x4B</text>
+
+<rect x="155" y="305" width="135" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text class="th" x="222" y="325" text-anchor="middle" fill="#3C3489">MUX 16:1</text>
+<text class="ts" x="222" y="341" text-anchor="middle" fill="#534AB7">CD74HC4067</text>
+
+<rect x="305" y="305" width="150" height="44" rx="6" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+<text class="th" x="380" y="325" text-anchor="middle" fill="#791F1F">Schutz</text>
+<text class="ts" x="380" y="341" text-anchor="middle" fill="#A32D2D">16x Zener + 1k</text>
+
+<rect x="155" y="370" width="300" height="44" rx="6" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.5"/>
+<text class="th" x="305" y="390" text-anchor="middle" fill="#27500A">AMS1117 3.3V</text>
+<text class="ts" x="305" y="406" text-anchor="middle" fill="#3B6D11">Kondis · Pull-ups 4.7k</text>
+
+<!-- Legende -->
+<rect x="155" y="430" width="300" height="80" rx="4" fill="none" stroke="#ccc" stroke-width="0.5"/>
+<text class="th" x="305" y="448" text-anchor="middle" fill="#333">Legende</text>
+<circle cx="170" cy="462" r="4" fill="#3B6D11"/>
+<text class="ts" x="180" y="466" fill="#333">3.3V (5x)</text>
+<circle cx="250" cy="462" r="4" fill="#854F0B"/>
+<text class="ts" x="260" y="466" fill="#333">5V (5x)</text>
+<circle cx="330" cy="462" r="4" fill="#185FA5"/>
+<text class="ts" x="340" y="466" fill="#333">GND</text>
+<text class="ts" x="170" y="482" fill="#555">VCC/GND Leiste: links · nach oben raus · 10x JST 2-Pin</text>
+<text class="ts" x="170" y="496" fill="#555">Je Stecker: Pin 1 = VCC · Pin 2 = GND</text>
+
+<!-- Montagelöcher -->
+<circle cx="118" cy="98" r="4" fill="none" stroke="#888" stroke-width="1"/>
+<circle cx="622" cy="98" r="4" fill="none" stroke="#888" stroke-width="1"/>
+<circle cx="118" cy="562" r="4" fill="none" stroke="#888" stroke-width="1"/>
+<circle cx="622" cy="562" r="4" fill="none" stroke="#888" stroke-width="1"/>
+
+</svg>
