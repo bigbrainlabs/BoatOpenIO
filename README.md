@@ -256,7 +256,7 @@ boatopenio/status      → online
 | Component | Amazon | AliExpress | Amazon price | AliExpress price |
 |-----------|--------|------------|-------------|-----------------|
 | ESP32 DevKit V4 (30-pin) | [Amazon](https://amzn.to/4ged4iW) | [AliExpress](https://s.click.aliexpress.com/e/_c4pqHci1) | ~€9 | ~€5 |
-| ADS1115 Breakout (4×) | [Amazon](https://amzn.to/4gg8mRQ) | [AliExpress](https://s.click.aliexpress.com/e/_c35sBSYd) | ~€9 | ~€7 |
+| ADS1115 Breakout (4×) | [Amazon](https://amzn.to/4gg8mRQ) | [AliExpress](https://s.click.aliexpress.com/e/_c35sBSYd) | ~€12 | ~€7 |
 | CD74HC4067 MUX Breakout | [Amazon](https://amzn.to/4vPmaHH) | [AliExpress](https://s.click.aliexpress.com/e/_c3RLw85R) | ~€6 | ~€5 |
 | MPU6050 Breakout (GY-521) | [Amazon](https://amzn.to/3S3gGKJ) | [AliExpress](https://s.click.aliexpress.com/e/_c3tzzLRn) | ~€5 | ~€2 |
 | AMS1117-3.3 Breakout | [Amazon](https://amzn.to/4gfqqeL) | [AliExpress](https://s.click.aliexpress.com/e/_c33Kg9MD) | ~€5 | ~€3 |
@@ -268,7 +268,7 @@ boatopenio/status      → online
 | Female Headers | [Amazon](https://amzn.to/3S1rXLD) | [AliExpress](https://s.click.aliexpress.com/e/_c3B9h4ip) | ~€9 | ~€2 |
 | Perfboard (set) | [Amazon](https://amzn.to/3SAIJ4k) | [AliExpress](https://s.click.aliexpress.com/e/_c4dYUhKH) | ~€14 | ~€6 |
 | PCB (5 pcs JLCPCB) | Gerber files in `hardware/pcb/` | | ~€7 | ~€7 |
-| **Total** | | | **~€108** | **~€58** |
+| **Total** | | | **~€111** | **~€58** |
 
 > Amazon: faster delivery. AliExpress: significantly cheaper, 2–4 weeks delivery.
 
