@@ -76,8 +76,8 @@ Mini-Board SIG OUT → 1kΩ resistor → Zener 3.3V → MUX input Cx
 
 ```
 Pin 1: Signal IN   → raw input from sensor (up to 12V)
-Pin 2: Signal OUT  → conditioned signal to MUX (max. 3.3V after protection)
-Pin 3: GND
+Pin 2: GND
+Pin 3: Signal OUT  → conditioned signal to MUX (max. 3.3V after protection)
 ```
 
 ### VCC Rails (left side of PCB, JST 2-pin, pointing upward)

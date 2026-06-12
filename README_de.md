@@ -76,8 +76,8 @@ Mini-Platine SIG OUT → 1kΩ Widerstand → Zener 3.3V → MUX Eingang Cx
 
 ```
 Pin 1: Signal IN   → Roheingang vom Sensor (bis 12V)
-Pin 2: Signal OUT  → Aufbereitetes Signal zum MUX (max. 3.3V nach Schutz)
-Pin 3: GND
+Pin 2: GND
+Pin 3: Signal OUT  → Aufbereitetes Signal zum MUX (max. 3.3V nach Schutz)
 ```
 
 ### VCC-Leisten (linke Seite der Platine, JST 2-Pin, nach oben raus)
