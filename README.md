@@ -280,26 +280,31 @@ Commercial marine IO systems: €200–500.
 
 ```
 BoatOpenIO/
-├── README.md                   ← English (this file)
-├── README_de.md                ← German version
-├── LICENSE                     ← GPL-3.0
+├── README.md                          ← English (this file)
+├── README_de.md                       ← German version
+├── LICENSE                            ← GPL-3.0
+├── boatopenio_final_architektur.svg   ← system architecture diagram
+├── firmware_src/
+│   ├── firmware_src.ino               ← main firmware
+│   ├── webui.h                        ← web UI & captive portal
+│   └── data/
+│       └── config.json                ← default channel config
 ├── hardware/
-│   ├── pcb/
+│   ├── boardopenio/                   ← KiCad PCB project
 │   │   ├── boardopenio.kicad_sch
 │   │   ├── boardopenio.kicad_pcb
-│   │   └── gerber/             ← ready to order
-│   ├── mini-boards/
-│   │   ├── VT-voltage-divider/
-│   │   ├── PU-pullup/
-│   │   └── ...
-│   └── bom.md
-├── firmware/
-│   └── BoatOpenIO_Firmware.ino
-├── images/
+│   │   ├── boardopenio.kicad_pro
+│   │   └── boardopenio.kicad_prl
+│   ├── mainboard/
+│   │   ├── BoatOpenIO-v1.0-gerber.zip ← ready to order
+│   │   └── schaltplan_mainboard.jpg
+│   └── boatopenio-gehaeuse-draufsicht.svg
+├── images/                            ← build photos
 └── docs/
     ├── setup.md
     ├── setup_de.md
-    └── troubleshooting.md
+    ├── configuration.md
+    └── configuration_de.md
 ```
 
 ---
