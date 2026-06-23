@@ -1,0 +1,60 @@
+
+(rules PCB main-board.dsn
+  (snap_angle 
+    fortyfive_degree
+  )
+  (rule
+    (width 200.0)
+    (clearance 200.0)
+    (clearance 100.0 (type smd_to_turn_gap))
+    (clearance 50.0 (type smd))
+    (clearance 200.0 (type "kicad_default"))
+  )
+  (padstack "Via[0-1]_600:300_um"
+    (shape
+      (circle F.Cu 600.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 600.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_600:300_um" "Via[0-1]_600:300_um" default
+  )
+  (via 
+    "Via[0-1]_600:300_um-kicad_default" "Via[0-1]_600:300_um" "kicad_default"
+  )
+  (via_rule
+    default "Via[0-1]_600:300_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_600:300_um-kicad_default"
+  )
+  (class default
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 200.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    GND "Net-(J28-Pin_1)" "Net-(J34-Pin_5)" "Net-(J34-Pin_13)" "Net-(J34-Pin_6)" "Net-(J34-Pin_9)" "Net-(J34-Pin_8)" "Net-(J34-Pin_7)"
+    "Net-(J34-Pin_15)" "Net-(J34-Pin_11)" "Net-(J34-Pin_4)" "unconnected-(U2-XDA-Pad4)" "unconnected-(U2-ADO-Pad2)" "unconnected-(U2-INT-Pad1)" "Net-(J31-Pin_1)" "unconnected-(U2-XCL-Pad3)"
+    "Net-(J34-Pin_3)" "unconnected-(U3-A3-Pad1)" "unconnected-(U3-A2-Pad2)" "unconnected-(U3-A1-Pad3)" "unconnected-(U3-ALERT-Pad5)" "unconnected-(U3-ADDR-Pad6)" "Net-(U3-A0)" "Net-(J34-Pin_10)"
+    "Net-(J30-Pin_15)" "Net-(J34-Pin_12)" "Net-(J30-Pin_3)" "Net-(J30-Pin_9)" "Net-(J30-Pin_8)" "Net-(J30-Pin_5)" "unconnected-(U7-EN-PadJP3-3)" "Net-(J30-Pin_2)"
+    "Net-(J30-Pin_12)" "Net-(J30-Pin_1)" "Net-(J30-Pin_14)" "Net-(J34-Pin_16)" "Net-(J30-Pin_16)" "Net-(J30-Pin_7)" "Net-(J30-Pin_6)" "Net-(J30-Pin_10)"
+    "Net-(J30-Pin_4)" "Net-(J30-Pin_11)" "Net-(J30-Pin_13)" "Net-(J34-Pin_14)" "unconnected-(J30-Pin_18-Pad18)" "unconnected-(J30-Pin_19-Pad19)" "unconnected-(J30-Pin_17-Pad17)"
+    (clearance_class "kicad_default")
+    (via_rule "kicad_default")
+    (rule
+      (width 200.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)

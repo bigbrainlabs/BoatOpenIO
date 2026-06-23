@@ -1,5 +1,6 @@
 .claude/
 .theia/
-hardware/boardopenio/boardopenio-backups/
-hardware/boardopenio/fp-info-cache
-hardware/v2/BoatOpenIO-v2-backups/
+**/fp-info-cache
+**/BoatOpenIO-v2-backups/
+**/boardopenio-backups/
+**/*-backups/
