@@ -155,14 +155,16 @@ S3 S2 S1 S0 → aktiver Kanal
 ```json
 {
   "kanaele": [
-    {"klemme": 1, "ads": 1, "pin": "A0", "sensor": "batterie1",    "einheit": "V",   "faktor": 4.7, "offset": 0},
-    {"klemme": 2, "ads": 2, "pin": "A3", "sensor": "oeltemperatur","einheit": "°C",  "faktor": 1.0, "offset": 0},
-    {"klemme": 3, "ads": 1, "pin": "A1", "sensor": "oeldruck",     "einheit": "bar", "faktor": 1.0, "offset": 0},
-    {"klemme": 4, "ads": 3, "pin": "A0", "sensor": "tank",         "einheit": "%",   "faktor": 1.0, "offset": 0},
-    {"klemme": 5, "ads": 2, "pin": "A1", "sensor": "drehzahl",     "einheit": "rpm", "faktor": 1.0, "offset": 0}
+    {"klemme": 1, "sensor": "batterie1",    "einheit": "V",   "faktor": 4.7, "offset": 0, "aktiv": true},
+    {"klemme": 2, "sensor": "oeltemperatur","einheit": "°C",  "faktor": 1.0, "offset": 0, "aktiv": true},
+    {"klemme": 3, "sensor": "oeldruck",     "einheit": "bar", "faktor": 1.0, "offset": 0, "aktiv": true},
+    {"klemme": 4, "sensor": "tank",         "einheit": "%",   "faktor": 1.0, "offset": 0, "aktiv": true},
+    {"klemme": 5, "sensor": "drehzahl",     "einheit": "rpm", "faktor": 1.0, "offset": 0, "aktiv": false}
   ]
 }
 ```
+
+> Alle 16 Kanäle werden über den MUX (CD74HC4067) auf einen einzigen ADS1115 @ 0x48 an Pin A0 geleitet. Die Felder `ads` und `pin` entfallen – die Klemmen-Nummer (`klemme`) wird direkt auf die MUX-Selectleitungen abgebildet.
 
 ---
 
