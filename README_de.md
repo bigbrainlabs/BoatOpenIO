@@ -218,6 +218,8 @@ boatopenio/status       → online
 
 ## Stückliste – PCB Bausatz
 
+**[👉 Komplette Einkaufsliste bei Amazon](https://www.amazon.de/hz/wishlist/ls/2ZLKK0GZJ5RZE?&linkCode=ll2&tag=bigbrainlab08-21&linkId=caccb90fad5cfe3e58063e29c1bc7dd4&ref_=as_li_ss_tl)**
+
 > **Hinweis:** Positionen 7, 8, 13 und 14 sind aus dem gleichen Set – einmal kaufen reicht. Gleiches gilt für 12 und 15.
 
 | # | Komponente | Hinweis | Amazon |

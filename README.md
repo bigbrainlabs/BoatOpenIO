@@ -218,6 +218,8 @@ boatopenio/status      → online
 
 ## Bill of Materials – PCB Kit
 
+**[👉 Complete parts list on Amazon](https://www.amazon.de/hz/wishlist/ls/2ZLKK0GZJ5RZE?&linkCode=ll2&tag=bigbrainlab08-21&linkId=caccb90fad5cfe3e58063e29c1bc7dd4&ref_=as_li_ss_tl)**
+
 > **Note:** Items 7, 8, 13, and 14 are from the same set — one purchase covers all. Same applies to 12 and 15.
 
 | # | Component | Notes | Amazon |
