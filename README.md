@@ -245,8 +245,6 @@ boatopenio/status      → online
 
 > Amazon: faster delivery. AliExpress links to follow.
 
-Commercial marine IO systems: €200–500.
-
 ---
 
 ## Directory Structure
