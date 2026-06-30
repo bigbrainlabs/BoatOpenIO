@@ -1,5 +1,5 @@
 // ============================================================
-// BoatOpenIO – Firmware v2.2
+// BoatOpenIO – Firmware v3.0
 // Universal Marine IO System
 // github.com/bigbrainlabs/BoatOpenIO
 // ============================================================
@@ -54,7 +54,7 @@ char portal_user[32] = "admin";
 char portal_pass[64] = "";   // leer = Ersteinrichtung noch nicht abgeschlossen
 
 // ── OBJEKTE ─────────────────────────────────────────────────
-Adafruit_ADS1115 ads[4];   // ads[0]=0x48 … ads[3]=0x4B
+Adafruit_ADS1115 ads;      // 0x48
 Adafruit_MPU6050 mpu;
 WiFiClient       wifiClient;
 PubSubClient     mqtt(wifiClient);
@@ -75,7 +75,7 @@ struct KanalConfig {
 KanalConfig kanaele[16];
 bool testMode = true;
 bool mpuOK    = false;
-bool adsOK[4] = {false, false, false, false};
+bool adsOK    = false;
 
 // ── IMU / IMPACT ─────────────────────────────────────────────
 float         pitch = 0.0f, roll = 0.0f;
@@ -110,10 +110,10 @@ void selectChannel(uint8_t ch) {
 }
 
 // ── ADS LESEN ───────────────────────────────────────────────
-float readADS(uint8_t adsNr, uint8_t pin) {
-  if (adsNr < 1 || adsNr > 4 || !adsOK[adsNr - 1]) return 0.0f;
-  int16_t raw = ads[adsNr - 1].readADC_SingleEnded(pin);
-  return ads[adsNr - 1].computeVolts(raw);
+float readADS() {
+  if (!adsOK) return 0.0f;
+  int16_t raw = ads.readADC_SingleEnded(0);  // MUX routet alle 16 Kanäle auf A0
+  return ads.computeVolts(raw);
 }
 
 // ── KANÄLE LESEN & PUBLISHEN ─────────────────────────────────
@@ -126,7 +126,7 @@ void readAllChannels() {
     } else {
       selectChannel(kanaele[i].klemme - 1);
       delayMicroseconds(500);
-      voltage = readADS(kanaele[i].ads, kanaele[i].pin);
+      voltage = readADS();
     }
     float wert = voltage * kanaele[i].faktor + kanaele[i].offset;
     char buf[16];
@@ -215,7 +215,7 @@ void fakeIMU() {
 // ── KONFIGURATION LADEN / SPEICHERN ─────────────────────────
 void loadConfig() {
   for (int i = 0; i < 16; i++) {
-    kanaele[i] = {(uint8_t)(i + 1), (uint8_t)(i / 4 + 1), (uint8_t)(i % 4),
+    kanaele[i] = {(uint8_t)(i + 1), 1, 0,
                   "kanal_" + String(i + 1), "V", 1.0f, 0.0f, false};
   }
   if (!LittleFS.exists(CONFIG_FILE)) return;
@@ -415,7 +415,7 @@ void setup() {
   Serial.begin(115200);
   delay(500);
   Serial.println("\n========================================");
-  Serial.println("BoatOpenIO Firmware v2.2");
+  Serial.println("BoatOpenIO Firmware v3.0");
   Serial.println("========================================");
 
   pinMode(STATUS_LED_PIN,   OUTPUT);
@@ -452,16 +452,13 @@ void setup() {
       Serial.printf("  Geraet @ 0x%02X\n", addr);
   }
 
-  // ADS1115 (4x)
-  const uint8_t ADS_ADDRS[4] = {0x48, 0x49, 0x4A, 0x4B};
-  for (int i = 0; i < 4; i++) {
-    if (ads[i].begin(ADS_ADDRS[i])) {
-      ads[i].setGain(GAIN_TWOTHIRDS);
-      adsOK[i] = true;
-      Serial.printf("  ADS%d @ 0x%02X OK\n", i + 1, ADS_ADDRS[i]);
-    } else {
-      Serial.printf("  ADS%d @ 0x%02X fehlt\n", i + 1, ADS_ADDRS[i]);
-    }
+  // ADS1115 (1x, 0x48)
+  if (ads.begin(0x48)) {
+    ads.setGain(GAIN_TWOTHIRDS);
+    adsOK = true;
+    Serial.println("  ADS1115 @ 0x48 OK");
+  } else {
+    Serial.println("  ADS1115 @ 0x48 nicht gefunden");
   }
 
   // MPU6050: 0x68 (AD0=GND) oder 0x69 (AD0=VCC)

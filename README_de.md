@@ -16,7 +16,7 @@ Dieses Projekt ist 100% Open Source und kostenlos. Die gesamte Entstehungsgeschi
 
 Wer das Projekt nützlich findet und unterstützen möchte: Die Bücher kaufen ist der beste Weg.
 
-> *„Du findest das nützlich? Kauf die Buchreihe. Dann sind wir quitt."* 😄
+> *„Nützlich gefunden? Schnapp dir ein Buch – oder die ganze Serie. Du unterstützt damit die Weiterentwicklung."*
 
 **[👉 Logbuch ohne Pose auf Amazon](https://amzn.to/4e5swN6)**
 
@@ -28,7 +28,7 @@ Wer das Projekt nützlich findet und unterstützen möchte: Die Bücher kaufen i
 
 12V direkt an einen Pull-up-Kanal (statt über Spannungsteiler) zerstört den MUX, alle ADS1115 und den ESP32 durch I2C-Kettenreaktion.
 
-Die v1.0 PCB enthält Zenerdioden-Schutzschaltung (3.3V) an allen 16 Signaleingängen – aber die korrekte Mini-Platinen-Zuordnung bleibt trotzdem essenziell.
+Das Eingangsboard enthält eine Schutzschaltung (3.3V) an allen 16 Signaleingängen – aber die korrekte Mini-Platinen-Zuordnung bleibt trotzdem essenziell.
 
 ---
 
@@ -44,68 +44,78 @@ Sensor → Mini-Platine → JST 3-Pin → PCB → Zenerschutz → MUX → ADS111
 
 ---
 
-## Hardware – v1.0 PCB
+## Hardware – v2 PCB
 
-Die v1.0 PCB ist jetzt verfügbar! Gerber-Dateien im Ordner `hardware/pcb/` – direkt bei JLCPCB oder einem anderen PCB-Hersteller bestellen.
+Vier separate Platinen, verbunden über IDC-Flachbandkabel: **Eingangsboard**, **Mainboard**, **ESP32-Adapterboard** und **VCC-Verteiler**. Bestellfertige Gerber-Dateien in `hardware/v2/*/gerber/`.
 
-### Hauptplatinen-Komponenten
+```
+Eingangsboard ──20-pol Flachband──> Mainboard <──16-pol Flachband── ESP32-Adapterboard
+                                        │
+                                   3-pol JST
+                                        │
+                                   VCC-Board
+```
+
+### Mainboard-Komponenten
 
 | Komponente | Beschreibung | Sockel |
 |------------|-------------|--------|
-| ESP32 DevKit V4 (30-Pin) | Mikrocontroller, WLAN, I2C, MUX-Steuerung | ✅ |
-| CD74HC4067 Breakout (BOB-09056) | 16:1 Analog-Multiplexer | ✅ |
-| ADS1115 Breakout (×1–4) | 16-bit ADC, I2C Adressen 0x48–0x4B | ✅ |
+| ESP32-DEVKITC-32D-F (38-Pin) | Mikrocontroller, WLAN, I2C, MUX-Steuerung – auf eigenem Adapterboard | ✅ |
+| CD74HC4067 Breakout | 16:1 Analog-Multiplexer | ✅ |
+| ADS1115 Breakout (1×) | 16-bit ADC | ✅ |
 | MPU6050 Breakout (GY-521) | 6-DOF IMU, Neigung/Impact-Detection | ✅ |
-| AMS1117-3.3 Breakout | 5V → 3.3V Regler, LED-Anzeige | ✅ |
+| AMS1117-3.3 Breakout | 5V → 3.3V Regler | ✅ |
 
-**Alles auf Sockeln** – kein Bauteil ist fest verlötet. Defekter ESP32? Neuen aufstecken. Fertig.
+**Alles auf Sockeln** – kein Bauteil ist fest verlötet. Defekter ESP32? Adapterboard tauschen. Fertig.
 
-### Schutzschaltung
+Der ESP32 sitzt bewusst auf einem eigenen Adapterboard. Das erste Adapterboard ist für den 38-Pin ESP32 DevKitC-32D ausgelegt – austauschbar, falls später andere ESP32-Varianten zum Einsatz kommen sollen.
 
-Jeder Signaleingang hat eine Hardware-Schutzschaltung:
+### Schutzschaltung (Eingangsboard)
 
-```
-Mini-Platine SIG OUT → 1kΩ Widerstand → Zener 3.3V → MUX Eingang Cx
-                                              ↓
-                                             GND
-```
-
-16× BZX55C3V3 (3.3V Zener, DO-35 THT) + 16× 1kΩ Widerstand auf der Platine.
-
-### Signal-Stecker: JST 3-Pin (×16)
+Jeder der 16 Signaleingänge hat eine Hardware-Schutzschaltung, direkt auf dem Eingangsboard:
 
 ```
-Pin 1: Signal IN   → Roheingang vom Sensor (bis 12V)
-Pin 2: GND
-Pin 3: Signal OUT  → Aufbereitetes Signal zum MUX (max. 3.3V nach Schutz)
+Sensor → Schraubklemme → R_Pack08 (Widerstandsnetzwerk) → SP0503BAHTG (Zener-Array, 3.3V) → MUX-Signal
 ```
 
-### VCC-Leisten (linke Seite der Platine, JST 2-Pin, nach oben raus)
+2× Bourns 4116R-1-102LF (R_Pack08, DIL-16, isoliert) + 6× SP0503BAHTG (SOT-143, je 3 Kanäle).
+
+> ⚠️ **Pull-up Spannung ist 3.3V** – die ADS1115 VDD liegt bei 3.3V, höhere Spannungen an den Eingängen riskieren Bauteilschäden.
+
+### Eingangsboard – Anschlüsse
 
 ```
-7× 3.3V Leiste  → für ESP01-Mini-Platinen und passive Boards
-3× 5V Leiste    → für Arduino Nano Mini-Platinen
+16× Schraubklemme 5.08mm  → Sensor-Rohsignal
+20-pol Pfostenstecker     → Verbindung zum Mainboard (SIG1-16 + GND + 3.3V + 5V)
+7× JST 2-Pin (3.3V)       → VCC-Leiste für passive/ESP01-Mini-Platinen
+3× JST 2-Pin (5V)         → VCC-Leiste für Arduino-Nano-Mini-Platinen
 ```
 
-### I2C Adressen (fest auf der Platine)
+### I2C-Adresse
 
-| ADS | ADDR-Pin | I2C Adresse |
-|-----|----------|-------------|
-| ADS1 | → GND | 0x48 |
-| ADS2 | → VDD | 0x49 |
-| ADS3 | → SDA | 0x4A |
-| ADS4 | → SCL | 0x4B |
+Nur 1× ADS1115 verbaut (MUX legt alle 16 Kanäle auf eine gemeinsame Signalleitung) → feste Adresse **0x48**.
 
-### GPIO-Belegung (ESP32)
+### GPIO-Belegung (ESP32, 16-pol Mainboard↔Adapterboard)
 
 | GPIO | Funktion |
 |------|----------|
+| GPIO21 | I2C SDA |
+| GPIO22 | I2C SCL |
 | GPIO14 | MUX S0 |
 | GPIO27 | MUX S1 |
 | GPIO26 | MUX S2 |
 | GPIO25 | MUX S3 |
-| GPIO21 | I2C SDA |
-| GPIO22 | I2C SCL |
+| GPIO4 / 5 / 13 / 16 / 17 / 18 / 19 / 23 | OUT1–OUT8 (vorbereitet für Ausgangskanäle) |
+
+### Ausgangskanäle (vorbereitet)
+
+Das Mainboard hat bereits einen 10-pol Stecker für 8 Signal-Ausgangskanäle (+5V/GND) vorbereitet – z.B. für Heizung, Pumpe, Horn über Relais- oder MOSFET-Mini-Platinen. Funktioniert nach dem gleichen Baukastenprinzip wie die Eingänge.
+
+### Kompatible ESP32-Module (erstes Adapterboard)
+
+Der Footprint passt zu allen Modulen im 38-Pin DevKitC-Layout: **ESP32-WROOM-32 / -32D / -32E / -32U / -32UE**, sowie **ESP32-SOLO-1**.
+
+> ⚠️ **ESP32-WROVER ist NICHT kompatibel** – GPIO16/17 sind bei WROVER intern für PSRAM reserviert und damit für die Ausgangskanäle blockiert.
 
 ---
 
@@ -204,73 +214,34 @@ boatopenio/status       → online
 
 ---
 
-## Stückliste – v1.0 PCB Bausatz
+## Stückliste – PCB Bausatz
 
-### Aktive Komponenten (Breakout-Boards, gesockelt)
+> **Hinweis:** Positionen 7, 8, 13 und 14 sind aus dem gleichen Set – einmal kaufen reicht. Gleiches gilt für 12 und 15.
 
-| Anz. | Komponente | Hinweis |
-|------|------------|---------|
-| 1× | ESP32 DevKit V4 (30-Pin) | Hauptcontroller |
-| 4× | ADS1115 Breakout (GY-ADS1115) | 16-bit ADC |
-| 1× | CD74HC4067 Breakout (BOB-09056) | 16:1 MUX |
-| 1× | MPU6050 Breakout (GY-521) | IMU |
-| 1× | AMS1117-3.3 Breakout | Spannungsregler |
+| # | Komponente | Hinweis | Amazon |
+|---|------------|---------|--------|
+| 1 | ESP32 DevKitC-32D (38-Pin) | Hauptcontroller | [Amazon](https://amzn.to/441f1bl) |
+| 2 | CD74HC4067 Breakout | 16:1 MUX | [Amazon](https://amzn.to/4vPmaHH) |
+| 3 | ADS1115 Breakout (1×) | 16-bit ADC | [Amazon](https://amzn.to/4gg8mRQ) |
+| 4 | MPU6050 Breakout (GY-521) | IMU | [Amazon](https://amzn.to/3S3gGKJ) |
+| 5 | AMS1117-3.3 Breakout | Spannungsregler | [Amazon](https://amzn.to/4gfqqeL) |
+| 6 | Buchsenleisten Sortiment | Sockel für alle Breakouts | [Amazon](https://amzn.to/3S1rXLD) |
+| 7 | Pfostenstecker 2×10 (20-pol) | Mainboard ↔ Eingangsboard | [Amazon](https://amzn.to/4f2awU6) |
+| 8 | Pfostenstecker 2×08 (16-pol) | Mainboard ↔ ESP32-Adapterboard | [Amazon](https://amzn.to/4f2awU6) |
+| 9 | Schraubklemmen 5.08mm | 16× Sensoreingänge | [Amazon](https://amzn.to/4e6bJcN) |
+| 10 | Bourns 4116R-1-102LF (2×) | Widerstandsnetzwerk DIL-16 | [Amazon](https://amzn.to/3SuSZeD) |
+| 11 | SP0503BAHTG (6×) | Zener-Array SOT-143 | [Amazon](https://amzn.to/4aippiv) |
+| 12 | JST 2-Pin Stecker | VCC-Leisten | [Amazon](https://amzn.to/43y2Suh) |
+| 13 | Pfostenstecker 2×10 (20-pol) | Eingangsboard-Seite | [Amazon](https://amzn.to/4f2awU6) |
+| 14 | Pfostenstecker 2×08 (16-pol) | ESP32-Adapterboard-Seite | [Amazon](https://amzn.to/4f2awU6) |
+| 15 | JST 2-Pin Stecker (10×) | VCC-Verteilung | [Amazon](https://amzn.to/43y2Suh) |
+| 16 | Flachbandkabel + IDC 20-pol | Mainboard ↔ Eingangsboard | [Amazon](https://amzn.to/4w6858M) |
+| 17 | Flachbandkabel + IDC 16-pol | Mainboard ↔ ESP32-Adapterboard | [Amazon](https://amzn.to/3SuZ3DQ) |
+| 18 | Pfostenbuchse 2×05 (10-pol) | SIG-OUT Vorbereitung Mainboard | — |
+| 19 | JST 3-Pin Stecker | VCC-Board ↔ Mainboard | [Amazon](https://amzn.to/4ush82N) |
+| 20 | PCB Set (4 Platinen, JLCPCB) | Gerber-Dateien in `hardware/v2/` | — |
 
-### Schutzschaltung (THT, je 16× pro Kanal)
-
-| Anz. | Komponente | Wert | Gehäuse |
-|------|------------|------|---------|
-| 16× | Widerstand | 1kΩ | THT axial |
-| 16× | Zenerdiode | BZX55C3V3 (3.3V) | DO-35 |
-
-### Anschlüsse (THT)
-
-| Anz. | Komponente | Beschreibung |
-|------|------------|-------------|
-| 1× | Schraubklemme 1×16 | Sensorklemmen K1–K16, Rastermaß 5.08mm |
-| 1× | Stiftleiste 2×16 | SIG IN/OUT, nach oben raus |
-| 10× | JST PH 2-Pin (2.0mm) | VCC/GND Leisten (7× 3.3V + 3× 5V) |
-| 1× | JST PH 2-Pin (2.0mm) | Stromeingang 5V |
-
-### Sockel
-
-| Anz. | Komponente | Beschreibung |
-|------|------------|-------------|
-| 2× | Buchsenleiste 1×19 | ESP32 DevKit Sockel |
-| 4× | Buchsenleiste 1×08 | ADS1115 Breakout Sockel |
-| 1× | Buchsenleiste 1×08 | MPU6050 Sockel |
-| 1× | Buchsenleiste 1×16 | MUX Breakout (oben, C0–C15) |
-| 1× | Buchsenleiste 1×08 | MUX Breakout (unten) |
-| 1× | Buchsenleiste 1×03 | AMS1117 Breakout |
-
-### Platine
-
-| Anz. | Komponente | Beschreibung |
-|------|------------|-------------|
-| 1× | BoatOpenIO v1.0 PCB | Gerber-Dateien in `hardware/pcb/` |
-
-### Stückliste mit Links
-
-> **Hinweis zu den Preisen:** Alle Preise beziehen sich auf Sets und Packungsgrößen. Ein einzelnes Board kostet deutlich weniger – die Sets reichen für viele weitere Projekte.
-
-| Komponente | Amazon | AliExpress | Amazon Preis | AliExpress Preis |
-|------------|--------|------------|-------------|-----------------|
-| ESP32 DevKit V4 (30-Pin) | [Amazon](https://amzn.to/4ged4iW) | [AliExpress](https://s.click.aliexpress.com/e/_c4pqHci1) | ~9€ | ~5€ |
-| ADS1115 Breakout (4×) | [Amazon](https://amzn.to/4gg8mRQ) | [AliExpress](https://s.click.aliexpress.com/e/_c35sBSYd) | ~12€ | ~7€ |
-| CD74HC4067 MUX Breakout | [Amazon](https://amzn.to/4vPmaHH) | [AliExpress](https://s.click.aliexpress.com/e/_c3RLw85R) | ~6€ | ~5€ |
-| MPU6050 Breakout (GY-521) | [Amazon](https://amzn.to/3S3gGKJ) | [AliExpress](https://s.click.aliexpress.com/e/_c3tzzLRn) | ~5€ | ~2€ |
-| AMS1117-3.3 Breakout | [Amazon](https://amzn.to/4gfqqeL) | [AliExpress](https://s.click.aliexpress.com/e/_c33Kg9MD) | ~5€ | ~3€ |
-| 1kΩ Widerstände (Set) | [Amazon](https://amzn.to/4xpBFro) | [AliExpress](https://s.click.aliexpress.com/e/_c4BhD2g5) | ~14€ | ~6€ |
-| BZX55C3V3 Zenerdioden (100×) | [Amazon](https://amzn.to/4v9OTqK) | [AliExpress](https://s.click.aliexpress.com/e/_c3ra9r0h) | ~8€ | ~2€ |
-| Schraubklemmen 5.08mm | [Amazon](https://amzn.to/4e6bJcN) | [AliExpress](https://s.click.aliexpress.com/e/_c4X0xKf3) | ~8€ | ~7€ |
-| JST PH 2.0mm 2-Pin | [Amazon](https://amzn.to/43y2Suh) | [AliExpress](https://s.click.aliexpress.com/e/_c4BoCB7P) | ~6€ | ~3€ |
-| JST PH 2.0mm 3-Pin | [Amazon](https://amzn.to/4ush82N) | [AliExpress](https://s.click.aliexpress.com/e/_c3LlQpYp) | ~8€ | ~3€ |
-| Buchsenleisten | [Amazon](https://amzn.to/3S1rXLD) | [AliExpress](https://s.click.aliexpress.com/e/_c3B9h4ip) | ~9€ | ~2€ |
-| Lochraster (Set) | [Amazon](https://amzn.to/3SAIJ4k) | [AliExpress](https://s.click.aliexpress.com/e/_c4dYUhKH) | ~14€ | ~6€ |
-| PCB (5 Stück JLCPCB) | Gerber-Dateien in `hardware/pcb/` | | ~7€ | ~7€ |
-| **Gesamt** | | | **~111€** | **~58€** |
-
-> Amazon: schnelle Lieferung. AliExpress: deutlich günstiger, 2–4 Wochen Lieferzeit.
+> Amazon: schnelle Lieferung. AliExpress-Links folgen.
 
 Kommerzielle Marine-IO-Systeme: 200–500€.
 
@@ -290,15 +261,17 @@ BoatOpenIO/
 │   └── data/
 │       └── config.json                ← Standard-Kanalconfig
 ├── hardware/
-│   ├── boardopenio/                   ← KiCad PCB-Projekt
-│   │   ├── boardopenio.kicad_sch
-│   │   ├── boardopenio.kicad_pcb
-│   │   ├── boardopenio.kicad_pro
-│   │   └── boardopenio.kicad_prl
-│   ├── mainboard/
-│   │   ├── BoatOpenIO-v1.0-gerber.zip ← bestellfertig
-│   │   └── schaltplan_mainboard.jpg
-│   └── boatopenio-gehaeuse-draufsicht.svg
+│   ├── boatopenio-gehaeuse-draufsicht.svg  ← Gehäuse Draufsicht
+│   ├── mini-boards/                   ← Mini-Platinen-Designs
+│   └── v2/                            ← KiCad PCB-Projekt (4 Platinen)
+│       ├── main-board/
+│       │   └── gerber/main-board.zip
+│       ├── input-board/
+│       │   └── gerber/input-board.zip
+│       ├── esp32-adapter-board/
+│       │   └── gerber/esp32-adapter-board.zip
+│       └── vcc-board/
+│           └── gerber/vcc-board.zip
 ├── images/                            ← Aufbaufotos
 └── docs/
     ├── setup.md

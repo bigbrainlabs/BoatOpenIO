@@ -1,5 +1,5 @@
 // ============================================================
-// BoatOpenIO – Web-UI & Captive Portal (v2.3 – modern)
+// BoatOpenIO – Web-UI & Captive Portal (v3.0 – responsive)
 // ============================================================
 #pragma once
 
@@ -43,7 +43,7 @@ void handleSetup() {
     "<meta name='viewport' content='width=device-width,initial-scale=1'>"
     "<title>BoatOpenIO Setup</title>"
     "<style>"
-    ":root{--bg:#080e1a;--c1:#0f1929;--acc:#06b6d4;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;--txt:#e2e8f0;--sub:#94a3b8;--r:12px}"
+    ":root{--bg:#080e1a;--c1:#0f1929;--acc:#06b6d4;--ok:#10b981;--warn:#f59e0b;--txt:#e2e8f0;--sub:#94a3b8;--r:12px}"
     "*{box-sizing:border-box;margin:0;padding:0}"
     "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);"
     "color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;"
@@ -55,28 +55,28 @@ void handleSetup() {
     ".logo p{color:var(--sub);font-size:.88rem;margin-top:6px}"
     ".card{background:var(--c1);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);"
     "padding:24px;box-shadow:0 8px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04)}"
-    ".warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);padding:12px 16px;"
+    ".warnb{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);padding:12px 16px;"
     "border-radius:8px;color:var(--warn);margin-bottom:20px;font-size:.85rem;line-height:1.55}"
     "h2{font-size:.75rem;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.1em;"
     "margin:20px 0 10px;display:flex;align-items:center;gap:7px}"
     "h2::before{content:'';display:block;width:3px;height:13px;background:var(--acc);border-radius:2px;flex-shrink:0}"
     "h2:first-of-type{margin-top:0}"
     "label{display:block;font-size:.8rem;color:var(--sub);margin:12px 0 4px;font-weight:500}"
-    "input{background:#060c18;color:var(--txt);border:1px solid rgba(255,255,255,.1);padding:10px 12px;"
+    "input{background:#060c18;color:var(--txt);border:1px solid rgba(255,255,255,.1);padding:11px 12px;"
     "width:100%;border-radius:7px;font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s}"
     "input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(6,182,212,.15)}"
     ".sep{border:none;border-top:1px solid rgba(255,255,255,.07);margin:20px 0}"
-    ".btn{padding:12px;margin-top:16px;width:100%;border:none;border-radius:8px;"
+    ".btn{padding:13px;margin-top:16px;width:100%;border:none;border-radius:8px;"
     "background:linear-gradient(135deg,#047857,#10b981);color:#fff;font-size:.95rem;"
     "font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s}"
     ".btn:hover{opacity:.88}.btn:active{transform:scale(.98)}"
     "</style></head><body>"
     "<div class='wrap'>"
     "<div class='logo'><h1>&#9875; BoatOpenIO</h1>"
-    "<p>Universal Marine IO System &mdash; v2.2</p></div>"
+    "<p>Universal Marine IO System &mdash; v3.0</p></div>"
     "<div class='card'>"
-    "<div class='warn'>&#9888;&ensp;First-time setup required. Set a portal password to secure the "
-    "configuration interface.<br>Ersteinrichtung erforderlich. Bitte ein Portal-Passwort setzen.</div>"
+    "<div class='warnb'>&#9888;&ensp;First-time setup required. Set a portal password to secure the "
+    "configuration interface.<br>Ersteinrichtung: bitte ein Portal-Passwort setzen.</div>"
     "<form method='POST' action='/dosetup'>"
     "<h2>Portal Access</h2>"
     "<label>User / Benutzer</label>"
@@ -147,21 +147,29 @@ void handleRoot() {
     "<meta name='viewport' content='width=device-width,initial-scale=1'>"
     "<title>BoatOpenIO</title>"
     "<style>"
-    ":root{--bg:#080e1a;--c1:#0f1929;--c2:#141e35;--acc:#06b6d4;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;--txt:#e2e8f0;--sub:#94a3b8;--r:12px}"
+    ":root{--bg:#080e1a;--c1:#0f1929;--c2:#141e35;--acc:#06b6d4;--ok:#10b981;"
+    "--warn:#f59e0b;--err:#ef4444;--txt:#e2e8f0;--sub:#94a3b8;--r:12px}"
     "*{box-sizing:border-box}"
-    "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);"
-    "max-width:960px;margin:0 auto;padding:12px 16px 48px;"
-    "background-image:radial-gradient(ellipse 70% 50% at 0% 0%,rgba(6,182,212,.09) 0%,transparent 60%),"
-    "radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 60%)}"
-    "h1{font-size:1.45rem;font-weight:800;background:linear-gradient(120deg,#06b6d4,#818cf8);"
+    "html{scroll-behavior:smooth}"
+    "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"
+    "background:var(--bg);color:var(--txt);margin:0;"
+    "background-image:radial-gradient(ellipse 70% 40% at 0% 0%,rgba(6,182,212,.08) 0%,transparent 55%),"
+    "radial-gradient(ellipse 50% 40% at 100% 100%,rgba(124,58,237,.06) 0%,transparent 55%)}"
+    ".wrap{max-width:900px;margin:0 auto;padding:0 16px 60px}"
+    /* sticky header */
+    ".hdr{position:sticky;top:0;z-index:100;background:rgba(8,14,26,.92);"
+    "backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);"
+    "border-bottom:1px solid rgba(6,182,212,.15);padding:12px 16px;"
+    "display:flex;justify-content:space-between;align-items:center;margin:0 -16px}"
+    "h1{font-size:1.3rem;font-weight:800;background:linear-gradient(120deg,#06b6d4,#818cf8);"
     "-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}"
-    "h2{font-size:.73rem;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.1em;"
-    "margin:0 0 14px;display:flex;align-items:center;gap:6px}"
+    "h2{font-size:.72rem;font-weight:700;color:var(--acc);text-transform:uppercase;"
+    "letter-spacing:.1em;margin:0 0 14px;display:flex;align-items:center;gap:6px}"
     "h2::before{content:'';width:3px;height:13px;background:var(--acc);border-radius:2px;flex-shrink:0}"
-    ".hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 0 12px;"
-    "border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px}"
+    /* cards */
     ".card{background:var(--c1);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);"
-    "padding:16px 20px;margin:8px 0;box-shadow:0 2px 20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.03)}"
+    "padding:16px 20px;margin:10px 0;"
+    "box-shadow:0 2px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.03)}"
     "details.card{overflow:hidden}"
     "details.card>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;"
     "align-items:center;margin:-16px -20px;padding:16px 20px;border-radius:var(--r);user-select:none;"
@@ -170,21 +178,56 @@ void handleRoot() {
     "details.card>summary::-webkit-details-marker{display:none}"
     "details.card[open]>summary{border-radius:var(--r) var(--r) 0 0;"
     "border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:14px}"
-    ".chev{color:var(--sub);font-size:1.2em;transition:transform .25s;display:inline-block;line-height:1}"
+    ".chev{color:var(--sub);font-size:1.2em;transition:transform .25s;display:inline-block}"
     "details[open] .chev{transform:rotate(90deg)}"
+    /* forms */
     "label{display:block;font-size:.8rem;color:var(--sub);margin:10px 0 3px;font-weight:500}"
     "input,select{background:#060c18;color:var(--txt);border:1px solid rgba(255,255,255,.1);"
-    "padding:8px 10px;width:100%;border-radius:7px;font-size:.87rem;outline:none;"
+    "padding:9px 11px;width:100%;border-radius:7px;font-size:.87rem;outline:none;"
     "transition:border-color .2s,box-shadow .2s}"
     "input:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(6,182,212,.15)}"
-    "input[type=checkbox]{width:16px;height:16px;accent-color:var(--acc);cursor:pointer}"
-    "table{width:100%;border-collapse:collapse;font-size:.79rem}"
-    "th{padding:7px 5px;text-align:left;font-size:.7rem;font-weight:600;color:var(--sub);"
-    "text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid rgba(255,255,255,.09)}"
+    "input[type=checkbox]{width:17px;height:17px;accent-color:var(--acc);cursor:pointer}"
+    /* status grid */
+    ".stg{display:grid;grid-template-columns:1fr 1fr;gap:8px}"
+    ".sti{background:var(--c2);border:1px solid rgba(255,255,255,.06);border-radius:9px;padding:12px 14px}"
+    ".sl{font-size:.67rem;color:var(--sub);font-weight:600;text-transform:uppercase;"
+    "letter-spacing:.06em;margin-bottom:5px}"
+    ".sv{font-size:.87rem;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}"
+    /* dots */
+    ".dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}"
+    ".dok{background:var(--ok);box-shadow:0 0 6px var(--ok);animation:pok 2.5s ease-in-out infinite}"
+    ".derr{background:var(--err);box-shadow:0 0 5px var(--err)}"
+    ".dwarn{background:var(--warn);box-shadow:0 0 5px var(--warn);animation:pw 1.5s ease-in-out infinite}"
+    "@keyframes pok{0%,100%{opacity:1;box-shadow:0 0 5px var(--ok)}50%{opacity:.5;box-shadow:0 0 12px var(--ok)}}"
+    "@keyframes pw{0%,100%{opacity:1}50%{opacity:.3}}"
+    ".ok{color:var(--ok)}.err{color:var(--err)}.warn{color:var(--warn)}"
+    /* ads chip */
+    ".achip{padding:3px 10px;border-radius:10px;font-size:.75rem;font-weight:700}"
+    ".aok{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)}"
+    ".aerr{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}"
+    /* warn box */
+    ".warnbox{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);"
+    "padding:10px 14px;border-radius:8px;color:var(--warn);margin:10px 0;"
+    "font-size:.85rem;display:flex;align-items:center;gap:10px}"
+    /* channel table */
+    "table{width:100%;border-collapse:collapse;font-size:.8rem}"
+    "th{padding:7px 5px;text-align:left;font-size:.68rem;font-weight:600;color:var(--sub);"
+    "text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.09)}"
     "td{padding:4px 5px;border-bottom:1px solid rgba(255,255,255,.03)}"
-    "tr:nth-child(even) td{background:rgba(255,255,255,.025)}"
+    "tr:nth-child(even) td{background:rgba(255,255,255,.02)}"
     "tr:last-child td{border-bottom:none}"
-    "button{padding:9px 14px;margin:4px 0;border:none;border-radius:8px;font-size:.87rem;"
+    ".chwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}"
+    /* live value cards */
+    ".vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:2px}"
+    ".vc{background:var(--c2);border:1px solid rgba(255,255,255,.07);border-radius:10px;"
+    "padding:14px 12px;text-align:center;transition:border-color .2s}"
+    ".vc:hover{border-color:rgba(6,182,212,.3)}"
+    ".vn{font-size:.66rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;"
+    "margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+    ".vv{font-size:1.5rem;font-weight:700;color:var(--acc);line-height:1.1}"
+    ".vu{font-size:.72rem;color:var(--sub);margin-top:3px}"
+    /* buttons */
+    "button{padding:10px 14px;margin:4px 0;border:none;border-radius:8px;font-size:.87rem;"
     "font-weight:600;cursor:pointer;width:100%;transition:opacity .15s,transform .1s}"
     "button:hover{opacity:.85}button:active{transform:scale(.98)}"
     ".bsave{background:linear-gradient(135deg,#047857,#10b981);color:#fff}"
@@ -194,30 +237,23 @@ void handleRoot() {
     ".btest{background:linear-gradient(135deg,#92400e,#f59e0b);color:#111}"
     ".blive{background:linear-gradient(135deg,#14532d,#22c55e);color:#fff}"
     ".blang{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)!important;"
-    "color:var(--txt);padding:5px 16px;width:auto;font-size:.82rem;border-radius:20px}"
-    ".ok{color:var(--ok)}.err{color:var(--err)}.warn{color:var(--warn)}"
-    ".dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;vertical-align:middle}"
-    ".dok{background:var(--ok);box-shadow:0 0 7px var(--ok);animation:pok 2.5s ease-in-out infinite}"
-    ".derr{background:var(--err);box-shadow:0 0 5px var(--err)}"
-    ".dwarn{background:var(--warn);box-shadow:0 0 5px var(--warn);animation:pwarn 1.5s ease-in-out infinite}"
-    "@keyframes pok{0%,100%{opacity:1;box-shadow:0 0 5px var(--ok)}50%{opacity:.5;box-shadow:0 0 12px var(--ok)}}"
-    "@keyframes pwarn{0%,100%{opacity:1}50%{opacity:.3}}"
-    ".warnbox{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);padding:10px 14px;"
-    "border-radius:8px;color:var(--warn);margin:8px 0;font-size:.85rem;display:flex;align-items:center;gap:10px}"
-    ".stg{display:grid;grid-template-columns:1fr 1fr;gap:8px}"
-    ".sti{background:var(--c2);border:1px solid rgba(255,255,255,.06);border-radius:9px;padding:11px 14px}"
-    ".sl{font-size:.68rem;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}"
-    ".sv{font-size:.87rem;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}"
-    ".achip{padding:2px 8px;border-radius:10px;font-size:.73rem;font-weight:700}"
-    ".aok{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)}"
-    ".aerr{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}"
+    "color:var(--txt);padding:6px 16px;width:auto;font-size:.82rem;border-radius:20px}"
+    /* IMU */
     "#iw{display:flex;align-items:flex-start;gap:18px;margin:8px 0}"
     "#cal_status,#inv_status{font-size:.8rem;min-height:1.2em;color:var(--ok);margin-top:5px}"
-    "@media(max-width:560px){.stg{grid-template-columns:1fr}#iw{flex-direction:column}}"
+    /* responsive */
+    "@media(max-width:580px){"
+    ".stg{grid-template-columns:1fr}"
+    "#iw{flex-direction:column}"
+    ".vg{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}"
+    "}"
+    "@media(max-width:400px){"
+    ".vv{font-size:1.25rem}"
+    "}"
     "</style>"
   );
 
-  // ── JS i18n + helpers ────────────────────────────────────────
+  // ── JS ──────────────────────────────────────────────────────
   webServer.sendContent(
     "<script>"
     "var T={"
@@ -228,11 +264,10 @@ void handleRoot() {
     "l_ssid:'WiFi SSID',l_wpass:'WiFi Passwort',l_mqtt:'MQTT Server',"
     "l_mport:'MQTT Port',l_muser:'MQTT User',l_mpass:'MQTT Passwort',"
     "save_net:'Speichern & Neustart',"
-    "th_sensor:'Sensor',th_ads:'ADS',th_pin:'Pin',th_factor:'Faktor',"
-    "th_offset:'Offset',th_unit:'Einheit',th_active:'Aktiv',"
+    "th_sensor:'Sensor',th_factor:'Faktor',th_offset:'Offset',th_unit:'Einheit',th_active:'Aktiv',"
     "save_ch:'Konfiguration speichern',"
-    "cal_hint:'Faktor = Echter Wert / ADS-Pin-Spannung',"
-    "l_real:'Echter Wert (Multimeter)',l_adsv:'ADS-Pin-Spannung [V]',l_factor:'Faktor',"
+    "cal_hint:'Faktor = Echter Wert / ADS-Spannung (A0)',"
+    "l_real:'Echter Wert (Multimeter)',l_adsv:'ADS A0 Spannung [V]',l_factor:'Faktor',"
     "th_val:'Wert',loading:'Lade...',not_found:'nicht gefunden',"
     "imu_hint:'Boot auf ruhigem Wasser ausrichten, dann Null setzen.',"
     "imu_raw:'Rohwert',imu_corr:'Korrigiert',imu_off:'Offset',"
@@ -256,11 +291,10 @@ void handleRoot() {
     "l_ssid:'WiFi SSID',l_wpass:'WiFi Password',l_mqtt:'MQTT Server',"
     "l_mport:'MQTT Port',l_muser:'MQTT User',l_mpass:'MQTT Password',"
     "save_net:'Save & Restart',"
-    "th_sensor:'Sensor',th_ads:'ADS',th_pin:'Pin',th_factor:'Factor',"
-    "th_offset:'Offset',th_unit:'Unit',th_active:'Active',"
+    "th_sensor:'Sensor',th_factor:'Factor',th_offset:'Offset',th_unit:'Unit',th_active:'Active',"
     "save_ch:'Save Configuration',"
-    "cal_hint:'Factor = Real Value / ADS Pin Voltage',"
-    "l_real:'Real Value (Multimeter)',l_adsv:'ADS Pin Voltage [V]',l_factor:'Factor',"
+    "cal_hint:'Factor = Real Value / ADS Voltage (A0)',"
+    "l_real:'Real Value (Multimeter)',l_adsv:'ADS A0 Voltage [V]',l_factor:'Factor',"
     "th_val:'Value',loading:'Loading...',not_found:'not found',"
     "imu_hint:'Level boat on calm water, then set zero.',"
     "imu_raw:'Raw',imu_corr:'Corrected',imu_off:'Offset',"
@@ -303,6 +337,7 @@ void handleRoot() {
     "<h1>&#9875; BoatOpenIO</h1>"
     "<button class='blang' id='lbtn' onclick='toggleLang()'>EN</button>"
     "</div>"
+    "<div class='wrap'>"
   );
 
   // ── DEFAULT-PASSWORT WARNUNG ──────────────────────────────────
@@ -319,9 +354,10 @@ void handleRoot() {
   webServer.sendContent("<div class='card'><h2>Status</h2><div class='stg'>");
 
   // AP
-  webServer.sendContent("<div class='sti'><div class='sl'>Access Point</div><div class='sv'>");
-  webServer.sendContent(ap_ssid);
-  webServer.sendContent(" &rarr; 192.168.4.1</div></div>");
+  webServer.sendContent(
+    String("<div class='sti'><div class='sl'>Access Point</div>"
+    "<div class='sv'><span class='dot dok'></span>") + ap_ssid + " &rarr; 192.168.4.1</div></div>"
+  );
 
   // WiFi
   webServer.sendContent("<div class='sti'><div class='sl'>WiFi</div><div class='sv'>");
@@ -356,21 +392,19 @@ void handleRoot() {
   }
   webServer.sendContent("</div></div>");
 
+  // ADS1115 (single)
+  webServer.sendContent("<div class='sti'><div class='sl'>ADS1115</div><div class='sv'>");
+  webServer.sendContent(
+    String("<span class='achip ") + (adsOK ? "aok" : "aerr") + "'>ADS1115 @ 0x48</span>"
+  );
+  webServer.sendContent("</div></div>");
+
   // MPU6050
   webServer.sendContent("<div class='sti'><div class='sl'>MPU6050</div><div class='sv'>");
   if (mpuOK) {
     webServer.sendContent("<span class='dot dok'></span><span class='ok'>OK</span>");
   } else {
     webServer.sendContent("<span class='dot derr'></span><span class='err' data-i18n='s_miss'>fehlt</span>");
-  }
-  webServer.sendContent("</div></div>");
-
-  // ADS
-  webServer.sendContent("<div class='sti'><div class='sl'>ADS1115</div><div class='sv'>");
-  for (int i = 0; i < 4; i++) {
-    webServer.sendContent(
-      String("<span class='achip ") + (adsOK[i] ? "aok" : "aerr") + "'>ADS" + (i + 1) + "</span>"
-    );
   }
   webServer.sendContent("</div></div>");
 
@@ -386,9 +420,9 @@ void handleRoot() {
     "<div class='sv'>") + String(ESP.getFreeHeap() / 1024) + " KB free</div></div>"
   );
 
-  webServer.sendContent("</div></div>"); // close stg + card
+  webServer.sendContent("</div></div>"); // stg + card
 
-  // ── WIFI & MQTT (collapsible) ─────────────────────────────────
+  // ── WIFI & MQTT ───────────────────────────────────────────────
   webServer.sendContent(
     "<details class='card'>"
     "<summary><h2 data-i18n='h_wifi'>WiFi &amp; MQTT</h2><span class='chev'>&#8250;</span></summary>"
@@ -407,21 +441,21 @@ void handleRoot() {
     "<input name='muser' value='" + mqtt_user + "'>" +
     "<label data-i18n='l_mpass'>MQTT Passwort</label>"
     "<input type='password' name='mpass' placeholder='(unver&auml;ndert lassen)'>" +
-    "<button class='bsave' type='submit' data-i18n='save_net'>Speichern &amp; Neustart</button>"
+    "<button class='bsave' type='submit' style='margin-top:12px' data-i18n='save_net'>Speichern &amp; Neustart</button>"
     "</form></details>"
   );
 
-  // ── KANALZUORDNUNG (collapsible) ──────────────────────────────
+  // ── KANALZUORDNUNG ────────────────────────────────────────────
   webServer.sendContent(
     "<details class='card'>"
     "<summary><h2 data-i18n='h_ch'>Kanalzuordnung</h2><span class='chev'>&#8250;</span></summary>"
+    "<p style='font-size:.78rem;color:var(--sub);margin-bottom:10px'>"
+    "MUX &rarr; ADS1115 A0 &rarr; 0x48 &mdash; alle 16 Kan&auml;le &uuml;ber einen ADC.</p>"
     "<form method='POST' action='/save'>"
-    "<div style='overflow-x:auto'>"
+    "<div class='chwrap'>"
     "<table><tr>"
     "<th>#</th>"
     "<th data-i18n='th_sensor'>Sensor</th>"
-    "<th data-i18n='th_ads'>ADS</th>"
-    "<th data-i18n='th_pin'>Pin</th>"
     "<th data-i18n='th_factor'>Faktor</th>"
     "<th data-i18n='th_offset'>Offset</th>"
     "<th data-i18n='th_unit'>Einheit</th>"
@@ -429,19 +463,12 @@ void handleRoot() {
     "</tr>"
   );
   for (int i = 0; i < 16; i++) {
-    String r = "<tr><td>" + String(i + 1) + "</td>";
-    r += "<td><input name='s" + String(i) + "' value='" + kanaele[i].sensor + "'></td>";
-    r += "<td><select name='a" + String(i) + "'>";
-    for (int a = 1; a <= 4; a++)
-      r += "<option value='" + String(a) + "'" + (kanaele[i].ads == a ? " selected" : "") + ">" + a + "</option>";
-    r += "</select></td><td><select name='p" + String(i) + "'>";
-    for (int p = 0; p <= 3; p++)
-      r += "<option value='" + String(p) + "'" + (kanaele[i].pin == p ? " selected" : "") + ">A" + p + "</option>";
-    r += "</select></td>";
-    r += "<td><input name='f" + String(i) + "' value='" + String(kanaele[i].faktor, 4) + "' style='width:65px'></td>";
-    r += "<td><input name='o" + String(i) + "' value='" + String(kanaele[i].offset, 4) + "' style='width:65px'></td>";
-    r += "<td><input name='e" + String(i) + "' value='" + kanaele[i].einheit + "' style='width:45px'></td>";
-    r += "<td><input type='checkbox' name='c" + String(i) + "'" + (kanaele[i].aktiv ? " checked" : "") + "></td></tr>";
+    String r = String("<tr><td style='color:var(--sub);font-size:.75rem;font-weight:600'>") + (i + 1) + "</td>";
+    r += String("<td><input name='s") + i + "' value='" + kanaele[i].sensor + "' style='min-width:110px'></td>";
+    r += String("<td><input name='f") + i + "' value='" + String(kanaele[i].faktor, 4) + "' style='width:70px'></td>";
+    r += String("<td><input name='o") + i + "' value='" + String(kanaele[i].offset, 4) + "' style='width:70px'></td>";
+    r += String("<td><input name='e") + i + "' value='" + kanaele[i].einheit + "' style='width:48px'></td>";
+    r += String("<td style='text-align:center'><input type='checkbox' name='c") + i + "'" + (kanaele[i].aktiv ? " checked" : "") + "></td></tr>";
     webServer.sendContent(r);
   }
   webServer.sendContent(
@@ -450,20 +477,19 @@ void handleRoot() {
     "</form></details>"
   );
 
-  // ── KALIBRIERUNGS-RECHNER (collapsible) ───────────────────────
+  // ── KALIBRIERUNGS-RECHNER ─────────────────────────────────────
   webServer.sendContent(
     "<details class='card'>"
     "<summary><h2 data-i18n='h_cal'>Kalibrierungs-Rechner</h2><span class='chev'>&#8250;</span></summary>"
     "<p style='font-size:.82rem;color:var(--sub);margin-bottom:12px' data-i18n='cal_hint'>"
-    "Faktor = Echter Wert / ADS-Pin-Spannung</p>"
+    "Faktor = Echter Wert / ADS-Spannung (A0)</p>"
     "<label data-i18n='l_real'>Echter Wert (Multimeter)</label>"
     "<input type='number' step='0.001' id='cr' oninput='cf()'>"
-    "<label data-i18n='l_adsv'>ADS-Pin-Spannung [V]</label>"
+    "<label data-i18n='l_adsv'>ADS A0 Spannung [V]</label>"
     "<input type='number' step='0.001' id='cp' oninput='cf()'>"
     "<label data-i18n='l_factor'>Faktor</label>"
     "<input id='cres' readonly>"
-    "<script>"
-    "function cf(){"
+    "<script>function cf(){"
     "var r=parseFloat(document.getElementById('cr').value),"
     "p=parseFloat(document.getElementById('cp').value);"
     "if(!isNaN(r)&&!isNaN(p)&&p!==0)"
@@ -479,17 +505,24 @@ void handleRoot() {
     "<script>"
     "function reloadVals(){"
     "fetch('/api/values').then(function(r){return r.json();}).then(function(d){"
-    "var t=T[curLang];"
-    "var s='<table><tr><th>Sensor</th><th>'+t.th_val+'</th></tr>';"
-    "for(var k in d)s+='<tr><td>'+k+'</td><td>'+parseFloat(d[k]).toFixed(2)+'</td></tr>';"
-    "s+='</table>';"
+    "var s='<div class=vg>';"
+    "for(var k in d){"
+    "var v=d[k];"
+    "var disp=(typeof v==='number')?parseFloat(v).toFixed(2):v;"
+    "var unit=(k==='pitch'||k==='roll')?'&deg;':'';"
+    "s+='<div class=vc>';"
+    "s+='<div class=vn>'+k+'</div>';"
+    "s+='<div class=vv>'+disp+'</div>';"
+    "s+='<div class=vu>'+unit+'</div>';"
+    "s+='</div>';}"
+    "s+='</div>';"
     "document.getElementById('vals').innerHTML=s;"
     "}).catch(function(){});}"
-    "reloadVals();setInterval(reloadVals,3000);"
+    "reloadVals();setInterval(reloadVals,2000);"
     "</script></div>"
   );
 
-  // ── ADS DIAGNOSE (collapsible) ────────────────────────────────
+  // ── ADS DIAGNOSE ──────────────────────────────────────────────
   webServer.sendContent(
     "<details class='card'>"
     "<summary><h2 data-i18n='h_diag'>ADS Diagnose</h2><span class='chev'>&#8250;</span></summary>"
@@ -497,22 +530,21 @@ void handleRoot() {
     "<script>"
     "function reloadRaw(){"
     "fetch('/api/raw').then(function(r){return r.json();}).then(function(d){"
-    "var t=T[curLang];"
-    "var s='<table><tr><th>ADS</th><th>Addr</th><th>A0</th><th>A1</th><th>A2</th><th>A3</th></tr>';"
-    "for(var i=1;i<=4;i++){"
-    "var k='ads'+i,a=d[k];if(!a)continue;"
+    "var a=d.ads1;"
+    "if(!a){document.getElementById('raw').innerHTML="
+    "'<span style=\"color:var(--err)\">ADS1115 nicht gefunden</span>';return;}"
+    "var s='<table><tr><th>ADS</th><th>Addr</th><th>A0 (aktiv)</th><th>A1</th><th>A2</th><th>A3</th></tr>';"
     "s+='<tr>';"
-    "s+='<td>'+(a.ok?'<span class=ok>ADS'+i+'</span>':'<span class=err>ADS'+i+'</span>')+'</td>';"
-    "s+='<td>'+a.addr+'</td>';"
+    "s+='<td>'+(a.ok?'<span class=ok>ADS1115</span>':'<span class=err>ADS1115</span>')+'</td>';"
+    "s+='<td>0x48</td>';"
     "if(a.ok){"
-    "s+='<td>'+a.a0.toFixed(3)+'V</td>';"
-    "s+='<td>'+a.a1.toFixed(3)+'V</td>';"
-    "s+='<td>'+a.a2.toFixed(3)+'V</td>';"
-    "s+='<td>'+a.a3.toFixed(3)+'V</td>';"
+    "s+='<td style=\"color:var(--acc);font-weight:600\">'+a.a0.toFixed(3)+'V</td>';"
+    "s+='<td style=\"color:var(--sub)\">'+a.a1.toFixed(3)+'V</td>';"
+    "s+='<td style=\"color:var(--sub)\">'+a.a2.toFixed(3)+'V</td>';"
+    "s+='<td style=\"color:var(--sub)\">'+a.a3.toFixed(3)+'V</td>';"
     "}else{"
-    "s+='<td colspan=4 style=\"color:var(--err)\">'+t.not_found+'</td>';}"
-    "s+='</tr>';}"
-    "s+='</table>';"
+    "s+='<td colspan=4 style=\"color:var(--err)\">nicht gefunden</td>';}"
+    "s+='</tr></table>';"
     "document.getElementById('raw').innerHTML=s;"
     "}).catch(function(){});}"
     "reloadRaw();setInterval(reloadRaw,2000);"
@@ -534,7 +566,7 @@ void handleRoot() {
     "<rect x='-60' y='0' width='120' height='80' fill='#064e3b' opacity='.7'/>"
     "<line x1='-55' y1='0' x2='55' y2='0' stroke='#06b6d4' stroke-width='2'/>"
     "</g></g>"
-    "<circle r='47' fill='none' stroke='rgba(6,182,212,.45)' stroke-width='2.5'/>"
+    "<circle r='47' fill='none' stroke='rgba(6,182,212,.4)' stroke-width='2.5'/>"
     "<line x1='-20' y1='0' x2='20' y2='0' stroke='#f59e0b' stroke-width='2.5' stroke-linecap='round'/>"
     "<line x1='0' y1='-8' x2='0' y2='8' stroke='#f59e0b' stroke-width='2' stroke-linecap='round'/>"
     "<circle r='2.5' fill='#f59e0b'/>"
@@ -571,7 +603,7 @@ void handleRoot() {
     "<td style=\"color:var(--sub)\">'+d.pitch_offset.toFixed(2)+'&deg;</td>"
     "<td style=\"color:var(--sub)\">'+d.roll_offset.toFixed(2)+'&deg;</td></tr>';"
     "s+='</table>';"
-    "s+='<small style=\"color:#4a5568;margin-top:5px;display:block\">"
+    "s+='<small style=\"color:#4a5568;margin-top:6px;display:block\">"
     "'+t.imu_bias+': X='+d.bias_x.toFixed(4)+' Y='+d.bias_y.toFixed(4)+' Z='+d.bias_z.toFixed(4)+'</small>';"
     "document.getElementById('imu_table').innerHTML=s;"
     "updateHorizon(d.pitch_corr,d.roll_corr);"
@@ -603,7 +635,7 @@ void handleRoot() {
     "</script></div>"
   );
 
-  // ── SICHERHEIT (collapsible) ──────────────────────────────────
+  // ── SICHERHEIT ────────────────────────────────────────────────
   webServer.sendContent(
     "<details class='card'>"
     "<summary><h2 data-i18n='h_sec'>Sicherheit</h2><span class='chev'>&#8250;</span></summary>"
@@ -644,6 +676,7 @@ void handleRoot() {
     "<form method='POST' action='/reboot'>"
     "<button class='breboot' type='submit' data-i18n='restart'>Neustart</button>"
     "</form></div>"
+    "</div>" // .wrap
     "<script>applyLang(curLang);</script>"
     "</body></html>"
   );
@@ -654,8 +687,6 @@ void handleSave() {
   if (!requireAuth()) return;
   for (int i = 0; i < 16; i++) {
     kanaele[i].sensor  = webServer.arg("s" + String(i));
-    kanaele[i].ads     = webServer.arg("a" + String(i)).toInt();
-    kanaele[i].pin     = webServer.arg("p" + String(i)).toInt();
     kanaele[i].faktor  = webServer.arg("f" + String(i)).toFloat();
     kanaele[i].offset  = webServer.arg("o" + String(i)).toFloat();
     kanaele[i].einheit = webServer.arg("e" + String(i));
@@ -755,7 +786,7 @@ void handleValues() {
     } else {
       selectChannel(kanaele[i].klemme - 1);
       delayMicroseconds(500);
-      voltage = readADS(kanaele[i].ads, kanaele[i].pin);
+      voltage = readADS();
     }
     doc[kanaele[i].sensor] = roundf((voltage * kanaele[i].faktor + kanaele[i].offset) * 100.f) / 100.f;
   }
@@ -768,17 +799,13 @@ void handleValues() {
 
 // ── RAW ADS DIAGNOSE API ─────────────────────────────────────
 void handleRaw() {
-  const char* addrStr[4] = {"0x48", "0x49", "0x4A", "0x4B"};
-  StaticJsonDocument<512> doc;
-  for (int i = 0; i < 4; i++) {
-    JsonObject a = doc.createNestedObject(String("ads") + (i + 1));
-    a["ok"]   = adsOK[i];
-    a["addr"] = addrStr[i];
-    if (adsOK[i]) {
-      for (int p = 0; p < 4; p++) {
-        int16_t raw = ads[i].readADC_SingleEnded(p);
-        a["a" + String(p)] = roundf(ads[i].computeVolts(raw) * 1000.f) / 1000.f;
-      }
+  StaticJsonDocument<256> doc;
+  JsonObject a = doc.createNestedObject("ads1");
+  a["ok"] = adsOK;
+  if (adsOK) {
+    for (int p = 0; p < 4; p++) {
+      int16_t raw = ads.readADC_SingleEnded(p);
+      a["a" + String(p)] = roundf(ads.computeVolts(raw) * 1000.f) / 1000.f;
     }
   }
   String out;
