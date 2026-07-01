@@ -182,16 +182,18 @@ S3 S2 S1 S0 → active channel
 ```json
 {
   "kanaele": [
-    {"klemme": 1, "sensor": "battery1",     "einheit": "V",   "faktor": 4.7,  "offset": 0, "aktiv": true},
-    {"klemme": 2, "sensor": "oil_temp",     "einheit": "°C",  "faktor": 1.0,  "offset": 0, "aktiv": true},
-    {"klemme": 3, "sensor": "oil_pressure", "einheit": "bar", "faktor": 1.0,  "offset": 0, "aktiv": true},
-    {"klemme": 4, "sensor": "tank",         "einheit": "%",   "faktor": 1.0,  "offset": 0, "aktiv": true},
-    {"klemme": 5, "sensor": "rpm",          "einheit": "rpm", "faktor": 1.0,  "offset": 0, "aktiv": false}
+    {"klemme": 1, "sensor": "battery1",     "einheit": "V",   "faktor": 4.7, "offset": 0, "aktiv": true,  "topic": ""},
+    {"klemme": 2, "sensor": "oil_temp",     "einheit": "°C",  "faktor": 1.0, "offset": 0, "aktiv": true,  "topic": "vessels/self/propulsion/engine/oilTemperature"},
+    {"klemme": 3, "sensor": "oil_pressure", "einheit": "bar", "faktor": 1.0, "offset": 0, "aktiv": true,  "topic": "vessels/self/propulsion/engine/oilPressure"},
+    {"klemme": 4, "sensor": "tank",         "einheit": "%",   "faktor": 1.0, "offset": 0, "aktiv": true,  "topic": ""},
+    {"klemme": 5, "sensor": "rpm",          "einheit": "rpm", "faktor": 1.0, "offset": 0, "aktiv": false, "topic": ""}
   ]
 }
 ```
 
 > All 16 channels are routed via the MUX (CD74HC4067) to a single ADS1115 @ 0x48 on pin A0. No `ads` or `pin` fields needed — the channel number (`klemme`) maps directly to the MUX select lines.
+>
+> **`topic`** — optional. If empty (`""`), the firmware publishes to `boat/io/<sensor>` (default). Set a custom topic for Signal K compatibility or any other MQTT schema. The "SK" button in the web UI auto-fills the correct Signal K path for common sensor names.
 
 ---
 

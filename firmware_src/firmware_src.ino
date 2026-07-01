@@ -73,6 +73,7 @@ struct KanalConfig {
   float   faktor;
   float   offset;
   bool    aktiv;
+  String  topic;   // leer = boat/io/<sensor>
 };
 KanalConfig kanaele[16];
 bool testMode = true;
@@ -133,7 +134,10 @@ void readAllChannels() {
     float wert = voltage * kanaele[i].faktor + kanaele[i].offset;
     char buf[16];
     dtostrf(wert, 6, 2, buf);
-    mqtt.publish((String(MQTT_TOPIC_BASE) + kanaele[i].sensor).c_str(), buf);
+    String t = kanaele[i].topic.length() > 0
+      ? kanaele[i].topic
+      : String(MQTT_TOPIC_BASE) + kanaele[i].sensor;
+    mqtt.publish(t.c_str(), buf);
   }
 }
 
@@ -218,7 +222,7 @@ void fakeIMU() {
 void loadConfig() {
   for (int i = 0; i < 16; i++) {
     kanaele[i] = {(uint8_t)(i + 1), 1, 0,
-                  "kanal_" + String(i + 1), "V", 1.0f, 0.0f, false};
+                  "kanal_" + String(i + 1), "V", 1.0f, 0.0f, false, ""};
   }
   if (!LittleFS.exists(CONFIG_FILE)) return;
   File f = LittleFS.open(CONFIG_FILE, "r");
@@ -237,6 +241,7 @@ void loadConfig() {
     kanaele[idx].faktor  = k["faktor"]  | 1.0f;
     kanaele[idx].offset  = k["offset"]  | 0.0f;
     kanaele[idx].aktiv   = k["aktiv"]   | false;
+    kanaele[idx].topic   = k["topic"].isNull() ? "" : k["topic"].as<String>();
     idx++;
   }
 }
@@ -254,6 +259,7 @@ void saveConfig() {
     k["faktor"]  = kanaele[i].faktor;
     k["offset"]  = kanaele[i].offset;
     k["aktiv"]   = kanaele[i].aktiv;
+    k["topic"]   = kanaele[i].topic;
   }
   File f = LittleFS.open(CONFIG_FILE, "w");
   serializeJson(doc, f);
@@ -367,6 +373,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         kanaele[idx].faktor  = k["faktor"]  | kanaele[idx].faktor;
         kanaele[idx].offset  = k["offset"]  | kanaele[idx].offset;
         kanaele[idx].aktiv   = k["aktiv"]   | kanaele[idx].aktiv;
+        kanaele[idx].topic   = k["topic"].isNull() ? kanaele[idx].topic : k["topic"].as<String>();
         idx++;
       }
       saveConfig();

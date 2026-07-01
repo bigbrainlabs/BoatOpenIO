@@ -182,16 +182,18 @@ S3 S2 S1 S0 → aktiver Kanal
 ```json
 {
   "kanaele": [
-    {"klemme": 1, "sensor": "batterie1",    "einheit": "V",   "faktor": 4.7, "offset": 0, "aktiv": true},
-    {"klemme": 2, "sensor": "oeltemperatur","einheit": "°C",  "faktor": 1.0, "offset": 0, "aktiv": true},
-    {"klemme": 3, "sensor": "oeldruck",     "einheit": "bar", "faktor": 1.0, "offset": 0, "aktiv": true},
-    {"klemme": 4, "sensor": "tank",         "einheit": "%",   "faktor": 1.0, "offset": 0, "aktiv": true},
-    {"klemme": 5, "sensor": "drehzahl",     "einheit": "rpm", "faktor": 1.0, "offset": 0, "aktiv": false}
+    {"klemme": 1, "sensor": "batterie1",    "einheit": "V",   "faktor": 4.7, "offset": 0, "aktiv": true,  "topic": ""},
+    {"klemme": 2, "sensor": "oeltemperatur","einheit": "°C",  "faktor": 1.0, "offset": 0, "aktiv": true,  "topic": "vessels/self/propulsion/engine/oilTemperature"},
+    {"klemme": 3, "sensor": "oeldruck",     "einheit": "bar", "faktor": 1.0, "offset": 0, "aktiv": true,  "topic": "vessels/self/propulsion/engine/oilPressure"},
+    {"klemme": 4, "sensor": "tank",         "einheit": "%",   "faktor": 1.0, "offset": 0, "aktiv": true,  "topic": ""},
+    {"klemme": 5, "sensor": "drehzahl",     "einheit": "rpm", "faktor": 1.0, "offset": 0, "aktiv": false, "topic": ""}
   ]
 }
 ```
 
 > Alle 16 Kanäle werden über den MUX (CD74HC4067) auf einen einzigen ADS1115 @ 0x48 an Pin A0 geleitet. Die Felder `ads` und `pin` entfallen – die Klemmen-Nummer (`klemme`) wird direkt auf die MUX-Selectleitungen abgebildet.
+>
+> **`topic`** – optional. Leer (`""`) → Firmware sendet auf `boat/io/<sensor>` (Standard). Eigener Topic für Signal K-Kompatibilität oder andere MQTT-Schemas. Der „SK"-Button im Web-UI füllt den korrekten Signal K-Pfad für gängige Sensornamen automatisch ein.
 
 ---
 

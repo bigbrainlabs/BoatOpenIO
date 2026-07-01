@@ -239,8 +239,9 @@ void handleRoot() {
     "l_ssid:'WiFi SSID',l_wpass:'WiFi Passwort',l_mqtt:'MQTT Server',"
     "l_mport:'MQTT Port',l_muser:'MQTT User',l_mpass:'MQTT Passwort',"
     "save_net:'Speichern & Neustart',"
-    "th_sensor:'Sensor',th_factor:'Faktor',th_offset:'Offset',th_unit:'Einheit',th_active:'Aktiv',"
+    "th_sensor:'Sensor',th_factor:'Faktor',th_offset:'Offset',th_unit:'Einheit',th_topic:'Topic',th_active:'Aktiv',"
     "save_ch:'Konfiguration speichern',"
+    "sk_none:'Kein SK-Pfad bekannt für',"
     "cal_hint:'Faktor = Echter Wert / ADS-Spannung (A0)',"
     "l_real:'Echter Wert (Multimeter)',l_adsv:'ADS A0 Spannung [V]',l_factor:'Faktor',"
     "th_val:'Wert',loading:'Lade...',not_found:'nicht gefunden',"
@@ -266,8 +267,9 @@ void handleRoot() {
     "l_ssid:'WiFi SSID',l_wpass:'WiFi Password',l_mqtt:'MQTT Server',"
     "l_mport:'MQTT Port',l_muser:'MQTT User',l_mpass:'MQTT Password',"
     "save_net:'Save & Restart',"
-    "th_sensor:'Sensor',th_factor:'Factor',th_offset:'Offset',th_unit:'Unit',th_active:'Active',"
+    "th_sensor:'Sensor',th_factor:'Factor',th_offset:'Offset',th_unit:'Unit',th_topic:'Topic',th_active:'Active',"
     "save_ch:'Save Configuration',"
+    "sk_none:'No SK path known for',"
     "cal_hint:'Factor = Real Value / ADS Voltage (A0)',"
     "l_real:'Real Value (Multimeter)',l_adsv:'ADS A0 Voltage [V]',l_factor:'Factor',"
     "th_val:'Value',loading:'Loading...',not_found:'not found',"
@@ -298,6 +300,26 @@ void handleRoot() {
     "var b=document.getElementById('lbtn');if(b)b.textContent=l==='de'?'EN':'DE';"
     "}"
     "function toggleLang(){applyLang(curLang==='de'?'en':'de');}"
+    "function skPath(s){"
+    "s=s.toLowerCase();"
+    "if(s.includes('batter')||s.includes('batteri'))return 'vessels/self/electrical/batteries/0/voltage';"
+    "if(s.includes('oeldruck')||s.includes('oilpress')||s.includes('öldr'))return 'vessels/self/propulsion/engine/oilPressure';"
+    "if(s.includes('oeltemp')||s.includes('oiltemp')||s.includes('ölt'))return 'vessels/self/propulsion/engine/oilTemperature';"
+    "if(s.includes('kuehl')||s.includes('coolant'))return 'vessels/self/propulsion/engine/coolantTemperature';"
+    "if(s.includes('tank'))return 'vessels/self/tanks/fuel/0/currentLevel';"
+    "if(s.includes('drehzahl')||s.includes('rpm')||s.includes('rev'))return 'vessels/self/propulsion/engine/revolutions';"
+    "if(s.includes('pitch'))return 'vessels/self/navigation/attitude/pitch';"
+    "if(s.includes('roll'))return 'vessels/self/navigation/attitude/roll';"
+    "if(s.includes('temp'))return 'vessels/self/propulsion/engine/temperature';"
+    "if(s.includes('wind'))return 'vessels/self/environment/wind/speedApparent';"
+    "if(s.includes('volt')||s.includes('span'))return 'vessels/self/electrical/batteries/0/voltage';"
+    "return '';}"
+    "function setSK(i){"
+    "var sn=document.querySelector('input[name=\"s'+i+'\"]');"
+    "var tn=document.querySelector('input[name=\"t'+i+'\"]');"
+    "if(!sn||!tn)return;"
+    "var p=skPath(sn.value);"
+    "if(p){tn.value=p;}else{alert(T[curLang].sk_none+' \"'+sn.value+'\"');}}"
     "function updateHorizon(pitch,roll){"
     "var g=document.getElementById('imu-plane');if(!g)return;"
     "var py=Math.max(-38,Math.min(38,pitch*1.8));"
@@ -439,15 +461,25 @@ void handleRoot() {
     "<th data-i18n='th_factor'>Faktor</th>"
     "<th data-i18n='th_offset'>Offset</th>"
     "<th data-i18n='th_unit'>Einheit</th>"
+    "<th data-i18n='th_topic'>Topic</th>"
     "<th data-i18n='th_active'>Aktiv</th>"
     "</tr>"
   );
   for (int i = 0; i < 16; i++) {
+    String sensorVal = kanaele[i].sensor;
     String r = String("<tr><td style='color:var(--sub);font-size:.75rem;font-weight:600'>") + (i + 1) + "</td>";
-    r += String("<td><input name='s") + i + "' value='" + kanaele[i].sensor + "' style='min-width:110px'></td>";
+    r += String("<td><input name='s") + i + "' value='" + sensorVal + "' style='min-width:110px'></td>";
     r += String("<td><input name='f") + i + "' value='" + String(kanaele[i].faktor, 4) + "' style='width:70px'></td>";
     r += String("<td><input name='o") + i + "' value='" + String(kanaele[i].offset, 4) + "' style='width:70px'></td>";
     r += String("<td><input name='e") + i + "' value='" + kanaele[i].einheit + "' style='width:48px'></td>";
+    r += String("<td><div style='display:flex;gap:4px;align-items:center'>"
+                "<input name='t") + i + "' value='" + kanaele[i].topic +
+                "' placeholder='boat/io/…' style='min-width:150px'>"
+                "<button type='button' onclick='setSK(" + i + ")'"
+                " style='width:auto;padding:4px 8px;font-size:.72rem;background:#27272a;"
+                "color:#a1a1aa;border:1px solid #3f3f46;border-radius:6px;"
+                "white-space:nowrap;cursor:pointer'>SK</button>"
+                "</div></td>";
     r += String("<td style='text-align:center'><input type='checkbox' name='c") + i + "'" + (kanaele[i].aktiv ? " checked" : "") + "></td></tr>";
     webServer.sendContent(r);
   }
@@ -671,6 +703,7 @@ void handleSave() {
     kanaele[i].offset  = webServer.arg("o" + String(i)).toFloat();
     kanaele[i].einheit = webServer.arg("e" + String(i));
     kanaele[i].aktiv   = webServer.hasArg("c" + String(i));
+    kanaele[i].topic   = webServer.arg("t" + String(i));
   }
   saveConfig();
   webServer.sendHeader("Location", "/");
