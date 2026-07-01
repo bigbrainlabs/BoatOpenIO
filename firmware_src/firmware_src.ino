@@ -1,8 +1,10 @@
 // ============================================================
-// BoatOpenIO – Firmware v3.0
+// BoatOpenIO – Firmware v2.0
 // Universal Marine IO System
 // github.com/bigbrainlabs/BoatOpenIO
 // ============================================================
+
+#define FIRMWARE_VERSION "2.1"
 
 #include <Wire.h>
 #include <WiFi.h>
@@ -415,7 +417,7 @@ void setup() {
   Serial.begin(115200);
   delay(500);
   Serial.println("\n========================================");
-  Serial.println("BoatOpenIO Firmware v3.0");
+  Serial.println("BoatOpenIO Firmware v" FIRMWARE_VERSION);
   Serial.println("========================================");
 
   pinMode(STATUS_LED_PIN,   OUTPUT);

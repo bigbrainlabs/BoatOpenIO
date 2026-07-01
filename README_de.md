@@ -82,13 +82,40 @@ Sensor → Schraubklemme → R_Pack08 (Widerstandsnetzwerk) → SP0503BAHTG (Zen
 
 > ⚠️ **Pull-up Spannung ist 3.3V** – die ADS1115 VDD liegt bei 3.3V, höhere Spannungen an den Eingängen riskieren Bauteilschäden.
 
+#### Betrieb ohne Schutzschaltung (nicht empfohlen)
+
+Wer die Bourns-Widerstände oder Zener-Arrays noch nicht beschaffen konnte und die Platine trotzdem erst in Betrieb nehmen möchte, kann die Widerstandsnetzwerke überbrücken — aber sollte wissen, worauf verzichtet wird.
+
+**Bourns 4116R-1-102LF überbrücken:**  
+Das DIL-16-Gehäuse enthält 8 isolierte Einzelwiderstände. Jeder Widerstand verbindet einen Pin der linken Reihe mit dem gegenüberliegenden Pin der rechten Reihe:
+
+```
+Pin 1  ──[R]──  Pin 16
+Pin 2  ──[R]──  Pin 15
+Pin 3  ──[R]──  Pin 14
+  ...             ...
+Pin 8  ──[R]──  Pin 9
+```
+
+Zum Überbrücken: je einen kurzen Drahtbügel über jedes Pinpaar löten (8 Brücken pro Chip, 16 insgesamt für beide R_Pack08). Das Signal läuft dann ohne Vorwiderstand durch. Die SP0503BAHTG-Zener-Pads können einfach frei bleiben.
+
+> 🔴 **Ohne diese Schutzschaltung sind alle 16 Eingänge ungeschützt.** Eine falsche Mini-Platine, ein Verdrahtungsfehler oder eine kurze Überspannung kann MUX, ADS1115 und ESP32 gleichzeitig durch eine I2C-Kettenreaktion zerstören. Nur für Tests am Labortisch mit bekannten, sauberen Signalen vertretbar. Vor dem Einbau an Bord unbedingt die echten Bauteile bestücken.
+
 ### Eingangsboard – Anschlüsse
 
 ```
 16× Schraubklemme 5.08mm  → Sensor-Rohsignal
-20-pol Pfostenstecker     → Verbindung zum Mainboard (SIG1-16 + GND + 3.3V + 5V)
+20-pol Pfostenstecker     → Verbindung zum Mainboard (SIG1–16 + GND)
+```
+
+### VCC-Board – Anschlüsse
+
+Das VCC-Board verteilt die Versorgungsspannung an die Mini-Platinen. Es ist über ein 3-pol JST-Kabel mit dem Mainboard verbunden (5V, 3.3V, GND).
+
+```
 7× JST 2-Pin (3.3V)       → VCC-Leiste für passive/ESP01-Mini-Platinen
 3× JST 2-Pin (5V)         → VCC-Leiste für Arduino-Nano-Mini-Platinen
+3-pol JST                 → Verbindung zum Mainboard (5V · 3.3V · GND)
 ```
 
 ### I2C-Adresse

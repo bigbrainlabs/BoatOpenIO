@@ -82,13 +82,40 @@ Sensor → Screw terminal → R_Pack08 (resistor network) → SP0503BAHTG (Zener
 
 > ⚠️ **Pull-up voltage is 3.3V** — the ADS1115 VDD is at 3.3V; higher voltages on the inputs risk component damage.
 
+#### Running without the protection circuit (not recommended)
+
+If the Bourns or Zener components are unavailable and you want to get the board running first, the resistor networks can be bypassed — but understand what you are giving up.
+
+**How to bypass the Bourns 4116R-1-102LF:**  
+The DIL-16 package contains 8 isolated resistors. Each resistor connects a pin on the left row to the opposing pin on the right row:
+
+```
+Pin 1  ──[R]──  Pin 16
+Pin 2  ──[R]──  Pin 15
+Pin 3  ──[R]──  Pin 14
+  ...             ...
+Pin 8  ──[R]──  Pin 9
+```
+
+To bypass: solder a short jumper wire across each pair (8 bridges per chip, 16 total for both R_Pack08). The signal then passes through without series resistance. The SP0503BAHTG Zener pads can simply be left empty.
+
+> 🔴 **Without this protection, all 16 inputs are exposed.** A wrong mini-board, a wiring mistake, or any brief overvoltage can destroy the MUX, ADS1115, and ESP32 in a chain reaction — all three at once. Only bypass for bench tests with known, clean signals. Fit the real parts before installing on the boat.
+
 ### Input Board – Connectors
 
 ```
 16× screw terminal 5.08mm   → raw sensor signal
-20-pin IDC header            → connection to main board (SIG1-16 + GND + 3.3V + 5V)
+20-pin IDC header            → connection to main board (SIG1–16 + GND)
+```
+
+### VCC Board – Connectors
+
+The VCC board distributes power to the mini-boards via JST connectors. It connects to the main board via a 3-pin JST cable (5V, 3.3V, GND).
+
+```
 7× JST 2-pin (3.3V)         → VCC rail for passive/ESP01 mini-boards
 3× JST 2-pin (5V)           → VCC rail for Arduino Nano mini-boards
+3-pin JST                   → connection to main board (5V · 3.3V · GND)
 ```
 
 ### I2C Address
