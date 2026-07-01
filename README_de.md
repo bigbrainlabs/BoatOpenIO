@@ -44,6 +44,26 @@ Sensor → Mini-Platine → JST 3-Pin → PCB → Zenerschutz → MUX → ADS111
 
 ---
 
+## Für wen ist das?
+
+**Wenn dein Boot vor 2000 gebaut wurde, ist dieses Projekt für dich.**
+
+Boote aus dieser Zeit haben **analoge VDO-Sensoren** — Öldruck, Öltemperatur, Kühlwassertemperatur, Tankstand, Drehzahl. Diese Sensoren sind robust, erprobt, und tun ihren Job noch immer einwandfrei. Das Problem: Kein modernes System redet mit ihnen.
+
+NMEA-2000-Gateways, die analoge Signale in moderne Bootnetzwerke übersetzen, gibt es zwar — aber sie kosten **300–500€**, sind geschlossene Black Boxes, und du hast keinen Einblick oder Einfluss auf das, was darin passiert.
+
+**BoatOpenIO ist ein offenes analoges Marine-Gateway.**
+
+Bestehende VDO-Sensoren anschließen. Sauberes MQTT-Signal raus. Weiter zu Signal K oder BoatOS. Fertig — ohne einen einzigen Sensor zu ersetzen, ohne neue Kabelwege, ohne Black Box.
+
+```
+VDO-Sensor → BoatOpenIO → MQTT → Signal K / BoatOS → modernes Dashboard
+```
+
+> **Für Boote die vor 2000 gebaut wurden, noch 20 Jahre fahren — und ein modernes Dashboard verdienen, ohne alles neu zu kaufen.**
+
+---
+
 ## Hardware – v2 PCB
 
 Vier separate Platinen, verbunden über IDC-Flachbandkabel: **Eingangsboard**, **Mainboard**, **ESP32-Adapterboard** und **VCC-Verteiler**. Bestellfertige Gerber-Dateien in `hardware/v2/*/gerber/`.
