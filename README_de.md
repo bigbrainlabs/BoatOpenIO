@@ -333,6 +333,12 @@ BoatOpenIO/
 
 ---
 
+## Roadmap
+
+Was fertig ist, was geplant ist, was auf dem Backlog steht — siehe [ROADMAP_de.md](ROADMAP_de.md).
+
+---
+
 ## Integration mit BoatOS
 
 BoatOpenIO sendet alle Werte per MQTT. BoatOS erkennt alle Topics automatisch (Auto-Discovery) und zeigt sie im Dashboard an. Kein manuelles Konfigurieren nötig.

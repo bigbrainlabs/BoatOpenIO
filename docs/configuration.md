@@ -66,14 +66,16 @@ MQTT Password   leave blank = keep existing
 Each of the 16 terminals can be configured independently:
 
 ```
-Sensor    MQTT topic suffix → boat/io/<sensor>
-ADS       ADS1115 chip number: 1 (0x48) · 2 (0x49) · 3 (0x4A) · 4 (0x4B)
-Pin       ADS input: A0 · A1 · A2 · A3
+Sensor    sensor name — used as MQTT topic suffix if no custom topic is set
 Factor    output = raw_voltage × factor + offset
 Offset    additive offset (applied after factor)
 Unit      string label, e.g. V · °C · bar · %  (display only)
+Topic     custom MQTT topic — leave empty to use boat/io/<sensor>
+          use the SK button to auto-fill a Signal K path
 Active    only active channels are read and published to MQTT
 ```
+
+> All 16 channels share a single ADS1115 @ 0x48. The CD74HC4067 MUX routes each channel in sequence — no ADS or pin selection needed.
 
 → Saved to LittleFS `config.json`. Takes effect immediately, no restart needed.
 
@@ -121,7 +123,7 @@ All endpoints are accessible without additional auth once the browser session is
 | Endpoint | Method | Returns |
 |----------|--------|---------|
 | `/api/values` | GET | Active channel values + pitch + roll (corrected) |
-| `/api/raw` | GET | Raw voltages for all 16 ADS inputs (all 4×4 pins) |
+| `/api/raw` | GET | Raw voltages for all 16 channels (single ADS1115 @ 0x48, read via MUX) |
 | `/api/imu` | GET | Pitch/roll raw, corrected, offset, gyro bias |
 | `/calibrate` | POST | Sets current pitch/roll as mounting offset, returns new offsets |
 
@@ -141,23 +143,21 @@ Stored on the ESP32's flash filesystem. Loaded at boot.
   "kanaele": [
     {
       "klemme":  1,
-      "ads":     1,
-      "pin":     0,
       "sensor":  "battery_starter",
       "einheit": "V",
       "faktor":  3.127,
       "offset":  0.0,
-      "aktiv":   true
+      "aktiv":   true,
+      "topic":   ""
     },
     {
       "klemme":  2,
-      "ads":     1,
-      "pin":     1,
-      "sensor":  "battery_consumer",
-      "einheit": "V",
-      "faktor":  3.127,
+      "sensor":  "oil_temp",
+      "einheit": "°C",
+      "faktor":  1.0,
       "offset":  0.0,
-      "aktiv":   false
+      "aktiv":   true,
+      "topic":   "vessels/self/propulsion/engine/oilTemperature"
     }
   ]
 }
@@ -168,13 +168,12 @@ Stored on the ESP32's flash filesystem. Loaded at boot.
 | Field | Type | Description |
 |-------|------|-------------|
 | `klemme` | int 1–16 | Physical terminal number on the board |
-| `ads` | int 1–4 | ADS1115 chip: 1=0x48, 2=0x49, 3=0x4A, 4=0x4B |
-| `pin` | int 0–3 | ADS input pin: 0=A0, 1=A1, 2=A2, 3=A3 |
-| `sensor` | string | MQTT topic suffix, published as `boat/io/<sensor>` |
+| `sensor` | string | Sensor name — used as MQTT topic suffix when `topic` is empty |
 | `einheit` | string | Unit label (display only) |
 | `faktor` | float | Voltage multiplier: `value = voltage × faktor + offset` |
 | `offset` | float | Additive offset after factor |
 | `aktiv` | bool | `true` = channel is read and published |
+| `topic` | string | Custom MQTT topic. Empty = publishes to `boat/io/<sensor>` |
 
 ### Voltage → Physical Value
 
@@ -204,7 +203,7 @@ Or: configure via the web portal — changes are saved to LittleFS automatically
 
 | Topic | Payload | Retained | Interval |
 |-------|---------|----------|----------|
-| `boat/io/<sensor>` | float value | no | 2 s |
+| `boat/io/<sensor>` or custom `topic` | float value | no | 2 s |
 | `boat/io/pitch` | float °, corrected | yes | 200 ms |
 | `boat/io/roll` | float °, corrected | yes | 200 ms |
 | `boatopenio/status` | `online` / `offline` | yes | 10 s + LWT |
@@ -226,11 +225,11 @@ Payload: full or partial config.json structure (JSON)
 
 Overwrites the current channel configuration in memory and saves to LittleFS. Partial updates are supported — only fields present in the payload are changed.
 
-**Example — activate one channel:**
+**Example — activate one channel with a custom Signal K topic:**
 ```json
 {
   "kanaele": [
-    {"klemme": 3, "sensor": "oil_pressure", "faktor": 1.25, "aktiv": true}
+    {"klemme": 3, "sensor": "oil_pressure", "faktor": 1.25, "aktiv": true, "topic": "vessels/self/propulsion/engine/oilPressure"}
   ]
 }
 ```

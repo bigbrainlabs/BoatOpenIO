@@ -1,0 +1,79 @@
+# BoatOpenIO – Roadmap
+
+> Feature Freeze aktiv. Die folgenden Punkte zeigen geplante Richtungen, keine verbindlichen Zusagen.  
+> Pull Requests für alles auf dieser Liste sind willkommen.
+
+---
+
+## Fertig – v2.1 (aktuell)
+
+**Hardware**
+- [x] 4-Platinen-Architektur: Mainboard, Eingangsboard, ESP32-Adapterboard, VCC-Verteiler
+- [x] Einzelner ADS1115 @ 0x48 + CD74HC4067 16:1 MUX (alle 16 Kanäle über einen ADC)
+- [x] Hardwareschutz an allen 16 Eingängen: Bourns Widerstandsnetzwerk + SP0503BAHTG Zener-Array (3,3V Clamp)
+- [x] Alle Komponenten auf Sockeln — kein Bauteil fest verlötet
+- [x] 8× Ausgangskanal-Header auf dem Mainboard vorbereitet (GPIO 4/5/13/16–19/23)
+- [x] Steckbare Mini-Platinen: VT, PD, PU, ST, ISP, OPT, DIR, GND
+- [x] Gerber-Dateien bestellfertig für JLCPCB (alle 4 Platinen)
+
+**Firmware**
+- [x] 16-Kanal-Analogmessung über MUX (Faktor + Offset-Kalibrierung pro Kanal)
+- [x] MPU6050 IMU: Pitch / Roll / Aufprallerkennung mit Schweregradabstufung
+- [x] MQTT: alle Sensorwerte, LWT, Auth, frei konfigurierbarer Topic pro Kanal
+- [x] Signal K-Pfadvorschläge (SK-Button im Web-UI)
+- [x] OTA-Firmware-Updates (ArduinoOTA)
+- [x] mDNS (`boatopenio.local`)
+- [x] WiFiManager Captive Portal (WLAN-Einrichtung beim ersten Start)
+- [x] LittleFS Konfigurationsspeicher (config.json)
+- [x] Watchdog (automatischer Neustart bei Firmware-Hänger)
+- [x] Web-UI: zweisprachig DE/EN, dunkles Theme, responsiv, Live-Werte, Kalibrierung
+
+---
+
+## Geplant – v2.x
+
+**Firmware**
+- [ ] Ausgangskanäle: Firmware-Unterstützung für 8× GPIO-Ausgänge (An/Aus, PWM)
+- [ ] Ausgangs-Mini-Platinen: Relais- und MOSFET-Designs
+- [ ] DS18B20 1-Wire Temperatursensor-Unterstützung
+- [ ] Web-UI: eingebetteter config.json-Editor (JSON direkt im Browser bearbeiten)
+- [ ] Web-UI: OTA-Upload direkt aus dem Browser heraus
+- [ ] Veraltete Felder `ads` / `pin` aus Config-Schema und Firmware entfernen
+
+**Dokumentation**
+- [ ] `docs/setup.md` und `docs/configuration.md` auf v2-Stand bringen
+- [ ] Node-RED Integrationsbeispiel (MQTT → Dashboard)
+- [ ] Signal K Server Einrichtungsanleitung (BoatOpenIO als Datenquelle)
+
+---
+
+## Ideen / Backlog
+
+Mögliche Richtungen ohne festen Zeitplan.
+
+- [ ] **Kalibrierungsassistent** im Web-UI: bekannten Referenzwert eingeben, Faktor/Offset wird automatisch berechnet
+- [ ] **BoatOS Auto-Discovery** — alle aktiven Topics und Einheiten beim Verbinden ankündigen
+- [ ] **Zweites ESP32-Adapterboard** — kleinerer Footprint oder ESP32-S3 / C3 Variante
+- [ ] **PWM-Gauge-Ausgang** — analoge Cockpit-Instrumente aus digitalen Werten ansteuern
+- [ ] **Datenprotokollierung** — optionales SD-Karten-Modul für lokale Wertehistorie
+- [ ] **NMEA-2000-Bridge** — aktive Kanäle über CAN-Bus-Modul auf NMEA 2000 ausgeben
+- [ ] **Kanalbasierte Grenzwerte** — konfigurierbare Min/Max-Schwellen mit MQTT-Alarm-Topic
+- [ ] **Gehäuse** — Aufnahme für alle 4 Platinen mit dedizierten Steckplätzen für Mini-Platinen (3D-Druck / Hutschiene)
+
+---
+
+## Nicht geplant
+
+Um den Projektkern zu erhalten:
+
+- Keine Cloud-Abhängigkeit, keine Herstellerkonten, keine Abonnements
+- Keine proprietäre App — das Web-UI läuft vollständig auf dem ESP32
+- Keine Unterstützung für Sensoren mit Stromspeisung (4–20mA-Schleifen) — außerhalb des Rahmens dieser Hardware-Revision
+
+---
+
+## Mitmachen
+
+Fehler gefunden? Eigenes Mini-Platinen-Design? Pull Request oder Issue auf GitHub eröffnen.
+
+**[github.com/bigbrainlabs/BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO)**

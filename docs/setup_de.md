@@ -94,13 +94,14 @@ Im Portal zu **Kanalzuordnung** scrollen:
 | Spalte | Beschreibung |
 |--------|--------------|
 | # | Klemmennummer (1–16, physischer Anschluss) |
-| Sensor | MQTT-Topic-Suffix — wird zu `boat/io/<sensor>` |
-| ADS | Welcher ADS1115-Chip (1–4, I2C 0x48–0x4B) |
-| Pin | ADS-Eingangspin (A0–A3) |
+| Sensor | Sensorname — wird als MQTT-Topic-Suffix verwendet, wenn kein eigener Topic gesetzt ist |
 | Faktor | Multiplikator: `Ausgabe = Spannung × Faktor + Offset` |
 | Offset | Additiver Offset nach dem Faktor |
 | Einheit | Einheitenbezeichnung (nur Anzeige, nicht in MQTT) |
+| Topic | Eigener MQTT-Topic. Leer lassen → publiziert auf `boat/io/<sensor>`. Mit dem **SK**-Button wird der passende Signal K-Pfad für gängige Sensornamen automatisch eingetragen. |
 | Aktiv | Nur aktive Kanäle werden gelesen und publiziert |
+
+> Alle 16 Kanäle teilen sich einen einzigen ADS1115 @ 0x48. Der CD74HC4067 MUX schaltet die Kanäle der Reihe nach durch — keine ADS- oder Pin-Auswahl nötig.
 
 **Konfiguration speichern** klicken. Einstellungen werden sofort in LittleFS geschrieben, kein Neustart nötig.
 

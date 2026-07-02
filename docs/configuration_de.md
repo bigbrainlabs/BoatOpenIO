@@ -66,14 +66,16 @@ MQTT Passwort   Leer = bestehendes Passwort beibehalten
 Jede der 16 Klemmen kann unabhängig konfiguriert werden:
 
 ```
-Sensor    MQTT-Topic-Suffix → boat/io/<sensor>
-ADS       ADS1115-Chip-Nummer: 1 (0x48) · 2 (0x49) · 3 (0x4A) · 4 (0x4B)
-Pin       ADS-Eingangspin: A0 · A1 · A2 · A3
+Sensor    Sensorname — als MQTT-Topic-Suffix verwendet, wenn kein Topic gesetzt ist
 Faktor    Ausgabe = Rohspannung × Faktor + Offset
 Offset    Additiver Offset nach dem Faktor
 Einheit   Einheitenkürzel, z.B. V · °C · bar · %  (nur Anzeige)
+Topic     Eigener MQTT-Topic — leer lassen für boat/io/<sensor>
+          SK-Button füllt Signal K-Pfad automatisch ein
 Aktiv     Nur aktive Kanäle werden gelesen und an MQTT publiziert
 ```
+
+> Alle 16 Kanäle teilen sich einen einzigen ADS1115 @ 0x48. Der CD74HC4067 MUX schaltet die Kanäle der Reihe nach durch — keine ADS- oder Pin-Auswahl nötig.
 
 → In LittleFS `config.json` gespeichert. Sofort wirksam, kein Neustart nötig.
 
@@ -121,7 +123,7 @@ Alle Endpunkte sind im authentifizierten Browser-Session ohne weitere Anmeldung 
 | Endpunkt | Methode | Liefert |
 |----------|---------|---------|
 | `/api/values` | GET | Aktive Kanalwerte + Pitch + Roll (korrigiert) |
-| `/api/raw` | GET | Rohspannungen aller 16 ADS-Eingänge (alle 4×4 Pins) |
+| `/api/raw` | GET | Rohspannungen aller 16 Kanäle (einzelner ADS1115 @ 0x48, über MUX gelesen) |
 | `/api/imu` | GET | Pitch/Roll roh, korrigiert, Offset, Gyro-Bias |
 | `/calibrate` | POST | Setzt aktuellen Pitch/Roll als Montage-Offset, gibt neue Offsets zurück |
 
@@ -141,23 +143,21 @@ Auf dem Flash-Dateisystem des ESP32 gespeichert. Wird beim Booten geladen.
   "kanaele": [
     {
       "klemme":  1,
-      "ads":     1,
-      "pin":     0,
       "sensor":  "batterie_starter",
       "einheit": "V",
       "faktor":  3.127,
       "offset":  0.0,
-      "aktiv":   true
+      "aktiv":   true,
+      "topic":   ""
     },
     {
       "klemme":  2,
-      "ads":     1,
-      "pin":     1,
-      "sensor":  "batterie_verbraucher",
-      "einheit": "V",
-      "faktor":  3.127,
+      "sensor":  "oeltemperatur",
+      "einheit": "°C",
+      "faktor":  1.0,
       "offset":  0.0,
-      "aktiv":   false
+      "aktiv":   true,
+      "topic":   "vessels/self/propulsion/engine/oilTemperature"
     }
   ]
 }
@@ -168,13 +168,12 @@ Auf dem Flash-Dateisystem des ESP32 gespeichert. Wird beim Booten geladen.
 | Feld | Typ | Beschreibung |
 |------|-----|--------------|
 | `klemme` | int 1–16 | Physische Klemmennummer auf der Platine |
-| `ads` | int 1–4 | ADS1115-Chip: 1=0x48, 2=0x49, 3=0x4A, 4=0x4B |
-| `pin` | int 0–3 | ADS-Eingangspin: 0=A0, 1=A1, 2=A2, 3=A3 |
-| `sensor` | string | MQTT-Topic-Suffix, publiziert als `boat/io/<sensor>` |
+| `sensor` | string | Sensorname — als MQTT-Topic-Suffix verwendet, wenn `topic` leer ist |
 | `einheit` | string | Einheitenkürzel (nur Anzeige) |
 | `faktor` | float | Spannungsmultiplikator: `Wert = Spannung × faktor + offset` |
 | `offset` | float | Additiver Offset nach dem Faktor |
 | `aktiv` | bool | `true` = Kanal wird gelesen und publiziert |
+| `topic` | string | Eigener MQTT-Topic. Leer = publiziert auf `boat/io/<sensor>` |
 
 ### Spannung → Physikalischer Wert
 
@@ -204,7 +203,7 @@ Alternativ: Konfiguration über das Web-Portal — Änderungen werden automatisc
 
 | Topic | Payload | Retained | Intervall |
 |-------|---------|----------|-----------|
-| `boat/io/<sensor>` | Float-Wert | nein | 2 s |
+| `boat/io/<sensor>` oder eigener `topic` | Float-Wert | nein | 2 s |
 | `boat/io/pitch` | Float °, korrigiert | ja | 200 ms |
 | `boat/io/roll` | Float °, korrigiert | ja | 200 ms |
 | `boatopenio/status` | `online` / `offline` | ja | 10 s + LWT |
@@ -226,11 +225,11 @@ Payload: vollständige oder partielle config.json-Struktur (JSON)
 
 Überschreibt die aktuelle Kanalkonfiguration im Speicher und speichert in LittleFS. Partielle Updates werden unterstützt — nur im Payload vorhandene Felder werden geändert.
 
-**Beispiel — einen Kanal aktivieren:**
+**Beispiel — einen Kanal mit eigenem Signal K-Topic aktivieren:**
 ```json
 {
   "kanaele": [
-    {"klemme": 3, "sensor": "oeldruck", "faktor": 1.25, "aktiv": true}
+    {"klemme": 3, "sensor": "oeldruck", "faktor": 1.25, "aktiv": true, "topic": "vessels/self/propulsion/engine/oilPressure"}
   ]
 }
 ```
