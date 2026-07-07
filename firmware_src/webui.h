@@ -1,5 +1,5 @@
 // ============================================================
-// BoatOpenIO – Web-UI & Captive Portal (v2.1 – responsive)
+// BoatOpenIO – Web-UI & Captive Portal (v2.2 – responsive)
 // ============================================================
 #pragma once
 
@@ -33,8 +33,65 @@ static bool isDefaultApPass() {
   return strcmp(ap_pass, AP_DEFAULT_PASS) == 0;
 }
 
+// Host-Teil aus einer URL/Origin extrahieren (scheme://host[:port]/... -> host[:port]).
+static String urlHost(const String& u) {
+  int p = u.indexOf("://");
+  String h = (p >= 0) ? u.substring(p + 3) : u;
+  int slash = h.indexOf('/');
+  if (slash >= 0) h = h.substring(0, slash);
+  return h;
+}
+
+// CSRF-Schutz (M6): Eine boesartige Fremd-Seite kann zwar ein Formular auf
+// unsere POST-Endpunkte abschicken (Basic-Auth sendet der Browser automatisch
+// mit), setzt dabei aber einen Origin-/Referer-Header mit fremdem Host. Wir
+// akzeptieren nur POSTs, deren Origin/Referer zum eigenen Host passt.
+static bool sameOriginPost() {
+  String host = webServer.hostHeader();
+  String origin = webServer.header("Origin");
+  if (origin.length()) return urlHost(origin) == host;
+  String ref = webServer.header("Referer");
+  if (ref.length()) return urlHost(ref) == host;
+  return true;  // Fallback fuer Nicht-Browser-Clients (curl o.ae.)
+}
+
+// Gemeinsamer Gate fuer alle POST-Handler: Auth + CSRF.
+static bool postGuard() {
+  if (!requireAuth()) return false;
+  if (!sameOriginPost()) { webServer.send(403, "text/plain", "CSRF blocked"); return false; }
+  return true;
+}
+
+// Sicheres Kopieren in einen char-Puffer mit garantierter Null-Terminierung (N8).
+static void safeCopy(char* dst, const String& src, size_t size) {
+  strncpy(dst, src.c_str(), size - 1);
+  dst[size - 1] = '\0';
+}
+
+// Escaped Werte, die in HTML gerendert werden (Attribute + Textinhalt).
+// Zweite Verteidigungslinie gegen Injection ueber gespeicherte Felder
+// (Sensor/Topic sind bereits per sanitizeToken() gefiltert, Einheit nicht).
+static String htmlEscape(const String& in) {
+  String out;
+  out.reserve(in.length() + 8);
+  for (size_t i = 0; i < in.length(); i++) {
+    char c = in[i];
+    switch (c) {
+      case '&':  out += "&amp;";  break;
+      case '<':  out += "&lt;";   break;
+      case '>':  out += "&gt;";   break;
+      case '"':  out += "&quot;"; break;
+      case '\'': out += "&#39;";  break;
+      default:   out += c;        break;
+    }
+  }
+  return out;
+}
+
 // ── ERSTEINRICHTUNG ──────────────────────────────────────────
 void handleSetup() {
+  // Nur waehrend der Ersteinrichtung offen; danach Admin-Auth erforderlich.
+  if (!setupRequired() && !requireAuth()) return;
   webServer.setContentLength(CONTENT_LENGTH_UNKNOWN);
   webServer.send(200, "text/html", "");
   webServer.sendContent(
@@ -87,13 +144,13 @@ void handleSetup() {
     "<label>AP Name (SSID)</label>"
     "<input name='as' value='"
   );
-  webServer.sendContent(ap_ssid);
+  webServer.sendContent(htmlEscape(ap_ssid));
   webServer.sendContent(
     "' required>"
     "<label>AP Password (min. 8 Zeichen)</label>"
     "<input type='password' name='ap' value='"
   );
-  webServer.sendContent(ap_pass);
+  webServer.sendContent(htmlEscape(ap_pass));
   webServer.sendContent(
     "' required minlength='8' autocomplete='new-password'>"
     "<button class='btn' type='submit'>Setup abschlie&szlig;en &rarr;</button>"
@@ -102,6 +159,9 @@ void handleSetup() {
 }
 
 void handleDoSetup() {
+  // Nur waehrend der Ersteinrichtung offen; danach Admin-Auth erforderlich.
+  if (!setupRequired() && !requireAuth()) return;
+  if (!sameOriginPost()) { webServer.send(403, "text/plain", "CSRF blocked"); return; }
   String pu  = webServer.arg("pu");
   String pp  = webServer.arg("pp");
   String pp2 = webServer.arg("pp2");
@@ -242,8 +302,15 @@ void handleRoot() {
     "th_sensor:'Sensor',th_factor:'Faktor',th_offset:'Offset',th_unit:'Einheit',th_topic:'Topic',th_active:'Aktiv',"
     "save_ch:'Konfiguration speichern',"
     "sk_none:'Kein SK-Pfad bekannt für',"
-    "cal_hint:'Faktor = Echter Wert / ADS-Spannung (A0)',"
-    "l_real:'Echter Wert (Multimeter)',l_adsv:'ADS A0 Spannung [V]',l_factor:'Faktor',"
+    "sk_unit:'SK-Pfad gesetzt. Hinweis: Die Firmware sendet Rohwerte (Grad, °C, bar, %), NICHT die von Signal K erwarteten SI-Einheiten (rad, K, Pa, Ratio). Ggf. per Faktor/Offset umrechnen oder im SK-Server konvertieren.',"
+    "cal_hint:'Zwei-Punkt-Kalibrierung für lineare Geber (auch resistive VDO-Geber, z. B. Tank 10–180 Ω). Bring den Geber in zwei bekannte Zustände. Trage pro Punkt den ECHTEN WERT dieses Zustands (z. B. 40 °C / 100 °C oder 50 % / 75 %) und die dazu gemessene Spannung bzw. den Widerstand ein. Aus beiden Punkten ergeben sich Faktor UND Offset (Wert = Faktor·V + Offset). Beispiel: 40 °C bei 0,80 V und 100 °C bei 2,10 V → Faktor 46,15, Offset 3,08.',"
+    "cal_p1:'Punkt 1 — erster bekannter Zustand',cal_p2:'Punkt 2 — zweiter bekannter Zustand',"
+    "l_real:'Zustand / echter Wert',l_adsv:'ADS-Spannung [V]',l_factor:'Faktor',l_offset:'Offset',"
+    "cal_read:'A0 lesen',cal_chan:'Kanal',cal_apply:'In Kanal übernehmen',cal_applied:'Übernommen',"
+    "cal_need2:'Zwei gültige Punkte mit unterschiedlichen Spannungen nötig',cal_readerr:'Lesefehler (ADS/MUX)',"
+    "cal_mode:'Eingabemodus',cal_mode_v:'Spannung [V]',cal_mode_r:'Widerstand [Ω]',l_ohm:'Widerstand [Ω]',"
+    "l_vref:'Referenzspannung [V]',l_rfix:'Vorwiderstand [Ω]',l_topo:'Schaltung',"
+    "topo_pu:'Geber → GND (Pull-up)',topo_pd:'Geber → Vref (Pull-down)',"
     "th_val:'Wert',loading:'Lade...',not_found:'nicht gefunden',"
     "imu_hint:'Boot auf ruhigem Wasser ausrichten, dann Null setzen.',"
     "imu_raw:'Rohwert',imu_corr:'Korrigiert',imu_off:'Offset',"
@@ -270,8 +337,15 @@ void handleRoot() {
     "th_sensor:'Sensor',th_factor:'Factor',th_offset:'Offset',th_unit:'Unit',th_topic:'Topic',th_active:'Active',"
     "save_ch:'Save Configuration',"
     "sk_none:'No SK path known for',"
-    "cal_hint:'Factor = Real Value / ADS Voltage (A0)',"
-    "l_real:'Real Value (Multimeter)',l_adsv:'ADS A0 Voltage [V]',l_factor:'Factor',"
+    "sk_unit:'SK path set. Note: the firmware sends raw values (degrees, °C, bar, %), NOT the SI units Signal K expects (rad, K, Pa, ratio). Convert via factor/offset or in your SK server if needed.',"
+    "cal_hint:'Two-point calibration for linear senders (incl. resistive VDO senders, e.g. fuel 10–180 Ω). Put the sender into two known states. For each point enter the REAL VALUE of that state (e.g. 40 °C / 100 °C or 50 % / 75 %) and the voltage or resistance measured for it. Both points together yield factor AND offset (value = factor·V + offset). Example: 40 °C at 0.80 V and 100 °C at 2.10 V → factor 46.15, offset 3.08.',"
+    "cal_p1:'Point 1 — first known state',cal_p2:'Point 2 — second known state',"
+    "l_real:'State / real value',l_adsv:'ADS Voltage [V]',l_factor:'Factor',l_offset:'Offset',"
+    "cal_read:'Read A0',cal_chan:'Channel',cal_apply:'Apply to channel',cal_applied:'Applied',"
+    "cal_need2:'Need two valid points with different voltages',cal_readerr:'Read error (ADS/MUX)',"
+    "cal_mode:'Input mode',cal_mode_v:'Voltage [V]',cal_mode_r:'Resistance [Ω]',l_ohm:'Resistance [Ω]',"
+    "l_vref:'Reference voltage [V]',l_rfix:'Fixed resistor [Ω]',l_topo:'Circuit',"
+    "topo_pu:'Sender → GND (pull-up)',topo_pd:'Sender → Vref (pull-down)',"
     "th_val:'Value',loading:'Loading...',not_found:'not found',"
     "imu_hint:'Level boat on calm water, then set zero.',"
     "imu_raw:'Raw',imu_corr:'Corrected',imu_off:'Offset',"
@@ -319,7 +393,7 @@ void handleRoot() {
     "var tn=document.querySelector('input[name=\"t'+i+'\"]');"
     "if(!sn||!tn)return;"
     "var p=skPath(sn.value);"
-    "if(p){tn.value=p;}else{alert(T[curLang].sk_none+' \"'+sn.value+'\"');}}"
+    "if(p){tn.value=p;alert(T[curLang].sk_unit);}else{alert(T[curLang].sk_none+' \"'+sn.value+'\"');}}"
     "function updateHorizon(pitch,roll){"
     "var g=document.getElementById('imu-plane');if(!g)return;"
     "var py=Math.max(-38,Math.min(38,pitch*1.8));"
@@ -353,7 +427,7 @@ void handleRoot() {
   // AP
   webServer.sendContent(
     String("<div class='sti'><div class='sl'>Access Point</div>"
-    "<div class='sv'><span class='dot dok'></span>") + ap_ssid + " &rarr; 192.168.4.1</div></div>"
+    "<div class='sv'><span class='dot dok'></span>") + htmlEscape(ap_ssid) + " &rarr; 192.168.4.1</div></div>"
   );
 
   // WiFi
@@ -432,15 +506,15 @@ void handleRoot() {
   );
   webServer.sendContent(
     String("<label data-i18n='l_ssid'>WiFi SSID</label>"
-    "<input name='ssid' value='") + wifi_ssid + "' autocomplete='off'>" +
+    "<input name='ssid' value='") + htmlEscape(wifi_ssid) + "' autocomplete='off'>" +
     "<label data-i18n='l_wpass'>WiFi Passwort</label>"
     "<input type='password' name='wpass' placeholder='(unver&auml;ndert lassen)'>" +
     "<label data-i18n='l_mqtt'>MQTT Server</label>"
-    "<input name='mqtt' value='" + mqtt_server + "'>" +
+    "<input name='mqtt' value='" + htmlEscape(mqtt_server) + "'>" +
     "<label data-i18n='l_mport'>MQTT Port</label>"
-    "<input name='mport' value='" + mqtt_port + "'>" +
+    "<input name='mport' value='" + htmlEscape(mqtt_port) + "'>" +
     "<label data-i18n='l_muser'>MQTT User</label>"
-    "<input name='muser' value='" + mqtt_user + "'>" +
+    "<input name='muser' value='" + htmlEscape(mqtt_user) + "'>" +
     "<label data-i18n='l_mpass'>MQTT Passwort</label>"
     "<input type='password' name='mpass' placeholder='(unver&auml;ndert lassen)'>" +
     "<button class='bsave' type='submit' style='margin-top:12px' data-i18n='save_net'>Speichern &amp; Neustart</button>"
@@ -466,14 +540,14 @@ void handleRoot() {
     "</tr>"
   );
   for (int i = 0; i < 16; i++) {
-    String sensorVal = kanaele[i].sensor;
+    String sensorVal = htmlEscape(kanaele[i].sensor);
     String r = String("<tr><td style='color:var(--sub);font-size:.75rem;font-weight:600'>") + (i + 1) + "</td>";
     r += String("<td><input name='s") + i + "' value='" + sensorVal + "' style='min-width:110px'></td>";
     r += String("<td><input name='f") + i + "' value='" + String(kanaele[i].faktor, 4) + "' style='width:70px'></td>";
     r += String("<td><input name='o") + i + "' value='" + String(kanaele[i].offset, 4) + "' style='width:70px'></td>";
-    r += String("<td><input name='e") + i + "' value='" + kanaele[i].einheit + "' style='width:48px'></td>";
+    r += String("<td><input name='e") + i + "' value='" + htmlEscape(kanaele[i].einheit) + "' style='width:48px'></td>";
     r += String("<td><div style='display:flex;gap:4px;align-items:center'>"
-                "<input name='t") + i + "' value='" + kanaele[i].topic +
+                "<input name='t") + i + "' value='" + htmlEscape(kanaele[i].topic) +
                 "' placeholder='boat/io/…' style='min-width:150px'>"
                 "<button type='button' onclick='setSK(" + i + ")'"
                 " style='width:auto;padding:4px 8px;font-size:.72rem;background:#27272a;"
@@ -489,23 +563,115 @@ void handleRoot() {
     "</form></details>"
   );
 
-  // ── KALIBRIERUNGS-RECHNER ─────────────────────────────────────
+  // ── KALIBRIERUNGS-RECHNER (Zwei-Punkt, linear) ────────────────
   webServer.sendContent(
     "<details class='card'>"
     "<summary><h2 data-i18n='h_cal'>Kalibrierungs-Rechner</h2><span class='chev'>&#8250;</span></summary>"
     "<p style='font-size:.82rem;color:var(--sub);margin-bottom:12px' data-i18n='cal_hint'>"
-    "Faktor = Echter Wert / ADS-Spannung (A0)</p>"
-    "<label data-i18n='l_real'>Echter Wert (Multimeter)</label>"
-    "<input type='number' step='0.001' id='cr' oninput='cf()'>"
-    "<label data-i18n='l_adsv'>ADS A0 Spannung [V]</label>"
-    "<input type='number' step='0.001' id='cp' oninput='cf()'>"
-    "<label data-i18n='l_factor'>Faktor</label>"
-    "<input id='cres' readonly>"
-    "<script>function cf(){"
-    "var r=parseFloat(document.getElementById('cr').value),"
-    "p=parseFloat(document.getElementById('cp').value);"
-    "if(!isNaN(r)&&!isNaN(p)&&p!==0)"
-    "document.getElementById('cres').value=(r/p).toFixed(4);}"
+    "Zwei-Punkt-Kalibrierung f&uuml;r lineare Geber.</p>"
+    "<label data-i18n='cal_chan'>Kanal</label>"
+    "<select id='cch'>"
+  );
+  String kl = "var KL=[";
+  for (int i = 0; i < 16; i++) {
+    webServer.sendContent(String("<option value='") + (i + 1) + "'>" + (i + 1)
+                          + " &mdash; " + htmlEscape(kanaele[i].sensor) + "</option>");
+    kl += String(kanaele[i].klemme) + (i < 15 ? "," : "");
+  }
+  kl += "];";
+  webServer.sendContent(
+    "</select>"
+    // Eingabemodus: Spannung oder Widerstand (Ω)
+    "<label data-i18n='cal_mode' style='margin-top:10px'>Eingabemodus</label>"
+    "<select id='cmode' onchange='calMode()'>"
+    "<option value='v' data-i18n='cal_mode_v'>Spannung [V]</option>"
+    "<option value='r' data-i18n='cal_mode_r'>Widerstand [&#937;]</option>"
+    "</select>"
+    // Teiler-Parameter (nur im Ω-Modus sichtbar)
+    "<div id='cdiv' style='display:none;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;"
+    "background:var(--c2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px'>"
+    "<div><label data-i18n='l_vref'>Referenzspannung [V]</label>"
+    "<input type='number' step='0.01' id='cvref' value='3.3' oninput='cf()'></div>"
+    "<div><label data-i18n='l_rfix'>Vorwiderstand [&#937;]</label>"
+    "<input type='number' step='1' id='crfix' value='1000' oninput='cf()'></div>"
+    "<div style='grid-column:1/3'><label data-i18n='l_topo'>Schaltung</label>"
+    "<select id='ctopo' onchange='cf()'>"
+    "<option value='pu' data-i18n='topo_pu'>Geber &rarr; GND (Pull-up)</option>"
+    "<option value='pd' data-i18n='topo_pd'>Geber &rarr; Vref (Pull-down)</option>"
+    "</select></div>"
+    "</div>"
+    "<div style='display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px'>"
+    // Punkt 1
+    "<div>"
+    "<p style='font-size:.72rem;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.06em' data-i18n='cal_p1'>Punkt 1</p>"
+    "<label data-i18n='l_real'>Zustand / echter Wert</label>"
+    "<input type='number' step='0.001' id='cr1' placeholder='40' oninput='cf()'>"
+    "<label id='lv1' data-i18n='l_adsv'>ADS-Spannung [V]</label>"
+    "<div style='display:flex;gap:4px'>"
+    "<input type='number' step='0.0001' id='cv1' oninput='cf()'>"
+    "<button type='button' onclick='calRead(1)' data-i18n='cal_read' style='width:auto;padding:0 10px;font-size:.75rem;"
+    "background:#27272a;color:#a1a1aa;border:1px solid #3f3f46;border-radius:6px;white-space:nowrap;cursor:pointer'>A0 lesen</button>"
+    "</div></div>"
+    // Punkt 2
+    "<div>"
+    "<p style='font-size:.72rem;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.06em' data-i18n='cal_p2'>Punkt 2</p>"
+    "<label data-i18n='l_real'>Zustand / echter Wert</label>"
+    "<input type='number' step='0.001' id='cr2' placeholder='100' oninput='cf()'>"
+    "<label id='lv2' data-i18n='l_adsv'>ADS-Spannung [V]</label>"
+    "<div style='display:flex;gap:4px'>"
+    "<input type='number' step='0.0001' id='cv2' oninput='cf()'>"
+    "<button type='button' onclick='calRead(2)' data-i18n='cal_read' style='width:auto;padding:0 10px;font-size:.75rem;"
+    "background:#27272a;color:#a1a1aa;border:1px solid #3f3f46;border-radius:6px;white-space:nowrap;cursor:pointer'>A0 lesen</button>"
+    "</div></div>"
+    "</div>"
+    // Ergebnis
+    "<div style='display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px'>"
+    "<div><label data-i18n='l_factor'>Faktor</label><input id='cfac' readonly></div>"
+    "<div><label data-i18n='l_offset'>Offset</label><input id='coff' readonly></div>"
+    "</div>"
+    "<div style='display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap'>"
+    "<button type='button' class='bsave' style='width:auto;margin:0' onclick='calApply()' data-i18n='cal_apply'>In Kanal &uuml;bernehmen</button>"
+    "<span id='calmsg' style='font-size:.82rem'></span>"
+    "</div>"
+    "<script>"
+  );
+  webServer.sendContent(kl);   // var KL=[klemme je Kanal];
+  webServer.sendContent(
+    "function calG(id){return document.getElementById(id);}"
+    // Umschaltung Spannungs- / Widerstands-Modus
+    "function calMode(){var r=calG('cmode').value==='r';"
+    "calG('cdiv').style.display=r?'grid':'none';"
+    "calG('lv1').setAttribute('data-i18n',r?'l_ohm':'l_adsv');"
+    "calG('lv2').setAttribute('data-i18n',r?'l_ohm':'l_adsv');"
+    "applyLang(curLang);cf();}"
+    // Eingabewert (V oder Ω) -> ADS-Spannung, die die Firmware misst
+    "function calToV(x){if(calG('cmode').value==='v')return x;"
+    "var vr=parseFloat(calG('cvref').value)||3.3,rf=parseFloat(calG('crfix').value)||1000;"
+    "if(isNaN(x)||x<0)return NaN;"
+    "return calG('ctopo').value==='pu'?vr*x/(rf+x):vr*rf/(x+rf);}"
+    // ADS-Spannung -> Widerstand (fuer 'A0 lesen' im Ω-Modus)
+    "function calToR(v){var vr=parseFloat(calG('cvref').value)||3.3,rf=parseFloat(calG('crfix').value)||1000;"
+    "if(calG('ctopo').value==='pu'){if(vr-v<=0)return NaN;return rf*v/(vr-v);}"
+    "if(v<=0)return NaN;return rf*(vr-v)/v;}"
+    "function cf(){"
+    "var r1=parseFloat(calG('cr1').value),v1=calToV(parseFloat(calG('cv1').value)),"
+    "r2=parseFloat(calG('cr2').value),v2=calToV(parseFloat(calG('cv2').value));"
+    "if(isNaN(r1)||isNaN(v1)||isNaN(r2)||isNaN(v2)||v1===v2){calG('cfac').value='';calG('coff').value='';return;}"
+    "var f=(r2-r1)/(v2-v1);calG('cfac').value=f.toFixed(4);calG('coff').value=(r1-f*v1).toFixed(4);}"
+    "function calMsg(txt,ok){var m=calG('calmsg');m.style.color=ok?'var(--ok)':'var(--err)';m.textContent=txt;}"
+    "function calRead(n){"
+    "var ch=KL[parseInt(calG('cch').value)-1];"
+    "fetch('/api/adc?ch='+ch).then(function(r){return r.json();}).then(function(d){"
+    "if(d&&typeof d.v==='number'){"
+    "if(calG('cmode').value==='r'){var rr=calToR(d.v);calG(n===1?'cv1':'cv2').value=isNaN(rr)?'':rr.toFixed(1);}"
+    "else calG(n===1?'cv1':'cv2').value=d.v.toFixed(4);"
+    "cf();calMsg('',true);}"
+    "else calMsg(T[curLang].cal_readerr,false);}).catch(function(){calMsg(T[curLang].cal_readerr,false);});}"
+    "function calApply(){"
+    "if(calG('cfac').value===''||calG('coff').value===''){calMsg(T[curLang].cal_need2,false);return;}"
+    "var idx=parseInt(calG('cch').value)-1;"
+    "var ff=document.querySelector('input[name=\"f'+idx+'\"]'),oo=document.querySelector('input[name=\"o'+idx+'\"]');"
+    "if(ff&&oo){ff.value=calG('cfac').value;oo.value=calG('coff').value;calMsg(T[curLang].cal_applied,true);}}"
     "</script></details>"
   );
 
@@ -517,18 +683,18 @@ void handleRoot() {
     "<script>"
     "function reloadVals(){"
     "fetch('/api/values').then(function(r){return r.json();}).then(function(d){"
-    "var s='<div class=vg>';"
+    "var box=document.getElementById('vals');box.innerHTML='';"
+    "var g=document.createElement('div');g.className='vg';"
     "for(var k in d){"
     "var v=d[k];"
     "var disp=(typeof v==='number')?parseFloat(v).toFixed(2):v;"
-    "var unit=(k==='pitch'||k==='roll')?'&deg;':'';"
-    "s+='<div class=vc>';"
-    "s+='<div class=vn>'+k+'</div>';"
-    "s+='<div class=vv>'+disp+'</div>';"
-    "s+='<div class=vu>'+unit+'</div>';"
-    "s+='</div>';}"
-    "s+='</div>';"
-    "document.getElementById('vals').innerHTML=s;"
+    "var unit=(k==='pitch'||k==='roll')?'\\u00b0':'';"
+    "var vc=document.createElement('div');vc.className='vc';"
+    "var vn=document.createElement('div');vn.className='vn';vn.textContent=k;"
+    "var vv=document.createElement('div');vv.className='vv';vv.textContent=disp;"
+    "var vu=document.createElement('div');vu.className='vu';vu.textContent=unit;"
+    "vc.appendChild(vn);vc.appendChild(vv);vc.appendChild(vu);g.appendChild(vc);}"
+    "box.appendChild(g);"
     "}).catch(function(){});}"
     "reloadVals();setInterval(reloadVals,2000);"
     "</script></div>"
@@ -656,7 +822,7 @@ void handleRoot() {
     "<label data-i18n='l_ap_ssid'>AP Name (SSID)</label>"
     "<input name='as' value='"
   );
-  webServer.sendContent(ap_ssid);
+  webServer.sendContent(htmlEscape(ap_ssid));
   webServer.sendContent(
     "'>"
     "<label data-i18n='l_ap_pass'>AP Passwort (min. 8 Zeichen)</label>"
@@ -665,7 +831,7 @@ void handleRoot() {
     "<label data-i18n='l_pu'>Portal Benutzer</label>"
     "<input name='pu' value='"
   );
-  webServer.sendContent(portal_user);
+  webServer.sendContent(htmlEscape(portal_user));
   webServer.sendContent(
     "'>"
     "<label data-i18n='l_pp'>Portal Passwort (min. 6 Zeichen)</label>"
@@ -696,14 +862,16 @@ void handleRoot() {
 
 // ── SAVE KANALCONFIG ─────────────────────────────────────────
 void handleSave() {
-  if (!requireAuth()) return;
+  if (!postGuard()) return;
   for (int i = 0; i < 16; i++) {
-    kanaele[i].sensor  = webServer.arg("s" + String(i));
+    String s = sanitizeToken(webServer.arg("s" + String(i)), false);
+    if (s.length() == 0) s = "kanal_" + String(i + 1);
+    kanaele[i].sensor  = s;
     kanaele[i].faktor  = webServer.arg("f" + String(i)).toFloat();
     kanaele[i].offset  = webServer.arg("o" + String(i)).toFloat();
     kanaele[i].einheit = webServer.arg("e" + String(i));
     kanaele[i].aktiv   = webServer.hasArg("c" + String(i));
-    kanaele[i].topic   = webServer.arg("t" + String(i));
+    kanaele[i].topic   = sanitizeToken(webServer.arg("t" + String(i)), true);
   }
   saveConfig();
   webServer.sendHeader("Location", "/");
@@ -712,19 +880,24 @@ void handleSave() {
 
 // ── SAVE NETZWERK-CONFIG ──────────────────────────────────────
 void handleSaveNet() {
-  if (!requireAuth()) return;
+  if (!postGuard()) return;
   if (webServer.hasArg("ssid") && webServer.arg("ssid").length())
-    strncpy(wifi_ssid,   webServer.arg("ssid").c_str(),  sizeof(wifi_ssid)   - 1);
+    safeCopy(wifi_ssid,   webServer.arg("ssid"),  sizeof(wifi_ssid));
   if (webServer.hasArg("wpass") && webServer.arg("wpass").length())
-    strncpy(wifi_pass,   webServer.arg("wpass").c_str(), sizeof(wifi_pass)   - 1);
+    safeCopy(wifi_pass,   webServer.arg("wpass"), sizeof(wifi_pass));
   if (webServer.hasArg("mqtt") && webServer.arg("mqtt").length())
-    strncpy(mqtt_server, webServer.arg("mqtt").c_str(),  sizeof(mqtt_server) - 1);
-  if (webServer.hasArg("mport") && webServer.arg("mport").length())
-    strncpy(mqtt_port,   webServer.arg("mport").c_str(), sizeof(mqtt_port)   - 1);
+    safeCopy(mqtt_server, webServer.arg("mqtt"),  sizeof(mqtt_server));
+  // Port validieren (N3): nur numerisch und im gueltigen Bereich uebernehmen,
+  // sonst wuerde atoi() beim naechsten Boot stillschweigend Port 0 ergeben.
+  if (webServer.hasArg("mport") && webServer.arg("mport").length()) {
+    long port = webServer.arg("mport").toInt();
+    if (port >= 1 && port <= 65535)
+      safeCopy(mqtt_port, webServer.arg("mport"), sizeof(mqtt_port));
+  }
   if (webServer.hasArg("muser"))
-    strncpy(mqtt_user,   webServer.arg("muser").c_str(), sizeof(mqtt_user)   - 1);
+    safeCopy(mqtt_user,   webServer.arg("muser"), sizeof(mqtt_user));
   if (webServer.hasArg("mpass") && webServer.arg("mpass").length())
-    strncpy(mqtt_pass,   webServer.arg("mpass").c_str(), sizeof(mqtt_pass)   - 1);
+    safeCopy(mqtt_pass,   webServer.arg("mpass"), sizeof(mqtt_pass));
   saveNetConfig();
   webServer.send(200, "text/html",
     "<html><head><meta charset='UTF-8'>"
@@ -737,7 +910,7 @@ void handleSaveNet() {
 
 // ── SAVE SICHERHEITS-CONFIG ───────────────────────────────────
 void handleSaveSec() {
-  if (!requireAuth()) return;
+  if (!postGuard()) return;
   String as_ = webServer.arg("as");
   String ap_ = webServer.arg("ap");
   String pu  = webServer.arg("pu");
@@ -765,7 +938,7 @@ void handleSaveSec() {
 
 // ── TEST/LIVE UMSCHALTEN ──────────────────────────────────────
 void handleTestMode() {
-  if (!requireAuth()) return;
+  if (!postGuard()) return;
   testMode = !testMode;
   saveNetConfig();
   webServer.send(200, "text/html",
@@ -779,7 +952,7 @@ void handleTestMode() {
 
 // ── NEUSTART ─────────────────────────────────────────────────
 void handleReboot() {
-  if (!requireAuth()) return;
+  if (!postGuard()) return;
   webServer.send(200, "text/html",
     "<html><head><meta charset='UTF-8'></head>"
     "<body style='background:#0c0c0e;color:#fafafa;font-family:sans-serif;padding:20px'>"
@@ -790,17 +963,11 @@ void handleReboot() {
 
 // ── LIVE-WERTE API ───────────────────────────────────────────
 void handleValues() {
+  if (!requireAuth()) return;
   StaticJsonDocument<1024> doc;
   for (int i = 0; i < 16; i++) {
     if (!kanaele[i].aktiv) continue;
-    float voltage;
-    if (testMode) {
-      voltage = 2.5f + sinf(millis() / 3000.0f + i) * 0.3f;
-    } else {
-      selectChannel(kanaele[i].klemme - 1);
-      delayMicroseconds(500);
-      voltage = readADS();
-    }
+    float voltage = readChannelVoltage(i);
     doc[kanaele[i].sensor] = roundf((voltage * kanaele[i].faktor + kanaele[i].offset) * 100.f) / 100.f;
   }
   doc["pitch"] = roundf((pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f) * 10.f) / 10.f;
@@ -812,6 +979,7 @@ void handleValues() {
 
 // ── RAW ADS DIAGNOSE API ─────────────────────────────────────
 void handleRaw() {
+  if (!requireAuth()) return;
   StaticJsonDocument<256> doc;
   JsonObject a = doc.createNestedObject("ads1");
   a["ok"] = adsOK;
@@ -826,8 +994,30 @@ void handleRaw() {
   webServer.send(200, "application/json", out);
 }
 
+// ── EINZEL-KANAL ADC (fuer Kalibrierungs-Rechner) ────────────
+// Waehlt den MUX auf die angeforderte Klemme (1..16) und gibt die gemittelte
+// Spannung zurueck. Liest immer echte ADS-Hardware (unabhaengig vom Testmodus),
+// damit man auch vor dem Umschalten auf LIVE kalibrieren kann.
+void handleADC() {
+  if (!requireAuth()) return;
+  int ch = webServer.arg("ch").toInt();
+  StaticJsonDocument<64> doc;
+  if (ch < 1 || ch > 16 || !adsOK) {
+    doc["ok"] = false;
+  } else {
+    selectChannel(ch - 1);
+    delayMicroseconds(500);
+    doc["ok"] = true;
+    doc["v"]  = roundf(readADS() * 10000.f) / 10000.f;
+  }
+  String out;
+  serializeJson(doc, out);
+  webServer.send(200, "application/json", out);
+}
+
 // ── IMU API ──────────────────────────────────────────────────
 void handleIMU() {
+  if (!requireAuth()) return;
   float pc = (pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f);
   float rc = (roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f);
   StaticJsonDocument<256> doc;
@@ -849,7 +1039,7 @@ void handleIMU() {
 
 // ── INVERTIERUNG SETZEN ───────────────────────────────────────
 void handleSetInvert() {
-  if (!requireAuth()) return;
+  if (!postGuard()) return;
   pitch_invert = webServer.hasArg("pi") && webServer.arg("pi") == "1";
   roll_invert  = webServer.hasArg("ri") && webServer.arg("ri") == "1";
   Preferences prefs;
@@ -868,7 +1058,7 @@ void handleSetInvert() {
 
 // ── MONTAGE-OFFSET SETZEN ────────────────────────────────────
 void handleCalibrate() {
-  if (!requireAuth()) return;
+  if (!postGuard()) return;
   pitch_offset = pitch;
   roll_offset  = roll;
   Preferences prefs;
@@ -889,6 +1079,11 @@ void handleCalibrate() {
 void setupWebServer() {
   startCaptivePortal();
 
+  // Origin/Referer muessen explizit eingesammelt werden, damit sameOriginPost()
+  // sie lesen kann (Host-Header ist per Default verfuegbar). Fuer CSRF-Schutz.
+  const char* wanted[] = {"Origin", "Referer"};
+  webServer.collectHeaders(wanted, 2);
+
   webServer.on("/",           HTTP_GET,  handleRoot);
   webServer.on("/setup",      HTTP_GET,  handleSetup);
   webServer.on("/dosetup",    HTTP_POST, handleDoSetup);
@@ -899,6 +1094,7 @@ void setupWebServer() {
   webServer.on("/reboot",     HTTP_POST, handleReboot);
   webServer.on("/api/values", HTTP_GET,  handleValues);
   webServer.on("/api/raw",    HTTP_GET,  handleRaw);
+  webServer.on("/api/adc",    HTTP_GET,  handleADC);
   webServer.on("/api/imu",    HTTP_GET,  handleIMU);
   webServer.on("/calibrate",  HTTP_POST, handleCalibrate);
   webServer.on("/setinvert",  HTTP_POST, handleSetInvert);

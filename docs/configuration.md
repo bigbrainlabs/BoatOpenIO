@@ -123,9 +123,14 @@ All endpoints are accessible without additional auth once the browser session is
 | Endpoint | Method | Returns |
 |----------|--------|---------|
 | `/api/values` | GET | Active channel values + pitch + roll (corrected) |
-| `/api/raw` | GET | Raw voltages for all 16 channels (single ADS1115 @ 0x48, read via MUX) |
+| `/api/raw` | GET | Raw ADS A0–A3 voltages (diagnostics) |
+| `/api/adc?ch=<1–16>` | GET | Select MUX terminal, averaged voltage |
 | `/api/imu` | GET | Pitch/roll raw, corrected, offset, gyro bias |
 | `/calibrate` | POST | Sets current pitch/roll as mounting offset, returns new offsets |
+| `/setinvert` | POST | Set pitch/roll inversion |
+
+> POST endpoints are additionally CSRF-protected (Origin/Referer must match the device).
+> A full backend description is in [`backend.md`](backend.md).
 
 ---
 
@@ -177,16 +182,20 @@ Stored on the ESP32's flash filesystem. Loaded at boot.
 
 ### Voltage → Physical Value
 
-Use the **Calibration Calculator** in the web portal:
+Use the **Calibration Calculator** in the web portal (two-point, linear):
 ```
-Enter: real value (measured with multimeter) + ADS pin voltage
-→ factor is calculated automatically
+Per point: enter the real value of a known state + the measured ADS voltage
+→ factor AND offset are computed and can be applied straight to the channel
 ```
 
-Manual formula:
+Manual formula from two points (value₁@V₁, value₂@V₂):
 ```
-faktor = real_value / ads_pin_voltage
+faktor = (value₂ − value₁) / (V₂ − V₁)
+offset = value₁ − faktor · V₁
 ```
+
+For resistive VDO senders there is also an **Ω mode** (enter resistance instead of voltage,
+converted via divider parameters). Details in [`backend.md`](backend.md) §8.
 
 ### How to Upload
 
@@ -204,15 +213,17 @@ Or: configure via the web portal — changes are saved to LittleFS automatically
 | Topic | Payload | Retained | Interval |
 |-------|---------|----------|----------|
 | `boat/io/<sensor>` or custom `topic` | float value | no | 2 s |
-| `boat/io/pitch` | float °, corrected | yes | 200 ms |
-| `boat/io/roll` | float °, corrected | yes | 200 ms |
+| `boat/io/pitch` | float °, corrected | yes | 1 s |
+| `boat/io/roll` | float °, corrected | yes | 1 s |
 | `boatopenio/status` | `online` / `offline` | yes | 10 s + LWT |
 | `boatopenio/uptime` | seconds since boot | no | 10 s |
 | `boatopenio/rssi` | WiFi signal dBm | no | 10 s |
 | `boatopenio/mode` | `TEST` / `LIVE` | yes | 10 s |
-| `boat/alarm/impact_g` | peak G value | yes | on event |
-| `boat/alarm/impact_severity` | `LEICHT` / `MITTEL` / `STARK` / `KRITISCH` | yes | on event |
-| `boat/alarm/impact_active` | `true` / `false` | yes | on event |
+| `boat/alarm/impact_g` ¹ | peak G value | yes | on event |
+| `boat/alarm/impact_severity` ¹ | `LEICHT` / `MITTEL` / `STARK` / `KRITISCH` | yes | on event |
+| `boat/alarm/impact_active` ¹ | `true` / `false` | yes | on event |
+
+¹ In **TEST** mode the prefix is `boat/test/alarm/` instead of `boat/alarm/`.
 
 ### Subscribe (Broker → ESP32)
 
@@ -233,14 +244,6 @@ Overwrites the current channel configuration in memory and saves to LittleFS. Pa
   ]
 }
 ```
-
-#### Commands
-
-```
-Topic:   boatopenio/cmd/#
-```
-
-Reserved for future commands. Currently subscribed but not yet processed.
 
 ---
 

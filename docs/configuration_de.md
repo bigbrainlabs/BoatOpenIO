@@ -123,9 +123,14 @@ Alle Endpunkte sind im authentifizierten Browser-Session ohne weitere Anmeldung 
 | Endpunkt | Methode | Liefert |
 |----------|---------|---------|
 | `/api/values` | GET | Aktive Kanalwerte + Pitch + Roll (korrigiert) |
-| `/api/raw` | GET | Rohspannungen aller 16 Kanäle (einzelner ADS1115 @ 0x48, über MUX gelesen) |
+| `/api/raw` | GET | Rohspannungen ADS A0–A3 (Diagnose) |
+| `/api/adc?ch=<1–16>` | GET | MUX auf Klemme wählen, gemittelte Spannung |
 | `/api/imu` | GET | Pitch/Roll roh, korrigiert, Offset, Gyro-Bias |
 | `/calibrate` | POST | Setzt aktuellen Pitch/Roll als Montage-Offset, gibt neue Offsets zurück |
+| `/setinvert` | POST | Pitch-/Roll-Invertierung setzen |
+
+> POST-Endpunkte sind zusätzlich CSRF-geschützt (Origin/Referer muss zum Gerät passen).
+> Eine vollständige Backend-Beschreibung steht in [`backend_de.md`](backend_de.md).
 
 ---
 
@@ -177,16 +182,20 @@ Auf dem Flash-Dateisystem des ESP32 gespeichert. Wird beim Booten geladen.
 
 ### Spannung → Physikalischer Wert
 
-Den **Kalibrierungs-Hilfsrechner** im Web-Portal nutzen:
+Den **Kalibrierungs-Rechner** im Web-Portal nutzen (Zwei-Punkt, linear):
 ```
-Eingabe: Echter Wert (Multimeter) + ADS-Pin-Spannung
-→ Faktor wird automatisch berechnet
+Pro Punkt: echten Wert eines bekannten Zustands + gemessene ADS-Spannung eintragen
+→ Faktor UND Offset werden berechnet und lassen sich direkt in den Kanal übernehmen
 ```
 
-Manuelle Formel:
+Manuelle Formel aus zwei Punkten (Wert₁@V₁, Wert₂@V₂):
 ```
-faktor = echter_wert / ads_pin_spannung
+faktor = (Wert₂ − Wert₁) / (V₂ − V₁)
+offset = Wert₁ − faktor · V₁
 ```
+
+Für resistive VDO-Geber gibt es zusätzlich einen **Ω-Modus** (Widerstand statt Spannung
+eingeben, Umrechnung über Teilerparameter). Details in [`backend_de.md`](backend_de.md) §8.
 
 ### Hochladen
 
@@ -204,15 +213,17 @@ Alternativ: Konfiguration über das Web-Portal — Änderungen werden automatisc
 | Topic | Payload | Retained | Intervall |
 |-------|---------|----------|-----------|
 | `boat/io/<sensor>` oder eigener `topic` | Float-Wert | nein | 2 s |
-| `boat/io/pitch` | Float °, korrigiert | ja | 200 ms |
-| `boat/io/roll` | Float °, korrigiert | ja | 200 ms |
+| `boat/io/pitch` | Float °, korrigiert | ja | 1 s |
+| `boat/io/roll` | Float °, korrigiert | ja | 1 s |
 | `boatopenio/status` | `online` / `offline` | ja | 10 s + LWT |
 | `boatopenio/uptime` | Sekunden seit Boot | nein | 10 s |
 | `boatopenio/rssi` | WLAN-Signal dBm | nein | 10 s |
 | `boatopenio/mode` | `TEST` / `LIVE` | ja | 10 s |
-| `boat/alarm/impact_g` | Peak-G-Wert | ja | bei Ereignis |
-| `boat/alarm/impact_severity` | `LEICHT` / `MITTEL` / `STARK` / `KRITISCH` | ja | bei Ereignis |
-| `boat/alarm/impact_active` | `true` / `false` | ja | bei Ereignis |
+| `boat/alarm/impact_g` ¹ | Peak-G-Wert | ja | bei Ereignis |
+| `boat/alarm/impact_severity` ¹ | `LEICHT` / `MITTEL` / `STARK` / `KRITISCH` | ja | bei Ereignis |
+| `boat/alarm/impact_active` ¹ | `true` / `false` | ja | bei Ereignis |
+
+¹ Im **TEST**-Modus lautet das Präfix `boat/test/alarm/` statt `boat/alarm/`.
 
 ### Abonnieren (Broker → ESP32)
 
@@ -233,14 +244,6 @@ Payload: vollständige oder partielle config.json-Struktur (JSON)
   ]
 }
 ```
-
-#### Befehle
-
-```
-Topic:   boatopenio/cmd/#
-```
-
-Für zukünftige Befehle reserviert. Derzeit abonniert, aber noch nicht verarbeitet.
 
 ---
 

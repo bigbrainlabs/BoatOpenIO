@@ -1,10 +1,10 @@
 // ============================================================
-// BoatOpenIO – Firmware v2.0
+// BoatOpenIO – Firmware v2.2
 // Universal Marine IO System
 // github.com/bigbrainlabs/BoatOpenIO
 // ============================================================
 
-#define FIRMWARE_VERSION "2.1"
+#define FIRMWARE_VERSION "2.2"
 
 #include <Wire.h>
 #include <WiFi.h>
@@ -38,9 +38,11 @@
 #define MQTT_TOPIC_BASE  "boat/io/"
 #define MQTT_STATUS      "boatopenio/status"
 #define READ_INTERVAL    2000
-#define IMU_INTERVAL      200
+#define IMU_INTERVAL       20    // 50Hz: Aufprall-Transienten deutlich besser erfassen (M3)
+#define IMU_PUBLISH_INTERVAL 1000 // Pitch/Roll aber nur 1x/s per MQTT publizieren
 #define STATUS_INTERVAL  10000
 #define WDT_TIMEOUT        10
+#define ADS_SAMPLES         4    // Mittelung pro Kanal gegen Motorraum-Stoerungen (M8)
 
 // ── NETZWERK CONFIG ─────────────────────────────────────────
 char wifi_ssid[40]   = "";
@@ -73,7 +75,8 @@ struct KanalConfig {
   float   faktor;
   float   offset;
   bool    aktiv;
-  String  topic;   // leer = boat/io/<sensor>
+  String  topic;    // leer = boat/io/<sensor>
+  String  rtopic;   // aufgeloester Publish-Topic (Cache, s. rebuildTopics())
 };
 KanalConfig kanaele[16];
 bool testMode = true;
@@ -101,7 +104,10 @@ bool  pitch_invert = false, roll_invert = false;
 // ── TIMING ──────────────────────────────────────────────────
 unsigned long lastChannelRead = 0;
 unsigned long lastIMURead     = 0;
+unsigned long lastIMUPublish  = 0;
 unsigned long lastStatus      = 0;
+unsigned long lastWiFiRetry   = 0;
+bool          staServicesUp   = false;   // mDNS + OTA initialisiert?
 
 // ── MUX ─────────────────────────────────────────────────────
 void selectChannel(uint8_t ch) {
@@ -112,32 +118,45 @@ void selectChannel(uint8_t ch) {
   delayMicroseconds(10);
 }
 
-// ── ADS LESEN ───────────────────────────────────────────────
+// ── ADS LESEN (mit Mittelung gegen Stoerungen, M8) ──────────
 float readADS() {
   if (!adsOK) return 0.0f;
-  int16_t raw = ads.readADC_SingleEnded(0);  // MUX routet alle 16 Kanäle auf A0
-  return ads.computeVolts(raw);
+  // MUX routet alle 16 Kanäle auf A0. Mehrere Samples mitteln, da im
+  // Motorraum (Lichtmaschine, Zuendimpulse) ein Einzelsample stark springt.
+  int32_t sum = 0;
+  for (int s = 0; s < ADS_SAMPLES; s++) sum += ads.readADC_SingleEnded(0);
+  return ads.computeVolts((int16_t)(sum / ADS_SAMPLES));
+}
+
+// Liest die Spannung eines Kanals (Testmodus: Sinus-Demo, sonst MUX+ADS).
+// Gemeinsame Quelle fuer readAllChannels() und die Live-Werte-API (N5).
+float readChannelVoltage(int i) {
+  if (testMode) return 2.5f + sinf(millis() / 3000.0f + i) * 0.3f;
+  uint8_t ch = kanaele[i].klemme;              // 1..16, in loadConfig geclampt (M9)
+  selectChannel((ch >= 1 && ch <= 16 ? ch : 1) - 1);
+  delayMicroseconds(500);
+  return readADS();
+}
+
+// Berechnet den effektiven Publish-Topic je Kanal einmalig neu, statt ihn
+// bei jedem Publish per String-Konkatenation zu bauen (N7). Aufzurufen nach
+// jeder Aenderung der Kanal-Konfiguration.
+void rebuildTopics() {
+  for (int i = 0; i < 16; i++) {
+    kanaele[i].rtopic = kanaele[i].topic.length() > 0
+      ? kanaele[i].topic
+      : String(MQTT_TOPIC_BASE) + kanaele[i].sensor;
+  }
 }
 
 // ── KANÄLE LESEN & PUBLISHEN ─────────────────────────────────
 void readAllChannels() {
   for (int i = 0; i < 16; i++) {
     if (!kanaele[i].aktiv) continue;
-    float voltage;
-    if (testMode) {
-      voltage = 2.5f + sinf(millis() / 3000.0f + i) * 0.3f;
-    } else {
-      selectChannel(kanaele[i].klemme - 1);
-      delayMicroseconds(500);
-      voltage = readADS();
-    }
-    float wert = voltage * kanaele[i].faktor + kanaele[i].offset;
+    float wert = readChannelVoltage(i) * kanaele[i].faktor + kanaele[i].offset;
     char buf[16];
     dtostrf(wert, 6, 2, buf);
-    String t = kanaele[i].topic.length() > 0
-      ? kanaele[i].topic
-      : String(MQTT_TOPIC_BASE) + kanaele[i].sensor;
-    mqtt.publish(t.c_str(), buf);
+    mqtt.publish(kanaele[i].rtopic.c_str(), buf);
   }
 }
 
@@ -149,16 +168,26 @@ const char* impactSeverity(float g) {
   return "KRITISCH";
 }
 
+// Basis-Topic fuer Aufprall-Alarme. Im Testmodus auf boat/test/ umgeleitet,
+// damit die zufaelligen Fake-Impacts der Demo NICHT die echten Alarm-Topics
+// (und damit reale Dashboard-Anzeigen an Bord) ausloesen.
+const char* alarmTopic(const char* leaf) {
+  static char t[48];
+  snprintf(t, sizeof(t), "%s%s", testMode ? "boat/test/alarm/" : "boat/alarm/", leaf);
+  return t;
+}
+
 void publishImpact() {
   static unsigned long lastPub = 0;
   if (millis() - lastPub < 1000) return;
   lastPub = millis();
   char buf[10];
   dtostrf(impactPeakG, 5, 2, buf);
-  mqtt.publish("boat/alarm/impact_g",        buf, true);
-  mqtt.publish("boat/alarm/impact_severity", impactSeverity(impactPeakG), true);
-  mqtt.publish("boat/alarm/impact_active",   "true", true);
-  Serial.printf("AUFPRALL: %.2fg -> %s\n", impactPeakG, impactSeverity(impactPeakG));
+  mqtt.publish(alarmTopic("impact_g"),        buf, true);
+  mqtt.publish(alarmTopic("impact_severity"), impactSeverity(impactPeakG), true);
+  mqtt.publish(alarmTopic("impact_active"),   "true", true);
+  Serial.printf("AUFPRALL%s: %.2fg -> %s\n", testMode ? " (TEST)" : "",
+                impactPeakG, impactSeverity(impactPeakG));
 }
 
 // ── IMU (Komplementärfilter + Impact) ────────────────────────
@@ -192,7 +221,9 @@ void readIMU() {
   } else if (impactActive && millis() - lastImpactTime > IMPACT_DECAY) {
     impactActive = false;
     impactPeakG  = 0.0f;
-    mqtt.publish("boat/alarm/impact_active", "false", true);
+    mqtt.publish(alarmTopic("impact_active"),   "false", true);
+    mqtt.publish(alarmTopic("impact_g"),        "0.00",  true);
+    mqtt.publish(alarmTopic("impact_severity"), "-",     true);
   }
 }
 
@@ -203,9 +234,11 @@ void fakeIMU() {
   pitch = sinf(pa) * 3.5f + sinf(pa * 2.1f) * 1.2f;
   roll  = sinf(ra) * 6.0f + sinf(ra * 1.8f) * 2.5f;
 
-  static unsigned long nextFake = 45000UL;
-  if (millis() > nextFake) {
-    nextFake       = millis() + 30000UL + (unsigned long)random(0, 60000);
+  static unsigned long lastFake = 0;
+  static unsigned long fakeGap  = 45000UL;
+  if (millis() - lastFake > fakeGap) {   // overflow-fest (N1)
+    lastFake       = millis();
+    fakeGap        = 30000UL + (unsigned long)random(0, 60000);
     impactPeakG    = 0.6f + random(0, 35) / 10.0f;
     impactActive   = true;
     lastImpactTime = millis();
@@ -214,40 +247,71 @@ void fakeIMU() {
   if (impactActive && millis() - lastImpactTime > IMPACT_DECAY) {
     impactActive = false;
     impactPeakG  = 0.0f;
-    mqtt.publish("boat/alarm/impact_active", "false", true);
+    mqtt.publish(alarmTopic("impact_active"),   "false", true);
+    mqtt.publish(alarmTopic("impact_g"),        "0.00",  true);
+    mqtt.publish(alarmTopic("impact_severity"), "-",     true);
   }
+}
+
+// Erlaubt nur unbedenkliche Zeichen in Sensor-Namen und MQTT-Topics.
+// Blockt MQTT-Wildcards (#, +) und vor allem HTML-/Script-Zeichen, damit
+// ein manipulierter Sensorname (der spaeter als JSON-Key im Dashboard
+// landet) keine Stored-XSS ermoeglicht. allowSlash=true fuer Signal-K-Pfade.
+String sanitizeToken(const String& in, bool allowSlash) {
+  String out;
+  out.reserve(in.length());
+  for (size_t i = 0; i < in.length(); i++) {
+    char c = in[i];
+    bool ok = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+              (c >= '0' && c <= '9') || c == '_' || c == '-' || c == '.';
+    if (allowSlash && c == '/') ok = true;
+    if (ok) out += c;
+  }
+  return out;
 }
 
 // ── KONFIGURATION LADEN / SPEICHERN ─────────────────────────
 void loadConfig() {
   for (int i = 0; i < 16; i++) {
     kanaele[i] = {(uint8_t)(i + 1), 1, 0,
-                  "kanal_" + String(i + 1), "V", 1.0f, 0.0f, false, ""};
+                  "kanal_" + String(i + 1), "V", 1.0f, 0.0f, false, "", ""};
   }
-  if (!LittleFS.exists(CONFIG_FILE)) return;
+  if (!LittleFS.exists(CONFIG_FILE)) { rebuildTopics(); return; }
   File f = LittleFS.open(CONFIG_FILE, "r");
-  StaticJsonDocument<4096> doc;
-  if (deserializeJson(doc, f) != DeserializationError::Ok) { f.close(); return; }
+  DynamicJsonDocument doc(8192);
+  DeserializationError err = deserializeJson(doc, f);
   f.close();
+  if (err) {
+    // Wichtig: NICHT die (noch) gueltigen Default-Kanaele verwerfen und
+    // vor allem die Datei nicht ueberschreiben - so bleibt eine intakte
+    // Konfig nach einem Spannungseinbruch beim Anlassen erhalten.
+    Serial.printf("loadConfig: JSON-Fehler (%s) - Defaults aktiv\n", err.c_str());
+    return;
+  }
   JsonArray arr = doc["kanaele"].as<JsonArray>();
   int idx = 0;
   for (JsonObject k : arr) {
     if (idx >= 16) break;
     kanaele[idx].klemme  = k["klemme"]  | (idx + 1);
+    if (kanaele[idx].klemme < 1 || kanaele[idx].klemme > 16)  // MUX-Kanal absichern (M9)
+      kanaele[idx].klemme = idx + 1;
     kanaele[idx].ads     = k["ads"]     | 1;
     kanaele[idx].pin     = k["pin"]     | 0;
-    kanaele[idx].sensor  = k["sensor"].isNull()  ? "kanal_" + String(idx + 1) : k["sensor"].as<String>();
+    kanaele[idx].sensor  = k["sensor"].isNull()  ? "kanal_" + String(idx + 1) : sanitizeToken(k["sensor"].as<String>(), false);
+    if (kanaele[idx].sensor.length() == 0) kanaele[idx].sensor = "kanal_" + String(idx + 1);
     kanaele[idx].einheit = k["einheit"].isNull() ? "V"                         : k["einheit"].as<String>();
     kanaele[idx].faktor  = k["faktor"]  | 1.0f;
     kanaele[idx].offset  = k["offset"]  | 0.0f;
     kanaele[idx].aktiv   = k["aktiv"]   | false;
-    kanaele[idx].topic   = k["topic"].isNull() ? "" : k["topic"].as<String>();
+    kanaele[idx].topic   = k["topic"].isNull() ? "" : sanitizeToken(k["topic"].as<String>(), true);
     idx++;
   }
+  rebuildTopics();
 }
 
 void saveConfig() {
-  StaticJsonDocument<4096> doc;
+  rebuildTopics();  // In-Memory-Config hat sich geaendert -> Topic-Cache erneuern
+  DynamicJsonDocument doc(8192);
   JsonArray arr = doc.createNestedArray("kanaele");
   for (int i = 0; i < 16; i++) {
     JsonObject k = arr.createNestedObject();
@@ -261,8 +325,36 @@ void saveConfig() {
     k["aktiv"]   = kanaele[i].aktiv;
     k["topic"]   = kanaele[i].topic;
   }
+  // Overflow VOR dem Oeffnen pruefen: "w" wuerde die Datei sofort leeren
+  // und bei still abgeschnittenem JSON die gute Konfig zerstoeren.
+  if (doc.overflowed()) {
+    Serial.println("saveConfig: JSON zu gross - Konfig NICHT gespeichert!");
+    return;
+  }
+  String out;
+  serializeJson(doc, out);
+  // Flash-Wear vermeiden (M4): nur schreiben, wenn sich der Inhalt tatsaechlich
+  // geaendert hat. Eine retained Config auf boatopenio/config wuerde sonst bei
+  // jedem MQTT-Reconnect einen identischen Flash-Write ausloesen.
+  if (LittleFS.exists(CONFIG_FILE)) {
+    File rf = LittleFS.open(CONFIG_FILE, "r");
+    if (rf) {
+      bool same = (rf.size() == out.length());
+      if (same) {
+        size_t i = 0;
+        while (rf.available()) { if (rf.read() != out[i++]) { same = false; break; } }
+      }
+      rf.close();
+      if (same) return;
+    }
+  }
   File f = LittleFS.open(CONFIG_FILE, "w");
-  serializeJson(doc, f);
+  if (!f) {
+    Serial.println("saveConfig: Datei konnte nicht geoeffnet werden");
+    return;
+  }
+  if (f.print(out) == 0)
+    Serial.println("saveConfig: Schreibfehler");
   f.close();
 }
 
@@ -348,8 +440,10 @@ void connectWiFi() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\nWiFi verbunden: " + WiFi.localIP().toString());
   } else {
-    Serial.println("\nWiFi Verbindung fehlgeschlagen (AP bleibt aktiv)");
-    WiFi.disconnect();
+    // Nicht disconnecten: Der Arduino-Core versucht selbststaendig weiter zu
+    // verbinden, und loop() forciert zusaetzlich periodisch WiFi.begin().
+    // Wichtig fuer Kaltstart nach Stromausfall, wenn der Router laenger braucht.
+    Serial.println("\nWiFi noch nicht verbunden (AP bleibt aktiv, Reconnect laeuft)");
   }
 }
 
@@ -359,21 +453,26 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   for (unsigned int i = 0; i < length; i++) msg += (char)payload[i];
 
   if (String(topic) == "boatopenio/config") {
-    StaticJsonDocument<4096> doc;
+    DynamicJsonDocument doc(8192);
     if (deserializeJson(doc, msg) == DeserializationError::Ok) {
       JsonArray arr = doc["kanaele"].as<JsonArray>();
       int idx = 0;
       for (JsonObject k : arr) {
         if (idx >= 16) break;
         kanaele[idx].klemme  = k["klemme"]  | kanaele[idx].klemme;
+        if (kanaele[idx].klemme < 1 || kanaele[idx].klemme > 16)  // MUX-Kanal absichern (M9)
+          kanaele[idx].klemme = idx + 1;
         kanaele[idx].ads     = k["ads"]     | kanaele[idx].ads;
         kanaele[idx].pin     = k["pin"]     | kanaele[idx].pin;
-        kanaele[idx].sensor  = k["sensor"].isNull()  ? kanaele[idx].sensor : k["sensor"].as<String>();
+        if (!k["sensor"].isNull()) {
+          String s = sanitizeToken(k["sensor"].as<String>(), false);
+          if (s.length() > 0) kanaele[idx].sensor = s;
+        }
         kanaele[idx].einheit = k["einheit"].isNull() ? kanaele[idx].einheit : k["einheit"].as<String>();
         kanaele[idx].faktor  = k["faktor"]  | kanaele[idx].faktor;
         kanaele[idx].offset  = k["offset"]  | kanaele[idx].offset;
         kanaele[idx].aktiv   = k["aktiv"]   | kanaele[idx].aktiv;
-        kanaele[idx].topic   = k["topic"].isNull() ? kanaele[idx].topic : k["topic"].as<String>();
+        kanaele[idx].topic   = k["topic"].isNull() ? kanaele[idx].topic : sanitizeToken(k["topic"].as<String>(), true);
         idx++;
       }
       saveConfig();
@@ -384,8 +483,12 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
 void reconnectMQTT() {
   if (WiFi.status() != WL_CONNECTED) return;
+  // Backoff: nach fehlgeschlagenem Versuch 30s warten statt alle 5s erneut zu
+  // blockieren. Ist der Broker weg (Router an, Server aus - auf Booten normal),
+  // wuerde der TCP-Connect sonst regelmaessig die Web-UI/IMU-Schleife ausbremsen.
   static unsigned long lastAttempt = 0;
-  if (millis() - lastAttempt < 5000) return;
+  static unsigned long backoff     = 5000;
+  if (millis() - lastAttempt < backoff) return;
   lastAttempt = millis();
   Serial.print("MQTT... ");
   bool ok = (strlen(mqtt_user) > 0)
@@ -393,11 +496,21 @@ void reconnectMQTT() {
     : mqtt.connect(MQTT_CLIENT_ID, MQTT_STATUS, 1, true, "offline");
   if (ok) {
     mqtt.publish(MQTT_STATUS, "online", true);
+    // Retained Alarm-Zustand nach (Neu-)Verbindung bereinigen: Stirbt das
+    // Geraet waehrend eines aktiven Impacts (Brownout beim Aufprall!), bliebe
+    // sonst auf jedem Dashboard dauerhaft ein Alarm stehen. Beim Start ist
+    // impactActive=false / impactPeakG=0.
+    if (!impactActive) {
+      mqtt.publish(alarmTopic("impact_active"),   "false", true);
+      mqtt.publish(alarmTopic("impact_g"),        "0.00",  true);
+      mqtt.publish(alarmTopic("impact_severity"), "-",     true);
+    }
     mqtt.subscribe("boatopenio/config");
-    mqtt.subscribe("boatopenio/cmd/#");
+    backoff = 5000;   // nach Erfolg wieder schnell reagieren
     Serial.println("verbunden");
   } else {
-    Serial.printf("Fehler rc=%d\n", mqtt.state());
+    backoff = 30000;  // Broker nicht erreichbar -> langsamer nachfassen (M1)
+    Serial.printf("Fehler rc=%d (naechster Versuch in 30s)\n", mqtt.state());
   }
 }
 
@@ -408,15 +521,36 @@ void reconnectMQTT() {
 void setupOTA() {
   ArduinoOTA.setHostname("BoatOpenIO");
   ArduinoOTA.setPassword(strlen(portal_pass) > 0 ? portal_pass : AP_DEFAULT_PASS);
-  ArduinoOTA.onStart([]()  { Serial.println("OTA Start"); });
-  ArduinoOTA.onEnd([]()    { Serial.println("\nOTA fertig"); });
+  ArduinoOTA.onStart([]()  {
+    // Der Flash-Upload blockiert loop() zig Sekunden -> loop-Task vom
+    // Watchdog abmelden, sonst loest der TWDT (10s, panic) mitten im
+    // Update aus und hinterlaesst ein halbes Image.
+    esp_task_wdt_delete(NULL);
+    Serial.println("OTA Start");
+  });
+  ArduinoOTA.onEnd([]()    {
+    esp_task_wdt_add(NULL);
+    Serial.println("\nOTA fertig");
+  });
   ArduinoOTA.onProgress([](unsigned int p, unsigned int t) {
-    Serial.printf("OTA: %u%%\r", p / (t / 100));
+    esp_task_wdt_reset();
+    if (t >= 100) Serial.printf("OTA: %u%%\r", p / (t / 100));
   });
   ArduinoOTA.onError([](ota_error_t e) {
+    esp_task_wdt_add(NULL);
     Serial.printf("OTA Fehler[%u]\n", e);
   });
   ArduinoOTA.begin();
+}
+
+// Startet mDNS + OTA einmalig, sobald die STA-Verbindung steht.
+// Wird sowohl beim Boot als auch nach einem spaeteren Reconnect aufgerufen.
+void ensureStaServices() {
+  if (staServicesUp || WiFi.status() != WL_CONNECTED) return;
+  MDNS.begin("boatopenio");
+  setupOTA();
+  staServicesUp = true;
+  Serial.println("mDNS: http://boatopenio.local | OTA bereit");
 }
 
 // ── SETUP ───────────────────────────────────────────────────
@@ -474,13 +608,13 @@ void setup() {
   if (mpu.begin(0x68)) {
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+    mpu.setFilterBandwidth(MPU6050_BAND_94_HZ);  // hoehere Bandbreite fuer Aufprall-Peaks (M3)
     mpuOK = true;
     Serial.println("  MPU6050 @ 0x68 OK");
   } else if (mpu.begin(0x69)) {
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+    mpu.setFilterBandwidth(MPU6050_BAND_94_HZ);  // hoehere Bandbreite fuer Aufprall-Peaks (M3)
     mpuOK = true;
     Serial.println("  MPU6050 @ 0x69 OK (AD0=VCC)");
   } else {
@@ -501,25 +635,30 @@ void setup() {
   // MQTT
   mqtt.setServer(mqtt_server, atoi(mqtt_port));
   mqtt.setCallback(mqttCallback);
-  mqtt.setBufferSize(512);
+  // 4096B: PubSubClient verwirft eingehende Nachrichten groesser als der
+  // Buffer kommentarlos - eine volle 16-Kanal-Config auf boatopenio/config
+  // ist deutlich >512B und wuerde sonst nie im Callback ankommen.
+  mqtt.setBufferSize(4096);
 
-  // mDNS + OTA (nur wenn STA verbunden)
-  if (WiFi.status() == WL_CONNECTED) {
-    MDNS.begin("boatopenio");
-    setupOTA();
-    Serial.println("mDNS: http://boatopenio.local");
-  }
+  // mDNS + OTA (nur wenn STA verbunden; sonst spaeter in loop() nachgeholt)
+  ensureStaServices();
 
   setupWebServer();
 
   // Watchdog
 #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+  // idle_core_mask=0: NUR die loop-Task ueberwachen. Die Idle-Tasks nicht
+  // abonnieren, da loop() nie delay()t und die Idle-Task sonst aushungern
+  // und faelschlich einen WDT-Panic ausloesen koennte.
   esp_task_wdt_config_t wdt_cfg = {
     .timeout_ms     = WDT_TIMEOUT * 1000,
-    .idle_core_mask = (1 << portNUM_PROCESSORS) - 1,
+    .idle_core_mask = 0,
     .trigger_panic  = true
   };
-  esp_task_wdt_init(&wdt_cfg);
+  // Der Core initialisiert den TWDT bereits; init() liefert dann
+  // ESP_ERR_INVALID_STATE -> in dem Fall bestehende Instanz umkonfigurieren.
+  if (esp_task_wdt_init(&wdt_cfg) == ESP_ERR_INVALID_STATE)
+    esp_task_wdt_reconfigure(&wdt_cfg);
 #else
   esp_task_wdt_init(WDT_TIMEOUT, true);
 #endif
@@ -538,6 +677,22 @@ void setup() {
 // ── LOOP ────────────────────────────────────────────────────
 void loop() {
   esp_task_wdt_reset();
+
+  // WiFi-Reconnect: erzwingt alle 30s einen Verbindungsversuch, falls STA
+  // konfiguriert aber getrennt ist (z.B. Router bootet nach Stromausfall
+  // langsamer als der ESP). Sobald verbunden, mDNS/OTA nachziehen.
+  if (strlen(wifi_ssid) > 0) {
+    if (WiFi.status() != WL_CONNECTED) {
+      staServicesUp = false;
+      if (millis() - lastWiFiRetry > 30000) {
+        lastWiFiRetry = millis();
+        Serial.println("WiFi getrennt - Reconnect...");
+        WiFi.begin(wifi_ssid, wifi_pass);
+      }
+    } else {
+      ensureStaServices();
+    }
+  }
 
   if (!mqtt.connected()) reconnectMQTT();
   mqtt.loop();
@@ -571,11 +726,16 @@ void loop() {
 
   unsigned long now = millis();
 
-  // IMU (200ms)
+  // IMU mit 50Hz sampeln, damit kurze Aufprall-Transienten erfasst werden (M3).
+  // readIMU()/publishImpact() feuern Alarme selbst; Pitch/Roll wird getrennt
+  // nur 1x/s per MQTT publiziert, um den Broker nicht zu fluten.
   if (now - lastIMURead >= IMU_INTERVAL) {
     lastIMURead = now;
     if (mpuOK) readIMU();
     else        fakeIMU();
+  }
+  if (now - lastIMUPublish >= IMU_PUBLISH_INTERVAL) {
+    lastIMUPublish = now;
     if (mqtt.connected()) {
       char buf[10];
       float pitchOut = (pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f);

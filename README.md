@@ -325,10 +325,9 @@ BoatOpenIO/
 │           └── gerber/vcc-board.zip
 ├── images/                            ← build photos
 └── docs/
-    ├── setup.md
-    ├── setup_de.md
-    ├── configuration.md
-    └── configuration_de.md
+    ├── setup.md              / setup_de.md          ← commissioning guide
+    ├── configuration.md      / configuration_de.md  ← config reference
+    └── backend.md            / backend_de.md        ← firmware & backend reference
 ```
 
 ---

@@ -5,7 +5,33 @@
 
 ---
 
-## Done – v2.1 (current)
+## Done – v2.2 (current)
+
+**Security & hardening**
+- [x] First-time setup routes (`/setup`, `/dosetup`) auth-gated once completed
+- [x] JSON APIs (`/api/values`, `/api/raw`, `/api/imu`) require authentication
+- [x] CSRF protection on all POST endpoints (Origin/Referer check)
+- [x] Input filtering (sensor/topic whitelist) + HTML escaping against injection
+
+**Field reliability**
+- [x] Automatic WiFi reconnect after outage (cold start after power loss)
+- [x] OTA update no longer aborted by the watchdog
+- [x] Config integrity: larger JSON buffers, overflow-safe save (no data loss)
+- [x] Retained impact alarm cleared on MQTT connect (no "stuck" alarm)
+- [x] TEST mode publishes alarms to `boat/test/alarm/*` instead of real topics
+- [x] Reduced flash wear (write config only on change) · ADC averaging · terminal validation
+
+**Calibration**
+- [x] Two-point calibration calculator (computes factor **and** offset)
+- [x] Ω mode for resistive VDO senders (+ `/api/adc` endpoint for live reads)
+
+**Documentation**
+- [x] New firmware/backend reference (`docs/backend.md` / `backend_de.md`)
+- [x] `setup.md` and `configuration.md` brought up to date
+
+---
+
+## Done – v2.1
 
 **Hardware**
 - [x] 4-board architecture: main board, input board, ESP32 adapter, VCC distributor
@@ -41,7 +67,6 @@
 - [ ] Clean up legacy `ads` / `pin` fields from config schema and firmware
 
 **Docs**
-- [ ] Update `docs/setup.md` and `docs/configuration.md` to v2 accuracy
 - [ ] Node-RED integration example (MQTT → dashboard)
 - [ ] Signal K server setup guide (BoatOpenIO as data source)
 
@@ -51,7 +76,6 @@
 
 These are directions worth exploring — no timeline attached.
 
-- [ ] **Calibration wizard** in web UI: enter a known reference value, auto-calculate faktor/offset
 - [ ] **BoatOS auto-discovery** — announce all active topics and units on connect
 - [ ] **Second ESP32 adapter board** — smaller footprint, or ESP32-S3 / C3 variant
 - [ ] **PWM gauge output** — drive analog cockpit instruments from digital values

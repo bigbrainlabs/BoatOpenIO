@@ -5,7 +5,33 @@
 
 ---
 
-## Fertig – v2.1 (aktuell)
+## Fertig – v2.2 (aktuell)
+
+**Sicherheit & Härtung**
+- [x] Ersteinrichtungs-Routen (`/setup`, `/dosetup`) nach Abschluss auth-geschützt
+- [x] JSON-APIs (`/api/values`, `/api/raw`, `/api/imu`) erfordern Authentifizierung
+- [x] CSRF-Schutz auf allen POST-Endpunkten (Origin/Referer-Prüfung)
+- [x] Eingabe-Filterung (Sensor/Topic-Whitelist) + HTML-Escaping gegen Injection
+
+**Zuverlässigkeit im Feld**
+- [x] Automatischer WiFi-Reconnect nach Ausfall (Kaltstart nach Stromausfall)
+- [x] OTA-Update wird nicht mehr vom Watchdog abgebrochen
+- [x] Config-Integrität: größere JSON-Puffer, overflow-sicheres Speichern (kein Datenverlust)
+- [x] Retained Aufprall-Alarm wird beim MQTT-Connect bereinigt (kein „hängender" Alarm)
+- [x] TEST-Modus publiziert Alarme auf `boat/test/alarm/*` statt echter Topics
+- [x] Flash-Wear reduziert (Config nur bei Änderung schreiben) · ADC-Mittelung · Klemme-Validierung
+
+**Kalibrierung**
+- [x] Zwei-Punkt-Kalibrierungs-Rechner (berechnet Faktor **und** Offset)
+- [x] Ω-Modus für resistive VDO-Geber (+ `/api/adc`-Endpunkt zum Live-Lesen)
+
+**Dokumentation**
+- [x] Neue Firmware-/Backend-Referenz (`docs/backend.md` / `backend_de.md`)
+- [x] `setup.md` und `configuration.md` auf aktuellen Stand gebracht
+
+---
+
+## Fertig – v2.1
 
 **Hardware**
 - [x] 4-Platinen-Architektur: Mainboard, Eingangsboard, ESP32-Adapterboard, VCC-Verteiler
@@ -41,7 +67,6 @@
 - [ ] Veraltete Felder `ads` / `pin` aus Config-Schema und Firmware entfernen
 
 **Dokumentation**
-- [ ] `docs/setup.md` und `docs/configuration.md` auf v2-Stand bringen
 - [ ] Node-RED Integrationsbeispiel (MQTT → Dashboard)
 - [ ] Signal K Server Einrichtungsanleitung (BoatOpenIO als Datenquelle)
 
@@ -51,7 +76,6 @@
 
 Mögliche Richtungen ohne festen Zeitplan.
 
-- [ ] **Kalibrierungsassistent** im Web-UI: bekannten Referenzwert eingeben, Faktor/Offset wird automatisch berechnet
 - [ ] **BoatOS Auto-Discovery** — alle aktiven Topics und Einheiten beim Verbinden ankündigen
 - [ ] **Zweites ESP32-Adapterboard** — kleinerer Footprint oder ESP32-S3 / C3 Variante
 - [ ] **PWM-Gauge-Ausgang** — analoge Cockpit-Instrumente aus digitalen Werten ansteuern
