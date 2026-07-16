@@ -1,5 +1,8 @@
 # BoatOpenIO
 
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/bigbrainlabs?style=flat&logo=github&label=Sponsor&color=pink)](https://github.com/sponsors/bigbrainlabs)
+[![Patreon](https://img.shields.io/badge/Patreon-Support-orange?style=flat&logo=patreon)](https://www.patreon.com/cw/logbook_without_posing)
+
 **Universelles Marine-IO-System – Open Source, modular, vollständig konfigurierbar**
 
 > *„Steck rein, konfiguriere, fertig."*
