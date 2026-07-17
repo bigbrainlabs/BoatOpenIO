@@ -23,6 +23,10 @@ If you find this project useful and want to support it: buying the books is the 
 
 **[👉 Logbook Without Posing on Amazon](https://amzn.to/4e5swN6)**
 
+Prefer not to deal with a PCB fab? The manufactured board set is available on Tindie — same design as the Gerbers in this repo, which stay free to download and order yourself.
+
+**[👉 BoatOpenIO v2 PCB Set (4 boards) on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)**
+
 ---
 
 ## ⚠️ Safety Warning
@@ -70,6 +74,8 @@ VDO sensor → BoatOpenIO → MQTT → Signal K / BoatOS → modern dashboard
 ## Hardware – v2 PCB
 
 Four separate boards, connected via IDC ribbon cables: **input board**, **main board**, **ESP32 adapter board**, and **VCC distributor**. Gerber files ready to order in `hardware/v2/*/gerber/`.
+
+> 🛒 **Don't want to order at a PCB fab?** The fabricated set of all four boards is available ready-made: **[BoatOpenIO v2 PCB Set on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)** — bare PCBs, components not included (see the parts list below).
 
 ```
 Input Board ──20-pin ribbon──> Main Board <──16-pin ribbon── ESP32 Adapter Board
@@ -295,9 +301,11 @@ boatopenio/status      → online
 | 17 | Ribbon cable + IDC 16-pin | Main board ↔ ESP32 adapter board | [Amazon](https://amzn.to/3SuZ3DQ) |
 | 18 | Pin socket 2×05 (10-pin) | SIG-OUT prep on main board | — |
 | 19 | JST 3-pin connector | VCC board ↔ main board | [Amazon](https://amzn.to/4ush82N) |
-| 20 | PCB set (4 boards, JLCPCB) | Gerber files in `hardware/v2/` | — |
+| 20 | PCB set (4 boards) | Order the Gerbers in `hardware/v2/` yourself, or get the ready-made set | [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) |
 
 > Amazon: faster delivery. AliExpress links to follow.
+>
+> The Tindie set covers item 20 only — bare boards. Items 1–19 are the components you still need.
 
 ---
 
@@ -363,4 +371,4 @@ Free to use, modify, distribute — derivative works must also be GPL-3.0. See [
 
 > *"Build it yourself and you know what's in it — and what it cost."*
 
-📖 [Book series on Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO)
+📖 [Book series on Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO) · 🛒 [PCB set on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)

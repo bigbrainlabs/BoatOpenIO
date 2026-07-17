@@ -23,6 +23,10 @@ Wer das Projekt nützlich findet und unterstützen möchte: Die Bücher kaufen i
 
 **[👉 Logbuch ohne Pose auf Amazon](https://amzn.to/4e5swN6)**
 
+Keine Lust, selbst bei einem Platinenhersteller zu bestellen? Das gefertigte Platinen-Set gibt es fertig bei Tindie — dasselbe Design wie die Gerber-Dateien in diesem Repo, die weiterhin frei herunterladbar und selbst bestellbar bleiben.
+
+**[👉 BoatOpenIO v2 PCB-Set (4 Platinen) bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)**
+
 ---
 
 ## ⚠️ Sicherheitshinweis
@@ -70,6 +74,8 @@ VDO-Sensor → BoatOpenIO → MQTT → Signal K / BoatOS → modernes Dashboard
 ## Hardware – v2 PCB
 
 Vier separate Platinen, verbunden über IDC-Flachbandkabel: **Eingangsboard**, **Mainboard**, **ESP32-Adapterboard** und **VCC-Verteiler**. Bestellfertige Gerber-Dateien in `hardware/v2/*/gerber/`.
+
+> 🛒 **Nicht selbst beim Platinenhersteller bestellen?** Das gefertigte Set aller vier Platinen gibt es fertig: **[BoatOpenIO v2 PCB-Set bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)** — nackte Platinen, Bauteile nicht enthalten (siehe Stückliste weiter unten).
 
 ```
 Eingangsboard ──20-pol Flachband──> Mainboard <──16-pol Flachband── ESP32-Adapterboard
@@ -295,9 +301,11 @@ boatopenio/status       → online
 | 17 | Flachbandkabel + IDC 16-pol | Mainboard ↔ ESP32-Adapterboard | [Amazon](https://amzn.to/3SuZ3DQ) |
 | 18 | Pfostenbuchse 2×05 (10-pol) | SIG-OUT Vorbereitung Mainboard | — |
 | 19 | JST 3-Pin Stecker | VCC-Board ↔ Mainboard | [Amazon](https://amzn.to/4ush82N) |
-| 20 | PCB Set (4 Platinen, JLCPCB) | Gerber-Dateien in `hardware/v2/` | — |
+| 20 | PCB Set (4 Platinen) | Gerber in `hardware/v2/` selbst bestellen, oder fertiges Set kaufen | [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) |
 
 > Amazon: schnelle Lieferung. AliExpress-Links folgen.
+>
+> Das Tindie-Set deckt nur Position 20 ab — die nackten Platinen. Die Positionen 1–19 sind die Bauteile, die du zusätzlich brauchst.
 
 ---
 
@@ -363,4 +371,4 @@ Frei nutzbar, veränderbar und verteilbar – abgeleitete Werke müssen ebenfall
 
 > *„Selbstgemacht ist wissen was drin ist und bezahlbar."*
 
-📖 [Buchreihe auf Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO)
+📖 [Buchreihe auf Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO) · 🛒 [PCB-Set bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)

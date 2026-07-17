@@ -2,6 +2,10 @@
 
 ## Voraussetzungen
 
+**Hardware** — das v2-Platinen-Set (Eingang, Main, ESP32-Adapter, VCC). Entweder die Gerber-Dateien aus `hardware/v2/*/gerber/` selbst bei einem Platinenhersteller bestellen, oder das fertige Set bei [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) kaufen (nackte Platinen — Bauteile laut Stückliste in der [README](../README_de.md)).
+
+**Software**
+
 - Arduino IDE 1.8+ oder 2.x
 - ESP32-Board-Paket installiert (`espressif/arduino-esp32`)
 - Benötigte Bibliotheken (über den Library Manager installieren):

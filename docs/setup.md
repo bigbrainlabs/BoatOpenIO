@@ -2,6 +2,10 @@
 
 ## Requirements
 
+**Hardware** — the v2 board set (input, main, ESP32 adapter, VCC). Either order the Gerbers in `hardware/v2/*/gerber/` at a PCB fab yourself, or get the ready-made set on [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) (bare boards — components per the parts list in the [README](../README.md)).
+
+**Software**
+
 - Arduino IDE 1.8+ or 2.x
 - ESP32 board package installed (`espressif/arduino-esp32`)
 - Required libraries (install via Library Manager):
