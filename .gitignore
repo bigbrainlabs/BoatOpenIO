@@ -4,3 +4,7 @@
 **/BoatOpenIO-v2-backups/
 **/boardopenio-backups/
 **/*-backups/
+
+# KiCad Sperr-/Autosave-Dateien und benutzerspezifischer UI-Zustand
+**/~*.lck
+**/#auto_saved_files#
