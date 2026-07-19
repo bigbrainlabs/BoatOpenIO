@@ -1,0 +1,101 @@
+name: Gehäuse-Einreichung / Enclosure Submission
+description: Ein Gehäuse-Design für den BoatOpenIO v2 Community-Wettbewerb einreichen / Submit an enclosure design for the BoatOpenIO v2 community contest
+title: "[Gehäuse] "
+labels: ["enclosure", "submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Mitmachen! Details zu Anforderungen und Maßen stehen in der
+        [Gehäuse-README](../blob/master/hardware/enclosures/README_de.md).
+
+        Thanks for taking part! Requirements and dimensions are in the
+        [enclosure README](../blob/master/hardware/enclosures/README.md).
+
+  - type: input
+    id: design-name
+    attributes:
+      label: Name des Designs / Design name
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: Urheber / Author
+      description: Der Name, unter dem du genannt werden willst (CC BY-SA verlangt Namensnennung). / The name you want to be credited under (CC BY-SA requires attribution).
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Dateien / Files
+      description: |
+        Dateien hier ins Feld ziehen (GitHub akzeptiert ZIP) oder Download-Link angeben.
+        Bitte STL zum Drucken **und** wenn möglich das Quellformat (STEP, FCStd, f3d …).
+
+        Drag files into this field (GitHub accepts ZIP) or provide a download link.
+        Please include an STL for printing **and** the source format if possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: printing
+    attributes:
+      label: Druckeinstellungen / Print settings
+      description: Material, Schichthöhe, Infill, Stützen, Druckzeit. / Material, layer height, infill, supports, print time.
+      placeholder: |
+        Material: ASA
+        Schichthöhe / Layer height: 0.2 mm
+        Infill: 30 %
+        Stützen / Supports: nein / no
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Zusätzliche Teile / Additional parts
+      description: Schrauben, Einschmelzmuttern, Dichtungen, Kabelverschraubungen. / Screws, heat-set inserts, gaskets, cable glands.
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anmerkungen / Notes
+      description: Montagehinweise, Besonderheiten, bekannte Schwächen. / Assembly notes, special features, known weaknesses.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Rechte & Lizenz / Rights & License
+
+        Mit dem Einreichen stellst du dein Design unter **CC BY-SA 4.0**. Du behältst dein
+        Urheberrecht und darfst dein Design weiterhin überall sonst verwenden — aber die
+        erteilte Lizenz ist **unwiderruflich**: bereits veröffentlichte Kopien bleiben nutzbar.
+        Wer dein Design verändert weitergibt, muss dich nennen und das Ergebnis wieder unter
+        CC BY-SA 4.0 stellen. Das gilt auch für uns.
+
+        By submitting you license your design under **CC BY-SA 4.0**. You keep your copyright
+        and remain free to use your design elsewhere — but the license granted is
+        **irrevocable**: copies already published stay usable. Anyone redistributing a modified
+        version must credit you and license the result under CC BY-SA 4.0 as well. That
+        includes us.
+
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Bestätigung / Confirmation
+      description: Ohne diese Zustimmung können wir das Design nicht veröffentlichen. / Without this permission we cannot publish the design.
+      options:
+        - label: Das Design ist meine eigene Arbeit und enthält keine Fremdteile, deren Weitergabe eingeschränkt ist (z. B. Hersteller-CAD von Steckern). / This design is my own work and contains no third-party parts with redistribution restrictions (e.g. manufacturer connector CAD).
+          required: true
+        - label: Ich stelle das Design unter CC BY-SA 4.0 und weiß, dass diese Lizenz unwiderruflich ist. / I license this design under CC BY-SA 4.0 and understand that this license is irrevocable.
+          required: true
+        - label: Ich bin mit der Nennung des oben angegebenen Namens einverstanden. / I agree to being credited under the name given above.
+          required: true

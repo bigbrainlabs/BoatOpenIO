@@ -363,6 +363,8 @@ BoatOpenIO sendet alle Werte per MQTT. BoatOS erkennt alle Topics automatisch (A
 
 Frei nutzbar, veränderbar und verteilbar – abgeleitete Werke müssen ebenfalls GPL-3.0 sein. Siehe [LICENSE](LICENSE).
 
+**Ausnahme:** Die Community-Gehäuse-Designs in `hardware/enclosures/` stehen unter **CC BY-SA 4.0** — die passendere Lizenz für CAD-Werke. Wer ein Design einreicht, stellt es unter diese Lizenz; siehe [Gehäuse-README](hardware/enclosures/README_de.md).
+
 ---
 
 ## Teil der Serie

@@ -4,11 +4,43 @@ Community-Designs für das BoatOpenIO v2 Platinensatz-Gehäuse.
 
 ## Wettbewerb
 
-Wir haben einen Community-Design-Wettbewerb durchgeführt (August–September 2026). Die drei Gewinner-Designs liegen im Ordner `winner/` und sind für alle zum Nachdrucken frei verfügbar.
+Wir veranstalten einen Community-Design-Wettbewerb (August–September 2026). Die Gewinner-Designs landen im Ordner `winner/` und sind für alle zum Nachdrucken frei verfügbar.
+
+## Einreichen
+
+Designs werden über ein [GitHub-Issue eingereicht](../../issues/new?template=enclosure-submission.yml). Alternativ per Pull Request mit den Dateien direkt in `community/<dein-name>/`.
+
+Bitte mitliefern:
+
+- STL zum Drucken, plus wenn möglich das Quellformat (STEP, FCStd, f3d …) — nur so kann jemand dein Design weiterentwickeln
+- Kurze Beschreibung: Druckeinstellungen, Material, benötigte Schrauben/Einschmelzmuttern
+- Foto oder Render, wenn vorhanden
+
+Die Vorlage dafür liegt in [`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md).
+
+## Rechte & Lizenz
+
+> **Mit dem Einreichen eines Designs stellst du es unter [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.de).** Ohne diese Zustimmung können wir dein Design nicht veröffentlichen.
+
+Was das konkret bedeutet:
+
+- **Du behältst dein Urheberrecht.** Du erteilst lediglich eine Nutzungslizenz — du darfst dein Design weiterhin überall sonst verwenden und veröffentlichen.
+- **Namensnennung (BY).** Jeder, der dein Design nutzt oder verändert, muss dich nennen. Sag uns deshalb, unter welchem Namen du genannt werden willst.
+- **Weitergabe unter gleichen Bedingungen (SA).** Wer dein Design verändert und weitergibt, muss das Ergebnis wieder unter CC BY-SA 4.0 stellen. Das gilt auch für uns, falls wir ein Design zum offiziellen BoatOpenIO-Gehäuse weiterentwickeln.
+- **Die Lizenz ist unwiderruflich.** Einmal veröffentlichte Kopien bleiben nutzbar, auch wenn du dein Design später aus dem Repo entfernen lässt. Bitte reiche nur ein, was du dauerhaft freigeben willst.
+- **Es muss deine eigene Arbeit sein.** Achtung bei importierten Fremdteilen: Hersteller-CAD von Steckern oder Gehäusen (STEP-Downloads) darf oft nicht weiterverbreitet werden. Solche Teile bitte vor dem Einreichen entfernen oder durch eigene Nachbauten ersetzen.
+
+Beim Einreichen bestätigst du diese Punkte einmal ausdrücklich — im Issue-Formular per Checkbox, beim Pull Request in der Beschreibung.
+
+Der übrige Inhalt dieses Repos steht unter GPL-3.0. Die Gehäuse-Designs sind davon bewusst ausgenommen, weil CC BY-SA 4.0 die passendere Lizenz für Hardware- und CAD-Werke ist.
 
 ## Referenz-Scans
 
-3D-Scans aller vier bestückten Platinen (bereitgestellt von Community-Mitglied Bernd) befinden sich in `reference-scans/`. Als STL verfügbar — einfach in die CAD-Software als Referenzgeometrie importieren.
+3D-Scans aller vier bestückten Platinen befinden sich in `reference_scans/`. Als STL verfügbar — einfach in die CAD-Software als Referenzgeometrie importieren.
+
+Bereitgestellt von Community-Mitglied Bernd — Namensnennung gemäß CC BY-SA 4.0.
+
+> **Hinweis:** Scans sind Messwerte, keine Konstruktionszeichnungen. Für Passungen und Toleranzen gelten die Maße aus der Spezifikation unten, nicht die Scan-Geometrie.
 
 ## Spezifikation
 
@@ -35,8 +67,4 @@ Vier Boards müssen ins Gehäuse passen:
 
 ## Community-Designs
 
-Alle eingereichten Designs befinden sich in `community/`. Nachdrucken, verbessern, teilen.
-
-## Lizenz
-
-Alle Designs in diesem Ordner stehen unter der **CC BY-SA 4.0** Lizenz — frei nutzbar, veränderbar und weiterzugeben mit Namensnennung.
+Alle eingereichten Designs befinden sich in `community/`. Nachdrucken, verbessern, teilen — unter Nennung des jeweiligen Urhebers.
