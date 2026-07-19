@@ -280,30 +280,32 @@ boatopenio/status      → online
 
 > **Note:** Items 7, 8, 13, and 14 are from the same set — one purchase covers all. Same applies to 12 and 15.
 
-| # | Component | Notes | Amazon |
-|---|-----------|-------|--------|
-| 1 | ESP32 DevKitC-32D (38-pin) | Main controller | [Amazon](https://amzn.to/441f1bl) |
-| 2 | CD74HC4067 Breakout | 16:1 MUX | [Amazon](https://amzn.to/4vPmaHH) |
-| 3 | ADS1115 Breakout (1×) | 16-bit ADC | [Amazon](https://amzn.to/4gg8mRQ) |
-| 4 | MPU6050 Breakout (GY-521) | IMU | [Amazon](https://amzn.to/3S3gGKJ) |
-| 5 | AMS1117-3.3 Breakout | Voltage regulator | [Amazon](https://amzn.to/4gfqqeL) |
-| 6 | Female header assortment | Sockets for all breakouts | [Amazon](https://amzn.to/3S1rXLD) |
-| 7 | Pin header 2×10 (20-pin) | Main board ↔ input board | [Amazon](https://amzn.to/4f2awU6) |
-| 8 | Pin header 2×08 (16-pin) | Main board ↔ ESP32 adapter board | [Amazon](https://amzn.to/4f2awU6) |
-| 9 | Screw terminals 5.08mm | 16× sensor inputs | [Amazon](https://amzn.to/4e6bJcN) |
-| 10 | Bourns 4116R-1-102LF (2×) | Resistor network DIL-16 | [Amazon](https://amzn.to/3SuSZeD) |
-| 11 | SP0503BAHTG (6×) | Zener array SOT-143 | [Amazon](https://amzn.to/4aippiv) |
-| 12 | JST 2-pin connector | VCC rails | [Amazon](https://amzn.to/43y2Suh) |
-| 13 | Pin header 2×10 (20-pin) | Input board side | [Amazon](https://amzn.to/4f2awU6) |
-| 14 | Pin header 2×08 (16-pin) | ESP32 adapter board side | [Amazon](https://amzn.to/4f2awU6) |
-| 15 | JST 2-pin connector (10×) | VCC distribution | [Amazon](https://amzn.to/43y2Suh) |
-| 16 | Ribbon cable + IDC 20-pin | Main board ↔ input board | [Amazon](https://amzn.to/4w6858M) |
-| 17 | Ribbon cable + IDC 16-pin | Main board ↔ ESP32 adapter board | [Amazon](https://amzn.to/3SuZ3DQ) |
-| 18 | Pin socket 2×05 (10-pin) | SIG-OUT prep on main board | — |
-| 19 | JST 3-pin connector | VCC board ↔ main board | [Amazon](https://amzn.to/4ush82N) |
-| 20 | PCB set (4 boards) | Order the Gerbers in `hardware/v2/` yourself, or get the ready-made set | [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) |
+| # | Component | Notes | Source |  |
+|---|-----------|-------|--------|---|
+| 1 | ESP32 DevKitC-32D (38-pin) | Main controller | [Amazon](https://amzn.to/441f1bl) |  |
+| 2 | CD74HC4067 Breakout | 16:1 MUX | [Amazon](https://amzn.to/4vPmaHH) |  |
+| 3 | ADS1115 Breakout (1×) | 16-bit ADC | [Amazon](https://amzn.to/4gg8mRQ) |  |
+| 4 | MPU6050 Breakout (GY-521) | IMU | [Amazon](https://amzn.to/3S3gGKJ) |  |
+| 5 | AMS1117-3.3 Breakout | Voltage regulator | [Amazon](https://amzn.to/4gfqqeL) |  |
+| 6 | Female header assortment | Sockets for all breakouts | [Amazon](https://amzn.to/3S1rXLD) |  |
+| 7 | Pin header 2×10 (20-pin) | Main board ↔ input board | [Amazon](https://amzn.to/4f2awU6) |  |
+| 8 | Pin header 2×08 (16-pin) | Main board ↔ ESP32 adapter board | [Amazon](https://amzn.to/4f2awU6) |  |
+| 9 | Screw terminals 5.08mm | 16× sensor inputs | [Amazon](https://amzn.to/4e6bJcN) |  |
+| 10 | Bourns 4116R-1-102LF (2×) | Resistor network DIL-16 | [Conrad](https://www.conrad.de/de/p/bourns-4116r-1-102lf-4116r-1-102lf-widerstandsnetzwerk-1-k-radial-bedrahtet-dip-16-0-25-w-1-st-1055156.html) | [Amazon](https://amzn.to/3SuSZeD) |
+| 11 | SP0503BAHTG (6×) | Zener array SOT-143 | [Amazon](https://amzn.to/4aippiv) |  |
+| 12 | JST 2-pin connector | VCC rails | [Amazon](https://amzn.to/43y2Suh) |  |
+| 13 | Pin header 2×10 (20-pin) | Input board side | [Amazon](https://amzn.to/4f2awU6) |  |
+| 14 | Pin header 2×08 (16-pin) | ESP32 adapter board side | [Amazon](https://amzn.to/4f2awU6) |  |
+| 15 | JST 2-pin connector (10×) | VCC distribution | [Amazon](https://amzn.to/43y2Suh) |  |
+| 16 | Ribbon cable + IDC 20-pin | Main board ↔ input board | [Amazon](https://amzn.to/4w6858M) |  |
+| 17 | Ribbon cable + IDC 16-pin | Main board ↔ ESP32 adapter board | [Amazon](https://amzn.to/3SuZ3DQ) |  |
+| 18 | Pin socket 2×05 (10-pin) | SIG-OUT prep on main board | — |  |
+| 19 | JST 3-pin connector | VCC board ↔ main board | [Amazon](https://amzn.to/4ush82N) |  |
+| 20 | PCB set (4 boards) | Order the Gerbers in `hardware/v2/` yourself, or get the ready-made set | [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) |  |
 
 > Amazon: faster delivery. AliExpress links to follow.
+>
+> **Item 10 comes from Conrad**, not Amazon: the same Bourns part is around €1.30 there versus roughly €10. For the 2 pieces needed that saves nearly €18. The Amazon link beside it is just the fallback source.
 >
 > The Tindie set covers item 20 only — bare boards. Items 1–19 are the components you still need.
 
