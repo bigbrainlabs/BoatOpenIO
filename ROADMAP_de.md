@@ -80,7 +80,9 @@ Mögliche Richtungen ohne festen Zeitplan.
 - [ ] **Zweites ESP32-Adapterboard** — kleinerer Footprint oder ESP32-S3 / C3 Variante
 - [ ] **PWM-Gauge-Ausgang** — analoge Cockpit-Instrumente aus digitalen Werten ansteuern
 - [ ] **Datenprotokollierung** — optionales SD-Karten-Modul für lokale Wertehistorie
-- [ ] **NMEA-2000-Bridge** — aktive Kanäle über CAN-Bus-Modul auf NMEA 2000 ausgeben
+- [ ] **NMEA-2000-Bridge** — CAN-Bus-Modul, beide Richtungen:
+  - [ ] **Senden** — aktive Kanäle auf NMEA 2000 ausgeben
+  - [ ] **Empfangen** — bestehende NMEA-2000-Geräte am Bus mitlesen und als MQTT publizieren
 - [ ] **Kanalbasierte Grenzwerte** — konfigurierbare Min/Max-Schwellen mit MQTT-Alarm-Topic
 - [ ] **Gehäuse** — Aufnahme für alle 4 Platinen mit dedizierten Steckplätzen für Mini-Platinen (3D-Druck / Hutschiene)
 

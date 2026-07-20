@@ -80,7 +80,9 @@ These are directions worth exploring — no timeline attached.
 - [ ] **Second ESP32 adapter board** — smaller footprint, or ESP32-S3 / C3 variant
 - [ ] **PWM gauge output** — drive analog cockpit instruments from digital values
 - [ ] **Data logging** — optional SD card module for offline value history
-- [ ] **NMEA 2000 bridge** — output active channels to NMEA 2000 via CAN bus module
+- [ ] **NMEA 2000 bridge** — CAN bus module, both directions:
+  - [ ] **Transmit** — output active channels to NMEA 2000
+  - [ ] **Receive** — read existing NMEA 2000 devices on the bus and publish them as MQTT
 - [ ] **Per-channel alert thresholds** — configurable min/max with MQTT alert topic
 - [ ] **Enclosure** — housing for all 4 boards with dedicated slots for mini-boards (3D print / DIN rail)
 
