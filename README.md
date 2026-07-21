@@ -188,6 +188,23 @@ The footprint fits all modules in the 38-pin DevKitC layout: **ESP32-WROOM-32 / 
 | Direct / jumper | DIR | 3.3V signals directly |
 | GND collector | GND | Multiple sensor ground loops → single reference |
 
+### MotorCombo — everything on one board
+
+The **MotorCombo** taps the most common engine sensors directly, so you don't have to plug in six separate mini-boards:
+
+| Channel | Conditioning |
+|---------|--------------|
+| Battery 1 + 2 | Voltage divider |
+| Oil pressure | Pull-up |
+| Temperature | Pull-up |
+| Tank | Pull-up |
+| RPM | Optocoupler + ESP-01 |
+
+Two variants:
+
+- **[MotorCombo THT](hardware/mini-boards/MotorCombo_THT/README.md)** — through-hole, hand-solderable. Gerbers and documentation are in the repo; resistor values are deliberately left open so everyone can fit what matches their own VDO senders.
+- **MotorCombo SMD** — planned as a pre-assembled board, since SMD is hard to hand-solder at home.
+
 **Design and submit your own mini-boards** — pull requests welcome!
 
 ---

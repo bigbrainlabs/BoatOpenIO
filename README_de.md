@@ -188,6 +188,23 @@ Der Footprint passt zu allen Modulen im 38-Pin DevKitC-Layout: **ESP32-WROOM-32 
 | Jumper / Direkt | DIR | 3.3V Signale direkt |
 | Masse-Sammler | GND | Mehrere Massekreise → gemeinsame Referenz |
 
+### MotorCombo – alles auf einer Platine
+
+Die gängigsten Motorsensoren zapft die **MotorCombo** direkt an, ohne dass man dafür sechs einzelne Mini-Platinen stecken muss:
+
+| Kanal | Aufbereitung |
+|-------|--------------|
+| Batterie 1 + 2 | Spannungsteiler |
+| Öldruck | Pull-up |
+| Temperatur | Pull-up |
+| Tank | Pull-up |
+| Drehzahl | Optokoppler + ESP-01 |
+
+Zwei Varianten:
+
+- **[MotorCombo THT](hardware/mini-boards/MotorCombo_THT/README_de.md)** – bedrahtet, von Hand lötbar. Gerber-Dateien und Doku im Repo, Widerstandswerte bewusst offen gelassen, damit jeder passend zu seinen eigenen VDO-Gebern bestücken kann.
+- **MotorCombo SMD** – als fertig bestückte Platine geplant, da SMD zu Hause kaum von Hand zu löten ist.
+
 **Eigene Mini-Platinen entwerfen und einreichen** – Pull Requests willkommen!
 
 ---
