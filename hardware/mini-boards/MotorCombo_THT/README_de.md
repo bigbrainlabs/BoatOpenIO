@@ -131,6 +131,8 @@ Beim Aufbau zu beachten: `GPIO0` und `GPIO2` legen beim ESP8266 gleichzeitig den
 
 Beides hängt an den Werten von R8, R9, R10 und C6 und lässt sich beim Erproben des Drehzahlkanals gemeinsam festlegen.
 
+> 💡 **Tipp: ESP-01S statt ESP-01 verwenden.** Die neuere ESP-01S-Variante hat GPIO0 bereits mit einem Pull-up bestückt. Das entschärft das Boot-Modus-Problem oben, da GPIO0 im Ruhezustand sicher auf High gehalten wird. Der ESP-01S ist pinkompatibel und passt in denselben Sockel.
+
 ---
 
 ## Sicherheit

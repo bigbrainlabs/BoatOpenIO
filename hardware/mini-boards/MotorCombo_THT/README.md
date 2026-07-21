@@ -131,6 +131,8 @@ Worth keeping in mind during assembly: on the ESP8266, `GPIO0` and `GPIO2` doubl
 
 Both depend on the values of R8, R9, R10 and C6, and can be settled together when the RPM channel is trialled.
 
+> 💡 **Tip: use an ESP-01S instead of an ESP-01.** The newer ESP-01S variant already has a pull-up fitted on GPIO0. This mitigates the boot-mode issue above, since GPIO0 is safely held high at idle. The ESP-01S is pin-compatible and fits the same socket.
+
 ---
 
 ## Safety
