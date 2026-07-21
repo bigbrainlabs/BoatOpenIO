@@ -1,5 +1,7 @@
 # MotorCombo THT — Kombi-Mini-Platine für Motorsensoren
 
+> 🚧 **Prototyp-Phase.** Diese Platine (Rev.1) ist noch nicht final erprobt. Fünf der sechs Kanäle sind getestet, der Drehzahlkanal noch nicht (siehe unten). Widerstandswerte, Bohrungen und Layout können sich in kommenden Revisionen noch ändern. Nachbau auf eigenes Risiko und am besten mit Rückmeldung.
+
 Bedrahtete (THT) Variante der MotorCombo-Platine. Fasst die sechs typischen Motorraum-Signale auf einer Platine zusammen, statt sechs einzelne Mini-Platinen zu stecken.
 
 Alle Bauteile sind bedrahtet — von Hand lötbar, ohne SMD-Ausrüstung. Für die SMD-Variante siehe [`../MotorCombo/`](../MotorCombo/).

@@ -1,5 +1,7 @@
 # MotorCombo THT — Combo Mini-Board for Engine Sensors
 
+> 🚧 **Prototype stage.** This board (Rev.1) has not been fully validated yet. Five of the six channels are tested, the RPM channel is not (see below). Resistor values, mounting holes and layout may still change in future revisions. Build at your own risk, and ideally with feedback.
+
 Through-hole (THT) variant of the MotorCombo board. Combines the six typical engine room signals onto a single board instead of plugging in six separate mini-boards.
 
 Every part is through-hole — hand-solderable, no SMD equipment needed. For the SMD variant see [`../MotorCombo/`](../MotorCombo/).
