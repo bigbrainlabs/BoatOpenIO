@@ -75,6 +75,8 @@ VDO-Sensor → BoatOpenIO → MQTT → Signal K / BoatOS → modernes Dashboard
 
 Vier separate Platinen, verbunden über IDC-Flachbandkabel: **Eingangsboard**, **Mainboard**, **ESP32-Adapterboard** und **VCC-Verteiler**. Bestellfertige Gerber-Dateien in `hardware/v2/*/gerber/`.
 
+![Der nackte v2-Platinensatz: Eingangsboard, Mainboard, ESP32-Adapterboard und VCC-Verteiler](images/v2-pcb-set.jpg)
+
 > 🛒 **Nicht selbst beim Platinenhersteller bestellen?** Das gefertigte Set aller vier Platinen gibt es fertig: **[BoatOpenIO v2 PCB-Set bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)** — nackte Platinen, Bauteile nicht enthalten (siehe Stückliste weiter unten).
 
 ```
@@ -84,6 +86,8 @@ Eingangsboard ──20-pol Flachband──> Mainboard <──16-pol Flachband─
                                         │
                                    VCC-Board
 ```
+
+![Bestückter und verkabelter v2-Aufbau mit Breakouts und Flachbandkabeln](images/v2-assembled.jpg)
 
 ### Mainboard-Komponenten
 

@@ -4,6 +4,8 @@ Bedrahtete (THT) Variante der MotorCombo-Platine. Fasst die sechs typischen Moto
 
 Alle Bauteile sind bedrahtet — von Hand lötbar, ohne SMD-Ausrüstung. Für die SMD-Variante siehe [`../MotorCombo/`](../MotorCombo/).
 
+![3D-Ansicht der MotorCombo THT Rev.1](../../../images/motorcombo-tht.png)
+
 ---
 
 ## Kanäle
@@ -69,9 +71,11 @@ Der Optokoppler trennt den Impulseingang galvanisch. Der ESP-01 zählt die Impul
 
 | | |
 |---|---|
+| Revision | Rev.1 |
 | Abmessungen | 75 × 55 mm |
 | Lagen | 2 |
 | Bauform | durchgehend THT |
+| Befestigung | 4 Bohrungen, eine je Ecke |
 | Gerber | [`gerber/`](gerber/) — bestellfertig, inkl. ZIP |
 
 ---

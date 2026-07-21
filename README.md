@@ -75,6 +75,8 @@ VDO sensor → BoatOpenIO → MQTT → Signal K / BoatOS → modern dashboard
 
 Four separate boards, connected via IDC ribbon cables: **input board**, **main board**, **ESP32 adapter board**, and **VCC distributor**. Gerber files ready to order in `hardware/v2/*/gerber/`.
 
+![The bare v2 board set: input board, main board, ESP32 adapter board and VCC distributor](images/v2-pcb-set.jpg)
+
 > 🛒 **Don't want to order at a PCB fab?** The fabricated set of all four boards is available ready-made: **[BoatOpenIO v2 PCB Set on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)** — bare PCBs, components not included (see the parts list below).
 
 ```
@@ -84,6 +86,8 @@ Input Board ──20-pin ribbon──> Main Board <──16-pin ribbon── ESP
                                     │
                                VCC Board
 ```
+
+![Populated and wired v2 assembly with breakouts and ribbon cables](images/v2-assembled.jpg)
 
 ### Main Board Components
 

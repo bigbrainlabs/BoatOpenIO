@@ -4,6 +4,8 @@ Through-hole (THT) variant of the MotorCombo board. Combines the six typical eng
 
 Every part is through-hole — hand-solderable, no SMD equipment needed. For the SMD variant see [`../MotorCombo/`](../MotorCombo/).
 
+![3D view of the MotorCombo THT Rev.1](../../../images/motorcombo-tht.png)
+
 ---
 
 ## Channels
@@ -69,9 +71,11 @@ The optocoupler isolates the pulse input galvanically. The ESP-01 counts the pul
 
 | | |
 |---|---|
+| Revision | Rev.1 |
 | Dimensions | 75 × 55 mm |
 | Layers | 2 |
 | Assembly | through-hole throughout |
+| Mounting | 4 holes, one per corner |
 | Gerbers | [`gerber/`](gerber/) — ready to order, ZIP included |
 
 ---
