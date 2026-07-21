@@ -2486,7 +2486,7 @@
 	(footprint "Package_DIP:DIP-4_W7.62mm_LongPads"
 		(layer "F.Cu")
 		(uuid "5932c7a9-8655-45ff-8472-9e419e052d51")
-		(at 125.93 45.46)
+		(at 129.19 45.225)
 		(descr "4-lead though-hole mounted DIP package, row spacing 7.62mm (300 mils), LongPads")
 		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil LongPads")
 		(property "Reference" "U1"

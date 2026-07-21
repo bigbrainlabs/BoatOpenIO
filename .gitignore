@@ -1,8 +1,6 @@
 .claude/
 .theia/
 **/fp-info-cache
-**/BoatOpenIO-v2-backups/
-**/boardopenio-backups/
 **/*-backups/
 
 # KiCad Sperr-/Autosave-Dateien und benutzerspezifischer UI-Zustand
