@@ -43,6 +43,12 @@
 #define STATUS_INTERVAL  10000
 #define WDT_TIMEOUT        10
 #define ADS_SAMPLES         4    // Mittelung pro Kanal gegen Motorraum-Stoerungen (M8)
+// TEMPORAER (Board Rev.1): Kanal 16 ist von Hand auf GND gezogen und dient als
+// Nullpegel-Referenz vor jeder Messung. Ab der naechsten Board-Revision liegen
+// alle GNDs hardwareseitig auf 0 — dann entfaellt der Umweg ueber K16 und das
+// GND-Nullen (selectChannelPrimed) kann wieder auf einfaches selectChannel zurueck.
+#define MUX_GND_CHANNEL    16    // Kanal 16 = GND-Referenz (Rev.1-Behelf, s. o.)
+#define MUX_SETTLE_MS       1    // Einschwingzeit nach jedem MUX-Umschalten (ms)
 
 // ── NETZWERK CONFIG ─────────────────────────────────────────
 char wifi_ssid[40]   = "";
@@ -118,6 +124,20 @@ void selectChannel(uint8_t ch) {
   delayMicroseconds(10);
 }
 
+// Nullpegel vor jeder Messung (Rev.1-Behelf, siehe MUX_GND_CHANNEL): MUX erst auf
+// den fest auf GND liegenden Kanal 16 schalten, damit der Sample&Hold des ADS1115
+// die Ladung des zuvor gelesenen
+// Kanals verliert. Sonst schleppt z. B. der niederohmige Batterie-Teiler seinen
+// Pegel auf alle folgenden (hochohmigen) Kanäle mit — dann liefern die scheinbar
+// alle denselben Wert. Danach auf den Zielkanal, jeweils 1 ms zum Einschwingen,
+// damit der Pegel sicher durchkommt. Erwartet ch als 0..15.
+void selectChannelPrimed(uint8_t ch) {
+  selectChannel(MUX_GND_CHANNEL - 1);   // erst nullen (Kanal 16 = GND)
+  delay(MUX_SETTLE_MS);
+  selectChannel(ch);                    // dann Zielkanal
+  delay(MUX_SETTLE_MS);
+}
+
 // ── ADS LESEN (mit Mittelung gegen Stoerungen, M8) ──────────
 float readADS() {
   if (!adsOK) return 0.0f;
@@ -133,8 +153,7 @@ float readADS() {
 float readChannelVoltage(int i) {
   if (testMode) return 2.5f + sinf(millis() / 3000.0f + i) * 0.3f;
   uint8_t ch = kanaele[i].klemme;              // 1..16, in loadConfig geclampt (M9)
-  selectChannel((ch >= 1 && ch <= 16 ? ch : 1) - 1);
-  delayMicroseconds(500);
+  selectChannelPrimed((ch >= 1 && ch <= 16 ? ch : 1) - 1);  // erst GND-nullen, dann Zielkanal
   return readADS();
 }
 

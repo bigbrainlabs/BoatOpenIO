@@ -303,12 +303,12 @@ void handleRoot() {
     "save_ch:'Konfiguration speichern',"
     "sk_none:'Kein SK-Pfad bekannt für',"
     "sk_unit:'SK-Pfad gesetzt. Hinweis: Die Firmware sendet Rohwerte (Grad, °C, bar, %), NICHT die von Signal K erwarteten SI-Einheiten (rad, K, Pa, Ratio). Ggf. per Faktor/Offset umrechnen oder im SK-Server konvertieren.',"
-    "cal_hint:'Kalibrierung für lineare Geber. Modus „Spannungsteiler“ (z. B. Batterie, proportional): EIN Punkt genügt – echten Wert eintragen (z. B. 12,80 V), A0 lesen → Faktor = Wert / V_A0, Offset = 0. Modus „Widerstandsgeber“ (resistive VDO-Geber, z. B. Tank 10–180 Ω, Pull-up/down): ZWEI Punkte mit Referenz-Block (Referenzspannung, Vorwiderstand, Schaltung) → Faktor UND Offset. Beispiel Tank: 0 % bei 0,50 V und 100 % bei 2,50 V → Faktor 50,0, Offset −25,0.',"
+    "cal_hint:'Kalibrierung für lineare Geber. Modus „Spannungsteiler“ (z. B. Batterie, proportional): EIN Punkt genügt – echten Wert eintragen (z. B. 12,80 V), A0 lesen → Faktor = Wert / V_A0, Offset = 0. Modus „Widerstandsgeber“ (resistive VDO-Geber, z. B. Tank 10–180 Ω, Pull-up/down): ZWEI Punkte mit Referenz-Block (Referenzspannung, Vorwiderstand, Schaltung) → Faktor UND Offset. Beispiel Tank: 0 % bei 0,50 V und 100 % bei 2,50 V → Faktor 50,0, Offset −25,0. Modus „Spannung direkt“ (2 Punkte, ohne Teiler-Angaben): zu zwei bekannten Zuständen jeweils die an A0 gemessene Spannung eintragen („A0 lesen“) → Faktor UND Offset. Der ADC misst nur Spannung, keinen Widerstand – dieser Modus braucht ihn gar nicht und ist ideal, wenn Vorwiderstand oder Schaltung unbekannt sind.',"
     "cal_p1:'Punkt 1 — erster bekannter Zustand',cal_p2:'Punkt 2 — zweiter bekannter Zustand',"
     "l_real:'Zustand / echter Wert',l_adsv:'ADS-Spannung [V]',l_factor:'Faktor',l_offset:'Offset',"
     "cal_read:'A0 lesen',cal_chan:'Kanal',cal_apply:'In Kanal übernehmen',cal_applied:'Übernommen',"
     "cal_need1:'Gültiger Wert und A0-Spannung > 0 nötig',cal_need2:'Zwei gültige Punkte mit unterschiedlichen Spannungen nötig',cal_readerr:'Lesefehler (ADS/MUX)',"
-    "cal_mode:'Geber-Typ',cal_mode_v:'Spannungsteiler – 1 Punkt',cal_mode_r:'Widerstandsgeber – 2 Punkte',l_ohm:'Widerstand [Ω]',"
+    "cal_mode:'Geber-Typ',cal_mode_v:'Spannungsteiler – 1 Punkt',cal_mode_v2:'Spannung direkt – 2 Punkte',cal_mode_r:'Widerstandsgeber – 2 Punkte',l_ohm:'Widerstand [Ω]',"
     "l_vref:'Referenzspannung [V]',l_rfix:'Vorwiderstand [Ω]',l_topo:'Schaltung',"
     "topo_pu:'Geber → GND (Pull-up)',topo_pd:'Geber → Vref (Pull-down)',"
     "th_val:'Wert',loading:'Lade...',not_found:'nicht gefunden',"
@@ -338,12 +338,12 @@ void handleRoot() {
     "save_ch:'Save Configuration',"
     "sk_none:'No SK path known for',"
     "sk_unit:'SK path set. Note: the firmware sends raw values (degrees, °C, bar, %), NOT the SI units Signal K expects (rad, K, Pa, ratio). Convert via factor/offset or in your SK server if needed.',"
-    "cal_hint:'Calibration for linear senders. Mode „Voltage divider“ (e.g. battery, proportional): ONE point is enough – enter the real value (e.g. 12.80 V), read A0 → factor = value / V_A0, offset = 0. Mode „Resistive sender“ (VDO senders, e.g. fuel 10–180 Ω, pull-up/down): TWO points with reference block (reference voltage, fixed resistor, circuit) → factor AND offset. Fuel example: 0 % at 0.50 V and 100 % at 2.50 V → factor 50.0, offset −25.0.',"
+    "cal_hint:'Calibration for linear senders. Mode „Voltage divider“ (e.g. battery, proportional): ONE point is enough – enter the real value (e.g. 12.80 V), read A0 → factor = value / V_A0, offset = 0. Mode „Resistive sender“ (VDO senders, e.g. fuel 10–180 Ω, pull-up/down): TWO points with reference block (reference voltage, fixed resistor, circuit) → factor AND offset. Fuel example: 0 % at 0.50 V and 100 % at 2.50 V → factor 50.0, offset −25.0. Mode „Voltage direct“ (2 points, no divider details): for two known states, enter the voltage measured at A0 (“Read A0”) → factor AND offset. The ADC only measures voltage, not resistance – this mode does not need it and is ideal when the fixed resistor or circuit is unknown.',"
     "cal_p1:'Point 1 — first known state',cal_p2:'Point 2 — second known state',"
     "l_real:'State / real value',l_adsv:'ADS Voltage [V]',l_factor:'Factor',l_offset:'Offset',"
     "cal_read:'Read A0',cal_chan:'Channel',cal_apply:'Apply to channel',cal_applied:'Applied',"
     "cal_need1:'Need a valid value and A0 voltage > 0',cal_need2:'Need two valid points with different voltages',cal_readerr:'Read error (ADS/MUX)',"
-    "cal_mode:'Sender type',cal_mode_v:'Voltage divider – 1 point',cal_mode_r:'Resistive sender – 2 points',l_ohm:'Resistance [Ω]',"
+    "cal_mode:'Sender type',cal_mode_v:'Voltage divider – 1 point',cal_mode_v2:'Voltage direct – 2 points',cal_mode_r:'Resistive sender – 2 points',l_ohm:'Resistance [Ω]',"
     "l_vref:'Reference voltage [V]',l_rfix:'Fixed resistor [Ω]',l_topo:'Circuit',"
     "topo_pu:'Sender → GND (pull-up)',topo_pd:'Sender → Vref (pull-down)',"
     "th_val:'Value',loading:'Loading...',not_found:'not found',"
@@ -585,6 +585,7 @@ void handleRoot() {
     "<label data-i18n='cal_mode' style='margin-top:10px'>Eingabemodus</label>"
     "<select id='cmode' onchange='calMode()'>"
     "<option value='v' data-i18n='cal_mode_v'>Spannung [V]</option>"
+    "<option value='v2' data-i18n='cal_mode_v2'>Spannung direkt &ndash; 2 Punkte</option>"
     "<option value='r' data-i18n='cal_mode_r'>Widerstand [&#937;]</option>"
     "</select>"
     // Teiler-Parameter (nur im Ω-Modus sichtbar)
@@ -639,16 +640,16 @@ void handleRoot() {
   webServer.sendContent(
     "function calG(id){return document.getElementById(id);}"
     // Umschaltung Spannungs- / Widerstands-Modus
-    "function calMode(){var r=calG('cmode').value==='r';"
+    "function calMode(){var m=calG('cmode').value,r=m==='r',two=r||m==='v2';"
     "calG('cdiv').style.display=r?'grid':'none';"
-    "calG('cp2').style.display=r?'block':'none';"
-    "calG('cp1h').style.display=r?'block':'none';"
-    "calG('cpts').style.gridTemplateColumns=r?'1fr 1fr':'1fr';"
+    "calG('cp2').style.display=two?'block':'none';"
+    "calG('cp1h').style.display=two?'block':'none';"
+    "calG('cpts').style.gridTemplateColumns=two?'1fr 1fr':'1fr';"
     "calG('lv1').setAttribute('data-i18n',r?'l_ohm':'l_adsv');"
     "calG('lv2').setAttribute('data-i18n',r?'l_ohm':'l_adsv');"
     "applyLang(curLang);cf();}"
     // Eingabewert (V oder Ω) -> ADS-Spannung, die die Firmware misst
-    "function calToV(x){if(calG('cmode').value==='v')return x;"
+    "function calToV(x){if(calG('cmode').value!=='r')return x;"
     "var vr=parseFloat(calG('cvref').value)||3.3,rf=parseFloat(calG('crfix').value)||1000;"
     "if(isNaN(x)||x<0)return NaN;"
     "return calG('ctopo').value==='pu'?vr*x/(rf+x):vr*rf/(x+rf);}"
@@ -658,7 +659,7 @@ void handleRoot() {
     "if(v<=0)return NaN;return rf*(vr-v)/v;}"
     "function cf(){"
     "var r1=parseFloat(calG('cr1').value),v1=calToV(parseFloat(calG('cv1').value));"
-    "if(calG('cmode').value!=='r'){"           // Ein-Punkt: Faktor=Wert/V_A0, Offset=0
+    "if(calG('cmode').value==='v'){"           // Ein-Punkt: Faktor=Wert/V_A0, Offset=0
     "if(isNaN(r1)||isNaN(v1)||v1===0){calG('cfac').value='';calG('coff').value='';return;}"
     "calG('cfac').value=(r1/v1).toFixed(4);calG('coff').value='0.0000';return;}"
     "var r2=parseFloat(calG('cr2').value),v2=calToV(parseFloat(calG('cv2').value));"
@@ -674,7 +675,7 @@ void handleRoot() {
     "cf();calMsg('',true);}"
     "else calMsg(T[curLang].cal_readerr,false);}).catch(function(){calMsg(T[curLang].cal_readerr,false);});}"
     "function calApply(){"
-    "if(calG('cfac').value===''||calG('coff').value===''){calMsg(calG('cmode').value==='r'?T[curLang].cal_need2:T[curLang].cal_need1,false);return;}"
+    "if(calG('cfac').value===''||calG('coff').value===''){calMsg(calG('cmode').value==='v'?T[curLang].cal_need1:T[curLang].cal_need2,false);return;}"
     "var idx=parseInt(calG('cch').value)-1;"
     "var ff=document.querySelector('input[name=\"f'+idx+'\"]'),oo=document.querySelector('input[name=\"o'+idx+'\"]');"
     "if(ff&&oo){ff.value=calG('cfac').value;oo.value=calG('coff').value;calMsg(T[curLang].cal_applied,true);}}"
@@ -1002,8 +1003,10 @@ void handleRaw() {
 
 // ── EINZEL-KANAL ADC (fuer Kalibrierungs-Rechner) ────────────
 // Waehlt den MUX auf die angeforderte Klemme (1..16) und gibt die gemittelte
-// Spannung zurueck. Liest immer echte ADS-Hardware (unabhaengig vom Testmodus),
-// damit man auch vor dem Umschalten auf LIVE kalibrieren kann.
+// Spannung zurueck. Wie im Live-Pfad wird vorher ueber Kanal 16 (GND) genullt,
+// damit hochohmige Kanaele nicht den Restpegel des zuletzt gelesenen Kanals
+// zeigen. Liest immer echte ADS-Hardware (unabhaengig vom Testmodus), damit man
+// auch vor dem Umschalten auf LIVE kalibrieren kann.
 void handleADC() {
   if (!requireAuth()) return;
   int ch = webServer.arg("ch").toInt();
@@ -1011,8 +1014,7 @@ void handleADC() {
   if (ch < 1 || ch > 16 || !adsOK) {
     doc["ok"] = false;
   } else {
-    selectChannel(ch - 1);
-    delayMicroseconds(500);
+    selectChannelPrimed(ch - 1);   // erst GND-nullen (Kanal 16), dann Zielkanal
     doc["ok"] = true;
     doc["v"]  = roundf(readADS() * 10000.f) / 10000.f;
   }
