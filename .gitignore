@@ -2,6 +2,7 @@
 .theia/
 **/fp-info-cache
 **/*-backups/
+laboratory/
 
 # KiCad Sperr-/Autosave-Dateien und benutzerspezifischer UI-Zustand
 **/~*.lck
