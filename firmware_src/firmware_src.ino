@@ -25,6 +25,18 @@
 #define MUX_S1           27
 #define MUX_S2           26
 #define MUX_S3           25
+// MUX-Adressleitungen debuggen: 1 = je Umschaltung Soll-Bits + tatsaechlichen
+// Pad-Pegel (Readback) auf Serial ausgeben, um Firmware- gegen Hardware-Fehler
+// zu trennen. Fuer den Normalbetrieb wieder auf 0 setzen.
+#define MUX_DEBUG         1
+// Einmaliger MUX-Selbsttest beim Boot: schaltet Kanal 0..15 durch und vergleicht
+// je Adressleitung Soll-Bit gegen Pad-Readback. So laesst sich nach jedem
+// Reparaturschritt ohne Multimeter pruefen. Fuer Normalbetrieb auf 0 setzen.
+#define MUX_SELFTEST      1
+// Park-Modus: MUX fest auf einem Kanal halten (z. B. zum Messen am Ausgang),
+// waehrenddessen pausiert der automatische Sweep. Auto-Freigabe nach diesem
+// Timeout (ms), falls die haltende Portalseite ohne Freigabe geschlossen wurde.
+#define MUX_HOLD_TIMEOUT  60000
 #define SDA_PIN          21
 #define SCL_PIN          22
 #define STATUS_LED_PIN    2
@@ -115,6 +127,11 @@ unsigned long lastStatus      = 0;
 unsigned long lastWiFiRetry   = 0;
 bool          staServicesUp   = false;   // mDNS + OTA initialisiert?
 
+// Park-Modus (siehe MUX_HOLD_TIMEOUT): >=0 haelt den MUX fest auf diesem Kanal
+// (0..15) und pausiert das automatische Sweepen; -1 = aus.
+int           muxHold        = -1;
+unsigned long muxHoldUntil   = 0;
+
 // ── MUX ─────────────────────────────────────────────────────
 void selectChannel(uint8_t ch) {
   digitalWrite(MUX_S0,  ch        & 0x01);
@@ -122,6 +139,16 @@ void selectChannel(uint8_t ch) {
   digitalWrite(MUX_S2, (ch >> 2)  & 0x01);
   digitalWrite(MUX_S3, (ch >> 3)  & 0x01);
   delayMicroseconds(10);
+#if MUX_DEBUG
+  // Soll = aus der Kanalnummer berechnete Bits; pad = per digitalRead
+  // zurueckgelesener echter Pegel (beim ESP32 auch an OUTPUT-Pins moeglich).
+  // Weichen soll und pad ab -> Pin/Trace/Loetstelle defekt oder Kurzschluss.
+  Serial.printf("[MUX] ch=%2u  soll S0=%d S1=%d S2=%d S3=%d | pad S0=%d S1=%d S2=%d S3=%d\n",
+                ch,
+                ch & 0x01, (ch >> 1) & 0x01, (ch >> 2) & 0x01, (ch >> 3) & 0x01,
+                digitalRead(MUX_S0), digitalRead(MUX_S1),
+                digitalRead(MUX_S2), digitalRead(MUX_S3));
+#endif
 }
 
 // Nullpegel vor jeder Messung (Rev.1-Behelf, siehe MUX_GND_CHANNEL): MUX erst auf
@@ -137,6 +164,58 @@ void selectChannelPrimed(uint8_t ch) {
   selectChannel(ch);                    // dann Zielkanal
   delay(MUX_SETTLE_MS);
 }
+
+// true, solange der MUX per Park-Modus festgehalten wird. Ist der Halte-Timeout
+// abgelaufen (haltende Seite weg), wird automatisch freigegeben. millis()-
+// ueberlaufsicher ueber die Differenzbildung.
+bool muxHoldActive() {
+  if (muxHold < 0) return false;
+  if ((long)(millis() - muxHoldUntil) >= 0) { muxHold = -1; return false; }
+  return true;
+}
+
+#if MUX_SELFTEST
+// Einmaliger Boot-Selbsttest der vier MUX-Adressleitungen: Kanal 0..15
+// durchschalten und je Leitung das Soll-Bit gegen den zurueckgelesenen Pad-Pegel
+// pruefen. digitalRead liefert beim arduino-esp32 auch an OUTPUT-Pins den echten
+// Pad-Zustand (OUTPUT haelt den Eingangspuffer aktiv), daher deckt ein Readback
+// von 0 trotz Soll 1 einen Kurzschluss gegen GND / eine offene Leitung auf.
+void muxSelfTest() {
+  const char* nm[4] = { "S0/GPIO14", "S1/GPIO27", "S2/GPIO26", "S3/GPIO25" };
+  const uint8_t pin[4] = { MUX_S0, MUX_S1, MUX_S2, MUX_S3 };
+  uint8_t stuckLow = 0x0F;   // Bit b: Leitung b war bei KEINEM Kanal HIGH
+  uint8_t mism     = 0;      // Bit b: Leitung b hatte mind. 1x Soll != Pad
+
+  Serial.println("\n--- MUX-Selbsttest: Adressleitungen 0..15 ---");
+  Serial.println("Bit-Reihenfolge: S3 S2 S1 S0  (S0=GPIO14 S1=GPIO27 S2=GPIO26 S3=GPIO25)");
+  for (uint8_t ch = 0; ch < 16; ch++) {
+    int soll[4], pad[4];
+    for (int b = 0; b < 4; b++) {
+      soll[b] = (ch >> b) & 0x01;
+      digitalWrite(pin[b], soll[b]);
+    }
+    delay(2);                                  // Pad einschwingen lassen
+    for (int b = 0; b < 4; b++) pad[b] = digitalRead(pin[b]);
+
+    bool ok = true;
+    for (int b = 0; b < 4; b++) {
+      if (pad[b] != soll[b]) { ok = false; mism |= (1 << b); }
+      if (pad[b] == 1)       { stuckLow &= ~(1 << b); }
+    }
+    Serial.printf("ch=%2u  soll %d%d%d%d | pad %d%d%d%d  %s\n",
+                  ch, soll[3], soll[2], soll[1], soll[0],
+                  pad[3], pad[2], pad[1], pad[0], ok ? "OK" : "<-- FEHLER");
+  }
+
+  for (int b = 0; b < 4; b++)
+    if (stuckLow & (1 << b))
+      Serial.printf("  ! %-9s kam NIE auf HIGH — Kurzschluss gegen GND / offene Leitung / defekter Pin\n", nm[b]);
+  if (mism == 0)
+    Serial.println("  Ergebnis: alle vier Leitungen folgen den Soll-Bits. MUX-Ansteuerung OK.");
+  Serial.println("--------------------------------------------");
+  selectChannel(0);                            // definierten Ausgangszustand hinterlassen
+}
+#endif
 
 // ── ADS LESEN (mit Mittelung gegen Stoerungen, M8) ──────────
 float readADS() {
@@ -170,6 +249,7 @@ void rebuildTopics() {
 
 // ── KANÄLE LESEN & PUBLISHEN ─────────────────────────────────
 void readAllChannels() {
+  if (muxHoldActive()) return;   // Park-Modus: MUX steht fest, nicht wegsweepen
   for (int i = 0; i < 16; i++) {
     if (!kanaele[i].aktiv) continue;
     float wert = readChannelVoltage(i) * kanaele[i].faktor + kanaele[i].offset;
@@ -584,6 +664,10 @@ void setup() {
   pinMode(RESET_BUTTON_PIN, INPUT_PULLUP);
   pinMode(MUX_S0, OUTPUT); pinMode(MUX_S1, OUTPUT);
   pinMode(MUX_S2, OUTPUT); pinMode(MUX_S3, OUTPUT);
+
+#if MUX_SELFTEST
+  muxSelfTest();   // Boot-Sweep 0..15, Soll vs. Pad-Readback auf Serial
+#endif
 
   // Factory Reset: GPIO0 beim Boot 3s gedrückt halten
   if (digitalRead(RESET_BUTTON_PIN) == LOW) {

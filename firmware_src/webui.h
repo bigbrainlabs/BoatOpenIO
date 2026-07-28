@@ -307,6 +307,7 @@ void handleRoot() {
     "cal_p1:'Punkt 1 — erster bekannter Zustand',cal_p2:'Punkt 2 — zweiter bekannter Zustand',"
     "l_real:'Zustand / echter Wert',l_adsv:'ADS-Spannung [V]',l_factor:'Faktor',l_offset:'Offset',"
     "cal_read:'A0 lesen',cal_chan:'Kanal',cal_apply:'In Kanal übernehmen',cal_applied:'Übernommen',"
+    "cal_hold:'Kanal halten',cal_hold_off:'Halten beenden',cal_hold_on:'MUX festgehalten auf Klemme',"
     "cal_need1:'Gültiger Wert und A0-Spannung > 0 nötig',cal_need2:'Zwei gültige Punkte mit unterschiedlichen Spannungen nötig',cal_readerr:'Lesefehler (ADS/MUX)',"
     "cal_mode:'Geber-Typ',cal_mode_v:'Spannungsteiler – 1 Punkt',cal_mode_v2:'Spannung direkt – 2 Punkte',cal_mode_r:'Widerstandsgeber – 2 Punkte',l_ohm:'Widerstand [Ω]',"
     "l_vref:'Referenzspannung [V]',l_rfix:'Vorwiderstand [Ω]',l_topo:'Schaltung',"
@@ -342,6 +343,7 @@ void handleRoot() {
     "cal_p1:'Point 1 — first known state',cal_p2:'Point 2 — second known state',"
     "l_real:'State / real value',l_adsv:'ADS Voltage [V]',l_factor:'Factor',l_offset:'Offset',"
     "cal_read:'Read A0',cal_chan:'Channel',cal_apply:'Apply to channel',cal_applied:'Applied',"
+    "cal_hold:'Hold channel',cal_hold_off:'Release',cal_hold_on:'MUX held on terminal',"
     "cal_need1:'Need a valid value and A0 voltage > 0',cal_need2:'Need two valid points with different voltages',cal_readerr:'Read error (ADS/MUX)',"
     "cal_mode:'Sender type',cal_mode_v:'Voltage divider – 1 point',cal_mode_v2:'Voltage direct – 2 points',cal_mode_r:'Resistive sender – 2 points',l_ohm:'Resistance [Ω]',"
     "l_vref:'Reference voltage [V]',l_rfix:'Fixed resistor [Ω]',l_topo:'Circuit',"
@@ -570,7 +572,7 @@ void handleRoot() {
     "<p style='font-size:.82rem;color:var(--sub);margin-bottom:12px' data-i18n='cal_hint'>"
     "Zwei-Punkt-Kalibrierung f&uuml;r lineare Geber.</p>"
     "<label data-i18n='cal_chan'>Kanal</label>"
-    "<select id='cch'>"
+    "<select id='cch' onchange='calHoldRetarget()'>"
   );
   String kl = "var KL=[";
   for (int i = 0; i < 16; i++) {
@@ -581,6 +583,11 @@ void handleRoot() {
   kl += "];";
   webServer.sendContent(
     "</select>"
+    // Kanal fuer externe Messung festhalten (pausiert den Hintergrund-Sweep)
+    "<button type='button' id='choldb' onclick='calHold()' data-i18n='cal_hold'"
+    " style='width:auto;margin-top:8px;padding:6px 12px;font-size:.8rem;background:#27272a;"
+    "color:#a1a1aa;border:1px solid #3f3f46;border-radius:6px;cursor:pointer'>Kanal halten</button>"
+    "<span id='choldmsg' style='font-size:.78rem;margin-left:8px'></span>"
     // Eingabemodus: Spannung oder Widerstand (Ω)
     "<label data-i18n='cal_mode' style='margin-top:10px'>Eingabemodus</label>"
     "<select id='cmode' onchange='calMode()'>"
@@ -679,6 +686,20 @@ void handleRoot() {
     "var idx=parseInt(calG('cch').value)-1;"
     "var ff=document.querySelector('input[name=\"f'+idx+'\"]'),oo=document.querySelector('input[name=\"o'+idx+'\"]');"
     "if(ff&&oo){ff.value=calG('cfac').value;oo.value=calG('coff').value;calMsg(T[curLang].cal_applied,true);}}"
+    // Park-Modus: MUX auf dem gewaehlten Kanal festhalten. Pingt regelmaessig
+    // nach (haelt den Server-Timeout frisch), gibt beim Schliessen per Beacon frei.
+    "var choldT=null;"
+    "function calHold(){"
+    "if(choldT){clearInterval(choldT);choldT=null;fetch('/api/mux/hold?ch=0');"
+    "calG('choldb').textContent=T[curLang].cal_hold;calG('choldmsg').textContent='';return;}"
+    "var ch=KL[parseInt(calG('cch').value)-1];"
+    "function png(){fetch('/api/mux/hold?ch='+ch).catch(function(){});}"
+    "png();choldT=setInterval(png,15000);"
+    "calG('choldb').textContent=T[curLang].cal_hold_off;"
+    "calG('choldmsg').style.color='var(--ok)';calG('choldmsg').textContent=T[curLang].cal_hold_on+' '+ch;}"
+    "function calHoldRetarget(){if(!choldT)return;var ch=KL[parseInt(calG('cch').value)-1];"
+    "fetch('/api/mux/hold?ch='+ch);calG('choldmsg').textContent=T[curLang].cal_hold_on+' '+ch;}"
+    "window.addEventListener('pagehide',function(){if(choldT)navigator.sendBeacon('/api/mux/hold?ch=0');});"
     "</script></details>"
   );
 
@@ -972,10 +993,17 @@ void handleReboot() {
 void handleValues() {
   if (!requireAuth()) return;
   StaticJsonDocument<1024> doc;
-  for (int i = 0; i < 16; i++) {
-    if (!kanaele[i].aktiv) continue;
-    float voltage = readChannelVoltage(i);
-    doc[kanaele[i].sensor] = roundf((voltage * kanaele[i].faktor + kanaele[i].offset) * 100.f) / 100.f;
+  // Park-Modus: MUX steht fest auf einem Kanal — nicht wegsweepen, sonst wandert
+  // der MUX beim 2-s-Poll dauernd weg. Kanalwerte dann auslassen, nur Lagewerte
+  // und den Halte-Hinweis liefern.
+  if (muxHoldActive()) {
+    doc["mux_hold"] = muxHold + 1;
+  } else {
+    for (int i = 0; i < 16; i++) {
+      if (!kanaele[i].aktiv) continue;
+      float voltage = readChannelVoltage(i);
+      doc[kanaele[i].sensor] = roundf((voltage * kanaele[i].faktor + kanaele[i].offset) * 100.f) / 100.f;
+    }
   }
   doc["pitch"] = roundf((pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f) * 10.f) / 10.f;
   doc["roll"]  = roundf((roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f) * 10.f) / 10.f;
@@ -1018,6 +1046,31 @@ void handleADC() {
     doc["ok"] = true;
     doc["v"]  = roundf(readADS() * 10000.f) / 10000.f;
   }
+  String out;
+  serializeJson(doc, out);
+  webServer.send(200, "application/json", out);
+}
+
+// ── MUX PARK-MODUS ───────────────────────────────────────────
+// Haelt den MUX fest auf einem Kanal (ch 1..16), damit man z. B. am Ausgang
+// messen kann, ohne dass der 2-s-Sweep dazwischenfunkt. ch=0 (oder ungueltig)
+// gibt frei. Die haltende Seite pingt regelmaessig nach (haelt den Timeout frisch)
+// und gibt beim Schliessen per Beacon frei. Als HTTP_ANY registriert, damit
+// sowohl der GET-Ping als auch der POST-Beacon greifen.
+void handleMuxHold() {
+  if (!requireAuth()) return;
+  int ch = webServer.arg("ch").toInt();
+  StaticJsonDocument<64> doc;
+  if (ch >= 1 && ch <= 16) {
+    muxHold      = ch - 1;
+    muxHoldUntil = millis() + MUX_HOLD_TIMEOUT;
+    selectChannel(muxHold);       // MUX sofort auf den Halte-Kanal setzen
+    doc["hold"] = ch;
+  } else {
+    muxHold = -1;                 // freigeben
+    doc["hold"] = 0;
+  }
+  doc["ok"] = true;
   String out;
   serializeJson(doc, out);
   webServer.send(200, "application/json", out);
@@ -1103,6 +1156,7 @@ void setupWebServer() {
   webServer.on("/api/values", HTTP_GET,  handleValues);
   webServer.on("/api/raw",    HTTP_GET,  handleRaw);
   webServer.on("/api/adc",    HTTP_GET,  handleADC);
+  webServer.on("/api/mux/hold",          handleMuxHold);  // HTTP_ANY: GET-Ping + POST-Beacon
   webServer.on("/api/imu",    HTTP_GET,  handleIMU);
   webServer.on("/calibrate",  HTTP_POST, handleCalibrate);
   webServer.on("/setinvert",  HTTP_POST, handleSetInvert);
