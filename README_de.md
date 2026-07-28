@@ -204,10 +204,7 @@ Die gängigsten Motorsensoren zapft die **MotorCombo** direkt an, ohne dass man 
 | Tank | Pull-up |
 | Drehzahl | Optokoppler + ESP-01 |
 
-Zwei Varianten:
-
-- **[MotorCombo THT](hardware/mini-boards/MotorCombo_THT/README_de.md)** – bedrahtet, von Hand lötbar. Gerber-Dateien und Doku im Repo, Widerstandswerte bewusst offen gelassen, damit jeder passend zu seinen eigenen VDO-Gebern bestücken kann.
-- **MotorCombo SMD** – als fertig bestückte Platine geplant, da SMD zu Hause kaum von Hand zu löten ist.
+**[MotorCombo THT](hardware/mini-boards/MotorCombo_THT/README_de.md)** – bedrahtet, von Hand lötbar. Gerber-Dateien und Doku im Repo. Widerstandswerte bewusst offen gelassen, damit jeder passend zu seinen eigenen VDO-Gebern bestücken kann – deshalb gibt es auch keine fertig bestückte SMD-Variante: Da die Werte von den Gebern abhängen, ergibt eine fest bestückte Platine keinen Sinn.
 
 **Eigene Mini-Platinen entwerfen und einreichen** – Pull Requests willkommen!
 

@@ -204,10 +204,7 @@ The **MotorCombo** taps the most common engine sensors directly, so you don't ha
 | Tank | Pull-up |
 | RPM | Optocoupler + ESP-01 |
 
-Two variants:
-
-- **[MotorCombo THT](hardware/mini-boards/MotorCombo_THT/README.md)** — through-hole, hand-solderable. Gerbers and documentation are in the repo; resistor values are deliberately left open so everyone can fit what matches their own VDO senders.
-- **MotorCombo SMD** — planned as a pre-assembled board, since SMD is hard to hand-solder at home.
+**[MotorCombo THT](hardware/mini-boards/MotorCombo_THT/README.md)** — through-hole, hand-solderable. Gerbers and documentation are in the repo. Resistor values are deliberately left open so everyone can fit what matches their own VDO senders — which is also why there is no pre-assembled SMD variant: with the values depending on the senders, a fixed pre-populated board makes no sense.
 
 **Design and submit your own mini-boards** — pull requests welcome!
 

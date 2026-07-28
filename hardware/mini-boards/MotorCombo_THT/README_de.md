@@ -4,7 +4,7 @@
 
 Bedrahtete (THT) Variante der MotorCombo-Platine. Fasst die sechs typischen Motorraum-Signale auf einer Platine zusammen, statt sechs einzelne Mini-Platinen zu stecken.
 
-Alle Bauteile sind bedrahtet — von Hand lötbar, ohne SMD-Ausrüstung. Für die SMD-Variante siehe [`../MotorCombo/`](../MotorCombo/).
+Alle Bauteile sind bedrahtet — von Hand lötbar, ohne SMD-Ausrüstung.
 
 ![3D-Ansicht der MotorCombo THT Rev.1](../../../images/motorcombo-tht.png)
 

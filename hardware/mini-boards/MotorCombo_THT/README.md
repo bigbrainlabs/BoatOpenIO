@@ -4,7 +4,7 @@
 
 Through-hole (THT) variant of the MotorCombo board. Combines the six typical engine room signals onto a single board instead of plugging in six separate mini-boards.
 
-Every part is through-hole — hand-solderable, no SMD equipment needed. For the SMD variant see [`../MotorCombo/`](../MotorCombo/).
+Every part is through-hole — hand-solderable, no SMD equipment needed.
 
 ![3D view of the MotorCombo THT Rev.1](../../../images/motorcombo-tht.png)
 
