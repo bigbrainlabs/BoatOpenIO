@@ -23,6 +23,8 @@ Every part is through-hole — hand-solderable, no SMD equipment needed. For the
 
 Every channel has a 100 nF capacitor for signal smoothing (C1–C6).
 
+> Channels 1–5 (`Batt1`, `Batt2`, `Tank1`, `Temp1`, `Oil1`) are **not hardwired** to one mode — two solder jumpers per channel select pull-up or voltage-divider. See [Channel Mode — Jumpers](#channel-mode--jumpers-channels-15). The table shows the typical default for each sensor.
+
 ---
 
 ## Signal Path
@@ -56,6 +58,30 @@ Pin 1 ──[R8]── PC817 LED ── GND
                               └── C6 ── GND
 ```
 The optocoupler isolates the pulse input galvanically. The ESP-01 counts the pulses and outputs an RPM-proportional value on pin 3.
+
+---
+
+## Channel Mode — Jumpers (channels 1–5)
+
+Channels 1–5 (`Batt1`, `Batt2`, `Tank1`, `Temp1`, `Oil1`) are **not hardwired to one mode**. Two solder jumpers **JP1** and **JP2** plus the channel's divider resistor **R2** select **pull-up** (resistive VDO senders) or **voltage-divider** (active voltage inputs) — per channel.
+
+**JP1 (3 pads):**
+- **P1 = 3.3 V** (pull-up)
+- **P3 = SIG-IN** (voltage divider)
+- **P2 = common** (centre pad)
+
+| | Pull-up mode | Voltage-divider mode |
+|---|---|---|
+| **JP1** | bridge **P2–P3** | bridge **P2–P1** |
+| **JP2** | **bridged** | **open** |
+| **R2** (channel divider resistor) | **leave unfitted** | **fit** |
+
+- **Pull-up:** JP1 P2–P3 closed, JP2 closed, R2 unfitted — the pull-up is active and SIG-OUT is passed through.
+- **Voltage divider:** JP1 P2–P1 closed, JP2 open, R2 fitted — the divider is formed.
+
+Channel 6 (`RPM1`) is the optocoupler + ESP-01 path and has no mode jumper.
+
+![MotorCombo THT Rev.1 board with component designators](MotorCombo_THT.jpg)
 
 ---
 

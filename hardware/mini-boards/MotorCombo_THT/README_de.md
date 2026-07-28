@@ -23,6 +23,8 @@ Alle Bauteile sind bedrahtet — von Hand lötbar, ohne SMD-Ausrüstung. Für di
 
 Jeder Kanal hat einen 100 nF Kondensator zur Signalglättung (C1–C6).
 
+> Die Kanäle 1–5 (`Batt1`, `Batt2`, `Tank1`, `Temp1`, `Oil1`) sind **nicht fest verdrahtet** — zwei Lötbrücken je Kanal wählen Pull-up- oder Spannungsteiler-Modus. Siehe [Kanalmodus — Jumper](#kanalmodus--jumper-kanäle-15). Die Tabelle zeigt den typischen Standard je Sensor.
+
 ---
 
 ## Signalführung
@@ -56,6 +58,30 @@ Pin 1 ──[R8]── PC817 LED ── GND
                               └── C6 ── GND
 ```
 Der Optokoppler trennt den Impulseingang galvanisch. Der ESP-01 zählt die Impulse und gibt auf Pin 3 einen drehzahlproportionalen Wert aus.
+
+---
+
+## Kanalmodus — Jumper (Kanäle 1–5)
+
+Die Kanäle 1–5 (`Batt1`, `Batt2`, `Tank1`, `Temp1`, `Oil1`) sind **nicht fest auf einen Modus verdrahtet**. Zwei Lötbrücken **JP1** und **JP2** sowie der Teilerwiderstand **R2** des Kanals wählen **Pull-up** (resistive VDO-Geber) oder **Spannungsteiler** (aktive Spannungseingänge) — je Kanal.
+
+**JP1 (3 Pads):**
+- **P1 = 3.3 V** (Pull-up)
+- **P3 = SIG-IN** (Spannungsteiler)
+- **P2 = gemeinsam** (mittleres Pad)
+
+| | Pull-up-Modus | Spannungsteiler-Modus |
+|---|---|---|
+| **JP1** | **P2–P3** brücken | **P2–P1** brücken |
+| **JP2** | **gebrückt** | **offen** |
+| **R2** (Teilerwiderstand des Kanals) | **weglassen** | **einlöten** |
+
+- **Pull-up:** JP1 P2–P3 gebrückt, JP2 gebrückt, R2 unbestückt — der Pull-up ist aktiv und SIG-OUT wird durchgereicht.
+- **Spannungsteiler:** JP1 P2–P1 gebrückt, JP2 offen, R2 bestückt — der Teiler wird gebildet.
+
+Kanal 6 (`RPM1`) ist der Optokoppler-/ESP-01-Pfad und hat keinen Modus-Jumper.
+
+![MotorCombo THT Rev.1 Platine mit Bauteilbezeichnern](MotorCombo_THT.jpg)
 
 ---
 
