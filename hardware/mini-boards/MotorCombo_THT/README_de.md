@@ -6,8 +6,6 @@ Bedrahtete (THT) Variante der MotorCombo-Platine. Fasst die sechs typischen Moto
 
 Alle Bauteile sind bedrahtet — von Hand lötbar, ohne SMD-Ausrüstung.
 
-![3D-Ansicht der MotorCombo THT Rev.1](../../../images/motorcombo-tht.png)
-
 ---
 
 ## Kanäle
