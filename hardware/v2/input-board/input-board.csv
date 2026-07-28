@@ -1,0 +1,7 @@
+"Reference","Qty","Value","DNP","Exclude from BOM","Exclude from Board","Footprint","Datasheet"
+"D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16","16","D_Zener","","","","PCM_Diode_SMD_AKL:D_SOD-123_Zener","~"
+"J1,J2,J3,J4,J5,J6,J7,J8,J9,J10,J11,J12,J13,J14,J15,J16","16","Conn_01x03_Pin","Nicht bestücken","","","Connector_JST:JST_PH_B3B-PH-K_1x03_P2.00mm_Vertical","~"
+"J27","1","Screw_Terminal_01x16","Nicht bestücken","","","TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-16-5.08_1x16_P5.08mm_Horizontal","~"
+"J29","1","Conn_02x10_Odd_Even","Nicht bestücken","","","Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical","~"
+"R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,R16","16","1k","","","","Resistor_SMD:R_0805_2012Metric",""
+"R17,R18,R19,R20,R21,R22,R23,R24,R25,R26,R27,R28,R29,R30,R31,R32","16","1M","","","","Resistor_SMD:R_0805_2012Metric",""
