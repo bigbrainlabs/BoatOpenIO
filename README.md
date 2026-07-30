@@ -31,9 +31,9 @@ Prefer not to deal with a PCB fab? The manufactured board set is available on Ti
 
 <a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="images/pcbway-logo.png" alt="PCBWay" width="220"></a>
 
-The prototype boards for BoatOpenIO are kindly sponsored by **[PCBWay](https://www.pcbway.com)**. The full board designs are shared in the PCBWay project, so you can order them yourself with a couple of clicks — no Gerber upload needed.
+PCBWay sponsors the board manufacturing for BoatOpenIO, the sensor gateway of this ecosystem — thank you!
 
-**[👉 Order the boards on PCBWay](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
+**[👉 Order the boards directly: PCBWay project page](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
 
 ---
 

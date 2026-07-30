@@ -31,9 +31,9 @@ Keine Lust, selbst bei einem Platinenhersteller zu bestellen? Das gefertigte Pla
 
 <a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="images/pcbway-logo.png" alt="PCBWay" width="220"></a>
 
-Die Prototyp-Platinen für BoatOpenIO werden freundlicherweise von **[PCBWay](https://www.pcbway.com)** gesponsert. Die kompletten Board-Designs sind im PCBWay-Projekt geteilt — so kannst du sie mit wenigen Klicks selbst bestellen, ohne Gerber hochzuladen.
+PCBWay sponsert die Platinenfertigung für BoatOpenIO, das Sensor-Gateway dieses Ökosystems — danke!
 
-**[👉 Platinen bei PCBWay bestellen](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
+**[👉 Platinen direkt bestellen: PCBWay-Projektseite](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
 
 ---
 
