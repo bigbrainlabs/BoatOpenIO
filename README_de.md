@@ -27,6 +27,14 @@ Keine Lust, selbst bei einem Platinenhersteller zu bestellen? Das gefertigte Pla
 
 **[👉 BoatOpenIO v2 PCB-Set (4 Platinen) bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)**
 
+### 🏭 Platinen gesponsert von PCBWay
+
+<a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="images/pcbway-logo.png" alt="PCBWay" width="220"></a>
+
+Die Prototyp-Platinen für BoatOpenIO werden freundlicherweise von **[PCBWay](https://www.pcbway.com)** gesponsert. Die kompletten Board-Designs sind im PCBWay-Projekt geteilt — so kannst du sie mit wenigen Klicks selbst bestellen, ohne Gerber hochzuladen.
+
+**[👉 Platinen bei PCBWay bestellen](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
+
 ---
 
 ## ⚠️ Sicherheitshinweis

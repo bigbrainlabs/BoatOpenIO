@@ -104,6 +104,10 @@ Channel 6 (`RPM1`) is the optocoupler + ESP-01 path and has no mode jumper.
 | Mounting | 4 holes, one per corner |
 | Gerbers | [`gerber/`](gerber/) — ready to order, ZIP included |
 
+> 🏭 **Order ready-made:** the boards are sponsored by [PCBWay](https://www.pcbway.com) and shared in the [PCBWay project](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44) — order directly, no Gerber upload needed.
+>
+> <a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="../../../images/pcbway-logo.png" alt="PCBWay" width="180"></a>
+
 ---
 
 ## Bill of Materials

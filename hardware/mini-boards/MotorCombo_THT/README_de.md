@@ -104,6 +104,10 @@ Kanal 6 (`RPM1`) ist der Optokoppler-/ESP-01-Pfad und hat keinen Modus-Jumper.
 | Befestigung | 4 Bohrungen, eine je Ecke |
 | Gerber | [`gerber/`](gerber/) — bestellfertig, inkl. ZIP |
 
+> 🏭 **Fertig bestellen:** Die Platinen werden von [PCBWay](https://www.pcbway.com) gesponsert und sind im [PCBWay-Projekt](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44) geteilt — direkt bestellbar, ohne Gerber hochzuladen.
+>
+> <a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="../../../images/pcbway-logo.png" alt="PCBWay" width="180"></a>
+
 ---
 
 ## Stückliste

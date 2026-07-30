@@ -27,6 +27,14 @@ Prefer not to deal with a PCB fab? The manufactured board set is available on Ti
 
 **[👉 BoatOpenIO v2 PCB Set (4 boards) on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)**
 
+### 🏭 Boards sponsored by PCBWay
+
+<a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="images/pcbway-logo.png" alt="PCBWay" width="220"></a>
+
+The prototype boards for BoatOpenIO are kindly sponsored by **[PCBWay](https://www.pcbway.com)**. The full board designs are shared in the PCBWay project, so you can order them yourself with a couple of clicks — no Gerber upload needed.
+
+**[👉 Order the boards on PCBWay](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
+
 ---
 
 ## ⚠️ Safety Warning
