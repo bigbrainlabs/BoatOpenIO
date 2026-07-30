@@ -31,7 +31,7 @@ Prefer not to deal with a PCB fab? The manufactured board set is available on Ti
 
 <a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="images/pcbway-logo.png" alt="PCBWay" width="220"></a>
 
-PCBWay sponsors the board manufacturing for BoatOpenIO, the sensor gateway of this ecosystem — thank you!
+**[PCBWay](https://www.pcbway.com)** sponsors the board manufacturing for BoatOpenIO, the sensor gateway of this ecosystem — thank you!
 
 **[👉 Order the boards directly: PCBWay project page](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
 

@@ -31,7 +31,7 @@ Keine Lust, selbst bei einem Platinenhersteller zu bestellen? Das gefertigte Pla
 
 <a href="https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44"><img src="images/pcbway-logo.png" alt="PCBWay" width="220"></a>
 
-PCBWay sponsert die Platinenfertigung für BoatOpenIO, das Sensor-Gateway dieses Ökosystems — danke!
+**[PCBWay](https://www.pcbway.com)** sponsert die Platinenfertigung für BoatOpenIO, das Sensor-Gateway dieses Ökosystems — danke!
 
 **[👉 Platinen direkt bestellen: PCBWay-Projektseite](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
 
