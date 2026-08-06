@@ -317,6 +317,7 @@ void handleRoot() {
     "imu_raw:'Rohwert',imu_corr:'Korrigiert',imu_off:'Offset',"
     "imu_bias:'Gyro-Bias (rad/s)',imu_btn:'Jetzt Null setzen',imu_saved:'Offset gespeichert',"
     "imu_inv_pitch:'Pitch invertieren',imu_inv_roll:'Roll invertieren',"
+    "imu_swap:'Pitch/Roll tauschen',"
     "imu_inv_save:'Invertierung speichern',imu_inv_saved:'Gespeichert',"
     "sec_ap:'AP-Zugangsdaten',sec_portal:'Portal-Zugangsdaten',"
     "l_ap_ssid:'AP Name (SSID)',l_ap_pass:'AP Passwort (min. 8 Zeichen)',"
@@ -353,6 +354,7 @@ void handleRoot() {
     "imu_raw:'Raw',imu_corr:'Corrected',imu_off:'Offset',"
     "imu_bias:'Gyro Bias (rad/s)',imu_btn:'Set Zero Now',imu_saved:'Offset saved',"
     "imu_inv_pitch:'Invert Pitch',imu_inv_roll:'Invert Roll',"
+    "imu_swap:'Swap Pitch/Roll',"
     "imu_inv_save:'Save Inversion',imu_inv_saved:'Saved',"
     "sec_ap:'AP Credentials',sec_portal:'Portal Credentials',"
     "l_ap_ssid:'AP Name (SSID)',l_ap_pass:'AP Password (min. 8 chars)',"
@@ -788,6 +790,9 @@ void handleRoot() {
     "<label style='display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;width:auto'>"
     "<input type='checkbox' id='roll_inv'>"
     "<span data-i18n='imu_inv_roll'>Roll invertieren</span></label>"
+    "<label style='display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;width:auto'>"
+    "<input type='checkbox' id='axes_swap'>"
+    "<span data-i18n='imu_swap'>Pitch/Roll tauschen</span></label>"
     "<button class='bsave' onclick='saveInvert()' style='margin-top:8px' data-i18n='imu_inv_save'>"
     "Invertierung speichern</button>"
     "<div id='inv_status'></div>"
@@ -816,14 +821,17 @@ void handleRoot() {
     "if(!imuInvLoaded){"
     "var pi=document.getElementById('pitch_inv');"
     "var ri=document.getElementById('roll_inv');"
+    "var sw=document.getElementById('axes_swap');"
     "if(pi)pi.checked=!!d.pitch_invert;"
     "if(ri)ri.checked=!!d.roll_invert;"
+    "if(sw)sw.checked=!!d.axes_swap;"
     "imuInvLoaded=true;}"
     "}).catch(function(){});}"
     "function saveInvert(){"
     "var fd=new FormData();"
     "if(document.getElementById('pitch_inv').checked)fd.append('pi','1');"
     "if(document.getElementById('roll_inv').checked)fd.append('ri','1');"
+    "if(document.getElementById('axes_swap').checked)fd.append('as','1');"
     "fetch('/setinvert',{method:'POST',body:fd})"
     ".then(function(r){return r.json();})"
     ".then(function(d){"
@@ -1005,8 +1013,8 @@ void handleValues() {
       doc[kanaele[i].sensor] = roundf((voltage * kanaele[i].faktor + kanaele[i].offset) * 100.f) / 100.f;
     }
   }
-  doc["pitch"] = roundf((pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f) * 10.f) / 10.f;
-  doc["roll"]  = roundf((roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f) * 10.f) / 10.f;
+  doc["pitch"] = roundf(pitchCorrected() * 10.f) / 10.f;
+  doc["roll"]  = roundf(rollCorrected()  * 10.f) / 10.f;
   String out;
   serializeJson(doc, out);
   webServer.send(200, "application/json", out);
@@ -1042,7 +1050,7 @@ void handleADC() {
   if (ch < 1 || ch > 16 || !adsOK) {
     doc["ok"] = false;
   } else {
-    selectChannelPrimed(ch - 1);   // erst GND-nullen (Kanal 16), dann Zielkanal
+    selectChannel(ch - 1);
     doc["ok"] = true;
     doc["v"]  = roundf(readADS() * 10000.f) / 10000.f;
   }
@@ -1079,17 +1087,18 @@ void handleMuxHold() {
 // ── IMU API ──────────────────────────────────────────────────
 void handleIMU() {
   if (!requireAuth()) return;
-  float pc = (pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f);
-  float rc = (roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f);
   StaticJsonDocument<256> doc;
-  doc["pitch_raw"]    = roundf(pitch * 100.f) / 100.f;
-  doc["roll_raw"]     = roundf(roll  * 100.f) / 100.f;
-  doc["pitch_corr"]   = roundf(pc * 100.f) / 100.f;
-  doc["roll_corr"]    = roundf(rc * 100.f) / 100.f;
+  // Rohquellen folgen dem Achsentausch, damit jede Spalte (Roh -> Offset ->
+  // Korrigiert) durchgaengig dieselbe physische Achse zeigt.
+  doc["pitch_raw"]    = roundf(pitchSource() * 100.f) / 100.f;
+  doc["roll_raw"]     = roundf(rollSource()  * 100.f) / 100.f;
+  doc["pitch_corr"]   = roundf(pitchCorrected() * 100.f) / 100.f;
+  doc["roll_corr"]    = roundf(rollCorrected()  * 100.f) / 100.f;
   doc["pitch_offset"] = roundf(pitch_offset * 100.f) / 100.f;
   doc["roll_offset"]  = roundf(roll_offset  * 100.f) / 100.f;
   doc["pitch_invert"] = pitch_invert;
   doc["roll_invert"]  = roll_invert;
+  doc["axes_swap"]    = axes_swap;
   doc["bias_x"]       = roundf(gyroBiasX * 10000.f) / 10000.f;
   doc["bias_y"]       = roundf(gyroBiasY * 10000.f) / 10000.f;
   doc["bias_z"]       = roundf(gyroBiasZ * 10000.f) / 10000.f;
@@ -1103,15 +1112,18 @@ void handleSetInvert() {
   if (!postGuard()) return;
   pitch_invert = webServer.hasArg("pi") && webServer.arg("pi") == "1";
   roll_invert  = webServer.hasArg("ri") && webServer.arg("ri") == "1";
+  axes_swap    = webServer.hasArg("as") && webServer.arg("as") == "1";
   Preferences prefs;
   prefs.begin("boatopenio", false);
   prefs.putBool("pitch_inv", pitch_invert);
   prefs.putBool("roll_inv",  roll_invert);
+  prefs.putBool("axes_swap", axes_swap);
   prefs.end();
-  StaticJsonDocument<64> doc;
+  StaticJsonDocument<96> doc;
   doc["ok"]           = true;
   doc["pitch_invert"] = pitch_invert;
   doc["roll_invert"]  = roll_invert;
+  doc["axes_swap"]    = axes_swap;
   String out;
   serializeJson(doc, out);
   webServer.send(200, "application/json", out);
@@ -1120,8 +1132,10 @@ void handleSetInvert() {
 // ── MONTAGE-OFFSET SETZEN ────────────────────────────────────
 void handleCalibrate() {
   if (!postGuard()) return;
-  pitch_offset = pitch;
-  roll_offset  = roll;
+  // Offset auf die (ggf. getauschte) Ausgabequelle beziehen, damit "Null setzen"
+  // die Pitch/Roll-Ausgabe unabhaengig vom Achsentausch auf 0 bringt.
+  pitch_offset = pitchSource();
+  roll_offset  = rollSource();
   Preferences prefs;
   prefs.begin("boatopenio", false);
   prefs.putFloat("pitch_off", pitch_offset);

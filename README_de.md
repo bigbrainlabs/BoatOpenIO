@@ -220,13 +220,16 @@ Die gängigsten Motorsensoren zapft die **MotorCombo** direkt an, ohne dass man 
 
 ## Multiplexer-Logik
 
-```
-S3 S2 S1 S0 → aktiver Kanal
- 0  0  0  0 → Klemme 1  (MUX C15 auf der Platine)
- 0  0  0  1 → Klemme 2  (MUX C14 auf der Platine)
- ...
- 1  1  1  1 → Klemme 16 (MUX C0 auf der Platine)
-```
+Der CD74HC4067 routet per 4-Bit-Adresse (S3–S0) einen von 16 Eingängen auf den gemeinsamen ADS-Pin A0. Adresse und Chip-Eingang folgen dem Datenblatt: `0000 → C0` … `1111 → C15`.
+
+> **Rev.1-Hinweis — Kanäle werden softwareseitig gespiegelt.** Auf der Rev.1-Platine ist die Kanalverdrahtung vertauscht (Klemme 1 liegt am Eingang, den Adresse `1111` wählt, Klemme 16 an `0000`). Die Firmware gleicht das aus (`MUX_MIRROR`): Klemme *N* → Adresse `16 − N`. Die Klemmennummerierung stimmt dadurch nach außen wieder. Eine spätere Board-Revision zieht die Verdrahtung gerade, dann wird die Spiegelung abgeschaltet (`MUX_MIRROR 0`).
+
+| Klemme | Adresse S3 S2 S1 S0 | CD74HC4067-Eingang |
+|--------|---------------------|--------------------|
+| 1      | `1111`              | C15                |
+| 2      | `1110`              | C14                |
+| …      | …                   | …                  |
+| 16     | `0000`              | C0                 |
 
 
 

@@ -86,8 +86,10 @@ Alle 16 Klemmen teilen sich **einen** ADS1115. Der CD74HC4067-Multiplexer routet
 gewählte Klemme auf ADS-Pin A0:
 
 ```
-selectChannel(klemme-1)  →  S0–S3 setzen  →  500 µs Settling  →  ADS A0 lesen
+selectChannel(klemme-1)  →  S0–S3 setzen (gespiegelt, Rev.1)  →  Settling  →  ADS A0 lesen
 ```
+
+> **Rev.1:** Die Rev.1-Platine hat die Kanäle vertauscht verdrahtet, daher spiegelt `selectChannel()` die Adresse softwareseitig (`MUX_MIRROR`, Klemme *N* → Adresse `16 − N`). Siehe Abschnitt Multiplexer-Logik in der [README](../README_de.md#multiplexer-logik). Eine spätere Board-Revision entfernt die Spiegelung.
 
 Pro Messung werden **4 Samples gemittelt** (`ADS_SAMPLES`), um Störungen im Motorraum
 (Lichtmaschine, Zündimpulse) zu glätten. Die Umrechnung in den publizierten Wert:
@@ -104,7 +106,7 @@ Nur als **aktiv** markierte Kanäle werden gelesen und publiziert. Getaktet alle
 - **50 Hz Sampling** (`IMU_INTERVAL` = 20 ms): Komplementärfilter (α = 0,98) aus Gyro +
   Accel liefert Pitch/Roll; parallel wird die Beschleunigungs­magnitude auf Aufprall geprüft.
 - **Pitch/Roll-Publish** entkoppelt nur alle **1 s** (`IMU_PUBLISH_INTERVAL`), um den
-  Broker nicht zu fluten. Ausgegeben werden montage-offset- und invertierungs-korrigierte Werte.
+  Broker nicht zu fluten. Ausgegeben werden achsentausch-, montage-offset- und invertierungs-korrigierte Werte (in dieser Reihenfolge).
 - **Aufprallerkennung:** übersteigt die Netto-Beschleunigung `|a|/9,81 − 1` den Schwellwert
   **0,5 g**, gilt ein Impact als aktiv; der Spitzenwert wird gehalten. Nach **8 s** ohne
   neuen Ausschlag (`IMPACT_DECAY`) wird der Alarm zurückgesetzt.
@@ -193,7 +195,7 @@ gemeldet.
 | `/testmode` | POST | Auth + CSRF | TEST/LIVE umschalten (+ Neustart) |
 | `/reboot` | POST | Auth + CSRF | Neustart |
 | `/calibrate` | POST | Auth + CSRF | Aktuellen Pitch/Roll als Montage-Offset setzen |
-| `/setinvert` | POST | Auth + CSRF | Pitch-/Roll-Invertierung setzen |
+| `/setinvert` | POST | Auth + CSRF | Pitch-/Roll-Invertierung und Achsentausch setzen (`pi`/`ri`/`as`) |
 | `/api/values` | GET | Auth | Aktive Kanalwerte + Pitch/Roll (korrigiert), JSON |
 | `/api/raw` | GET | Auth | Rohspannungen ADS A0–A3 (Diagnose), JSON |
 | `/api/adc?ch=<1–16>` | GET | Auth | MUX auf Klemme wählen, gemittelte Spannung, JSON |
@@ -278,6 +280,7 @@ Im Ω-Modus liefert „A0 lesen" den zurückgerechneten Widerstand.
 | `testmode` | bool | `true` | TEST-Modus aktiv |
 | `pitch_off` / `roll_off` | float | `0.0` | IMU-Montage-Offset (°) |
 | `pitch_inv` / `roll_inv` | bool | `false` | Achsen-Invertierung |
+| `axes_swap` | bool | `false` | Pitch/Roll tauschen (IMU um 90° gedreht montiert) |
 | `ap_ssid` | string | `BoatOpenIO-Setup` | AP-Name |
 | `ap_pass` | string | `boatopenio` | AP-Passwort |
 | `portal_user` | string | `admin` | Portal-Benutzer |

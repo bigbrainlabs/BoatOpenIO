@@ -4,7 +4,7 @@
 // github.com/bigbrainlabs/BoatOpenIO
 // ============================================================
 
-#define FIRMWARE_VERSION "2.2"
+#define FIRMWARE_VERSION "2.4"
 
 #include <Wire.h>
 #include <WiFi.h>
@@ -55,12 +55,11 @@
 #define STATUS_INTERVAL  10000
 #define WDT_TIMEOUT        10
 #define ADS_SAMPLES         4    // Mittelung pro Kanal gegen Motorraum-Stoerungen (M8)
-// TEMPORAER (Board Rev.1): Kanal 16 ist von Hand auf GND gezogen und dient als
-// Nullpegel-Referenz vor jeder Messung. Ab der naechsten Board-Revision liegen
-// alle GNDs hardwareseitig auf 0 — dann entfaellt der Umweg ueber K16 und das
-// GND-Nullen (selectChannelPrimed) kann wieder auf einfaches selectChannel zurueck.
-#define MUX_GND_CHANNEL    16    // Kanal 16 = GND-Referenz (Rev.1-Behelf, s. o.)
-#define MUX_SETTLE_MS       1    // Einschwingzeit nach jedem MUX-Umschalten (ms)
+// TEMPORAER (Board Rev.1): Kanalreihenfolge ist gespiegelt verdrahtet — Klemme 1
+// liegt physisch an MUX-Eingang C15, Klemme 2 an C14 usw. Statt die Hardware neu
+// zu machen, spiegeln wir softwareseitig: logischer Kanal 0..15 -> physischer
+// MUX-Eingang 15..0. Ab einer Board-Revision mit korrekter Verdrahtung: auf 0.
+#define MUX_MIRROR          1    // 1 = Kanal 15-ch spiegeln (Rev.1), 0 = 1:1
 
 // ── NETZWERK CONFIG ─────────────────────────────────────────
 char wifi_ssid[40]   = "";
@@ -118,6 +117,17 @@ float gyroBiasX = 0.0f, gyroBiasY = 0.0f, gyroBiasZ = 0.0f;
 float pitch_offset = 0.0f, roll_offset = 0.0f;
 // Achsen-Invertierung
 bool  pitch_invert = false, roll_invert = false;
+// Achsen-Tausch: IMU um 90° gedreht montiert -> Pitch- und Roll-Quelle tauschen.
+// Wird VOR Offset und Invertierung angewendet, damit sich alle weiteren
+// Korrekturen (inkl. "Null setzen") auf die getauschte Ausgabe beziehen.
+bool  axes_swap = false;
+
+// Rohquellen fuer die Pitch/Roll-Ausgabe nach optionalem Achsentausch.
+float pitchSource() { return axes_swap ? roll  : pitch; }
+float rollSource()  { return axes_swap ? pitch : roll;  }
+// Montage-korrigierte Ausgabewerte: Achsentausch -> Offset -> Invertierung.
+float pitchCorrected() { return (pitchSource() - pitch_offset) * (pitch_invert ? -1.0f : 1.0f); }
+float rollCorrected()  { return (rollSource()  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f); }
 
 // ── TIMING ──────────────────────────────────────────────────
 unsigned long lastChannelRead = 0;
@@ -126,6 +136,7 @@ unsigned long lastIMUPublish  = 0;
 unsigned long lastStatus      = 0;
 unsigned long lastWiFiRetry   = 0;
 bool          staServicesUp   = false;   // mDNS + OTA initialisiert?
+bool          apActive        = true;    // SoftAP laeuft? (nach STA-Connect aus)
 
 // Park-Modus (siehe MUX_HOLD_TIMEOUT): >=0 haelt den MUX fest auf diesem Kanal
 // (0..15) und pausiert das automatische Sweepen; -1 = aus.
@@ -134,35 +145,27 @@ unsigned long muxHoldUntil   = 0;
 
 // ── MUX ─────────────────────────────────────────────────────
 void selectChannel(uint8_t ch) {
-  digitalWrite(MUX_S0,  ch        & 0x01);
-  digitalWrite(MUX_S1, (ch >> 1)  & 0x01);
-  digitalWrite(MUX_S2, (ch >> 2)  & 0x01);
-  digitalWrite(MUX_S3, (ch >> 3)  & 0x01);
+  ch &= 0x0F;
+#if MUX_MIRROR
+  uint8_t phys = 15 - ch;   // Rev.1: Kanalreihenfolge gespiegelt verdrahtet
+#else
+  uint8_t phys = ch;
+#endif
+  digitalWrite(MUX_S0,  phys        & 0x01);
+  digitalWrite(MUX_S1, (phys >> 1)  & 0x01);
+  digitalWrite(MUX_S2, (phys >> 2)  & 0x01);
+  digitalWrite(MUX_S3, (phys >> 3)  & 0x01);
   delayMicroseconds(10);
 #if MUX_DEBUG
-  // Soll = aus der Kanalnummer berechnete Bits; pad = per digitalRead
+  // Soll = aus dem physischen MUX-Eingang berechnete Bits; pad = per digitalRead
   // zurueckgelesener echter Pegel (beim ESP32 auch an OUTPUT-Pins moeglich).
   // Weichen soll und pad ab -> Pin/Trace/Loetstelle defekt oder Kurzschluss.
-  Serial.printf("[MUX] ch=%2u  soll S0=%d S1=%d S2=%d S3=%d | pad S0=%d S1=%d S2=%d S3=%d\n",
-                ch,
-                ch & 0x01, (ch >> 1) & 0x01, (ch >> 2) & 0x01, (ch >> 3) & 0x01,
+  Serial.printf("[MUX] ch=%2u -> phys=%2u  soll S0=%d S1=%d S2=%d S3=%d | pad S0=%d S1=%d S2=%d S3=%d\n",
+                ch, phys,
+                phys & 0x01, (phys >> 1) & 0x01, (phys >> 2) & 0x01, (phys >> 3) & 0x01,
                 digitalRead(MUX_S0), digitalRead(MUX_S1),
                 digitalRead(MUX_S2), digitalRead(MUX_S3));
 #endif
-}
-
-// Nullpegel vor jeder Messung (Rev.1-Behelf, siehe MUX_GND_CHANNEL): MUX erst auf
-// den fest auf GND liegenden Kanal 16 schalten, damit der Sample&Hold des ADS1115
-// die Ladung des zuvor gelesenen
-// Kanals verliert. Sonst schleppt z. B. der niederohmige Batterie-Teiler seinen
-// Pegel auf alle folgenden (hochohmigen) Kanäle mit — dann liefern die scheinbar
-// alle denselben Wert. Danach auf den Zielkanal, jeweils 1 ms zum Einschwingen,
-// damit der Pegel sicher durchkommt. Erwartet ch als 0..15.
-void selectChannelPrimed(uint8_t ch) {
-  selectChannel(MUX_GND_CHANNEL - 1);   // erst nullen (Kanal 16 = GND)
-  delay(MUX_SETTLE_MS);
-  selectChannel(ch);                    // dann Zielkanal
-  delay(MUX_SETTLE_MS);
 }
 
 // true, solange der MUX per Park-Modus festgehalten wird. Ist der Halte-Timeout
@@ -232,7 +235,7 @@ float readADS() {
 float readChannelVoltage(int i) {
   if (testMode) return 2.5f + sinf(millis() / 3000.0f + i) * 0.3f;
   uint8_t ch = kanaele[i].klemme;              // 1..16, in loadConfig geclampt (M9)
-  selectChannelPrimed((ch >= 1 && ch <= 16 ? ch : 1) - 1);  // erst GND-nullen, dann Zielkanal
+  selectChannel((ch >= 1 && ch <= 16 ? ch : 1) - 1);
   return readADS();
 }
 
@@ -470,6 +473,7 @@ void loadNetConfig() {
   roll_offset  = preferences.getFloat("roll_off",   0.0f);
   pitch_invert = preferences.getBool("pitch_inv",  false);
   roll_invert  = preferences.getBool("roll_inv",   false);
+  axes_swap    = preferences.getBool("axes_swap",  false);
   String aps  = preferences.getString("ap_ssid",    AP_DEFAULT_SSID);
   String app  = preferences.getString("ap_pass",    AP_DEFAULT_PASS);
   String pu   = preferences.getString("portal_user","admin");
@@ -500,6 +504,7 @@ void saveNetConfig() {
   preferences.putFloat("roll_off",     roll_offset);
   preferences.putBool("pitch_inv",     pitch_invert);
   preferences.putBool("roll_inv",      roll_invert);
+  preferences.putBool("axes_swap",     axes_swap);
   preferences.putString("ap_ssid",     ap_ssid);
   preferences.putString("ap_pass",     ap_pass);
   preferences.putString("portal_user", portal_user);
@@ -650,6 +655,17 @@ void ensureStaServices() {
   setupOTA();
   staServicesUp = true;
   Serial.println("mDNS: http://boatopenio.local | OTA bereit");
+
+  // STA steht -> SoftAP abschalten. Der Dauer-AP haelt sonst das Radio staendig
+  // aktiv; das ist die groesste Dauer-Funklast und bei knapper 3V3-Speisung die
+  // Brownout-Ursache. Das Web-UI bleibt ueber die STA-IP / boatopenio.local
+  // erreichbar; bei STA-Verlust reaktiviert loop() den AP automatisch.
+  if (apActive) {
+    WiFi.softAPdisconnect(true);
+    WiFi.mode(WIFI_STA);
+    apActive = false;
+    Serial.println("SoftAP aus (STA verbunden) - Funklast gesenkt");
+  }
 }
 
 // ── SETUP ───────────────────────────────────────────────────
@@ -728,6 +744,7 @@ void setup() {
   // WiFi: AP immer sofort starten (Credentials aus NVS)
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(ap_ssid, ap_pass);
+  apActive = true;
   Serial.printf("AP gestartet: %s | 192.168.4.1\n", ap_ssid);
   if (strlen(portal_pass) == 0)
     Serial.println("  !! Ersteinrichtung erforderlich – http://192.168.4.1/setup");
@@ -787,6 +804,14 @@ void loop() {
   if (strlen(wifi_ssid) > 0) {
     if (WiFi.status() != WL_CONNECTED) {
       staServicesUp = false;
+      // STA weg -> SoftAP wieder hochfahren (in ensureStaServices abgeschaltet),
+      // damit das Config-Portal unter 192.168.4.1 erreichbar bleibt.
+      if (!apActive) {
+        WiFi.mode(WIFI_AP_STA);
+        WiFi.softAP(ap_ssid, ap_pass);
+        apActive = true;
+        Serial.println("SoftAP reaktiviert (STA getrennt)");
+      }
       if (millis() - lastWiFiRetry > 30000) {
         lastWiFiRetry = millis();
         Serial.println("WiFi getrennt - Reconnect...");
@@ -841,10 +866,8 @@ void loop() {
     lastIMUPublish = now;
     if (mqtt.connected()) {
       char buf[10];
-      float pitchOut = (pitch - pitch_offset) * (pitch_invert ? -1.0f : 1.0f);
-      float rollOut  = (roll  - roll_offset)  * (roll_invert  ? -1.0f : 1.0f);
-      dtostrf(pitchOut, 5, 1, buf); mqtt.publish("boat/io/pitch", buf, true);
-      dtostrf(rollOut,  5, 1, buf); mqtt.publish("boat/io/roll",  buf, true);
+      dtostrf(pitchCorrected(), 5, 1, buf); mqtt.publish("boat/io/pitch", buf, true);
+      dtostrf(rollCorrected(),  5, 1, buf); mqtt.publish("boat/io/roll",  buf, true);
     }
   }
 

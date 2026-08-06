@@ -127,7 +127,7 @@ Alle Endpunkte sind im authentifizierten Browser-Session ohne weitere Anmeldung 
 | `/api/adc?ch=<1–16>` | GET | MUX auf Klemme wählen, gemittelte Spannung |
 | `/api/imu` | GET | Pitch/Roll roh, korrigiert, Offset, Gyro-Bias |
 | `/calibrate` | POST | Setzt aktuellen Pitch/Roll als Montage-Offset, gibt neue Offsets zurück |
-| `/setinvert` | POST | Pitch-/Roll-Invertierung setzen |
+| `/setinvert` | POST | Pitch-/Roll-Invertierung und Achsentausch setzen |
 
 > POST-Endpunkte sind zusätzlich CSRF-geschützt (Origin/Referer muss zum Gerät passen).
 > Eine vollständige Backend-Beschreibung steht in [`backend_de.md`](backend_de.md).

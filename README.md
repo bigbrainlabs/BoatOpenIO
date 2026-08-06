@@ -220,13 +220,16 @@ The **MotorCombo** taps the most common engine sensors directly, so you don't ha
 
 ## Multiplexer Logic
 
-```
-S3 S2 S1 S0 → active channel
- 0  0  0  0 → terminal 1  (MUX C15 on PCB)
- 0  0  0  1 → terminal 2  (MUX C14 on PCB)
- ...
- 1  1  1  1 → terminal 16 (MUX C0 on PCB)
-```
+The CD74HC4067 routes one of 16 inputs onto the shared ADS pin A0 via a 4-bit address (S3–S0). Address and chip input follow the datasheet: `0000 → C0` … `1111 → C15`.
+
+> **Rev.1 note — channels are mirrored in software.** On the Rev.1 board the channel wiring is reversed (terminal 1 sits on the input that address `1111` selects, terminal 16 on `0000`). The firmware compensates in software (`MUX_MIRROR`): terminal *N* → address `16 − N`. The terminal numbering you see is therefore correct. A later board revision straightens the wiring, then the mirror is switched off (`MUX_MIRROR 0`).
+
+| Terminal | Address S3 S2 S1 S0 | CD74HC4067 input |
+|----------|---------------------|------------------|
+| 1        | `1111`              | C15              |
+| 2        | `1110`              | C14              |
+| …        | …                   | …                |
+| 16       | `0000`              | C0               |
 
 
 

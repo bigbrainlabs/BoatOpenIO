@@ -127,7 +127,7 @@ All endpoints are accessible without additional auth once the browser session is
 | `/api/adc?ch=<1–16>` | GET | Select MUX terminal, averaged voltage |
 | `/api/imu` | GET | Pitch/roll raw, corrected, offset, gyro bias |
 | `/calibrate` | POST | Sets current pitch/roll as mounting offset, returns new offsets |
-| `/setinvert` | POST | Set pitch/roll inversion |
+| `/setinvert` | POST | Set pitch/roll inversion and axis swap |
 
 > POST endpoints are additionally CSRF-protected (Origin/Referer must match the device).
 > A full backend description is in [`backend.md`](backend.md).

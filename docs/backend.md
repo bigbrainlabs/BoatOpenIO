@@ -83,8 +83,10 @@ All 16 terminals share **one** ADS1115. The CD74HC4067 multiplexer routes the se
 terminal onto ADS pin A0:
 
 ```
-selectChannel(terminal-1)  →  set S0–S3  →  500 µs settle  →  read ADS A0
+selectChannel(terminal-1)  →  set S0–S3 (mirrored, Rev.1)  →  settle  →  read ADS A0
 ```
+
+> **Rev.1:** the Rev.1 board has the channel wiring reversed, so `selectChannel()` mirrors the address in software (`MUX_MIRROR`, terminal *N* → address `16 − N`). See the Multiplexer Logic section in the [README](../README.md#multiplexer-logic). A later board revision drops the mirror.
 
 Each reading **averages 4 samples** (`ADS_SAMPLES`) to smooth engine-bay noise
 (alternator, ignition). Conversion to the published value:
@@ -100,7 +102,7 @@ Only channels marked **active** are read and published, every **2 s** (`READ_INT
 - **50 Hz sampling** (`IMU_INTERVAL` = 20 ms): a complementary filter (α = 0.98) of gyro +
   accel yields pitch/roll; in parallel the acceleration magnitude is checked for impacts.
 - **Pitch/roll publishing** is decoupled to every **1 s** (`IMU_PUBLISH_INTERVAL`) to avoid
-  flooding the broker. Values are mounting-offset and inversion corrected.
+  flooding the broker. Values are axis-swap, mounting-offset and inversion corrected (in that order).
 - **Impact detection:** when net acceleration `|a|/9.81 − 1` exceeds **0.5 g** an impact is
   active; the peak is held. After **8 s** without a new spike (`IMPACT_DECAY`) the alarm resets.
 
@@ -186,7 +188,7 @@ present in the payload are changed. Sensor and topic strings are filtered server
 | `/testmode` | POST | Auth + CSRF | Toggle TEST/LIVE (+ restart) |
 | `/reboot` | POST | Auth + CSRF | Restart |
 | `/calibrate` | POST | Auth + CSRF | Set current pitch/roll as mounting offset |
-| `/setinvert` | POST | Auth + CSRF | Set pitch/roll inversion |
+| `/setinvert` | POST | Auth + CSRF | Set pitch/roll inversion and axis swap (`pi`/`ri`/`as`) |
 | `/api/values` | GET | Auth | Active channel values + pitch/roll (corrected), JSON |
 | `/api/raw` | GET | Auth | Raw ADS A0–A3 voltages (diagnostics), JSON |
 | `/api/adc?ch=<1–16>` | GET | Auth | Select MUX terminal, averaged voltage, JSON |
@@ -270,6 +272,7 @@ Survives firmware updates. Only changeable via the portal or clearable by a fact
 | `testmode` | bool | `true` | TEST mode active |
 | `pitch_off` / `roll_off` | float | `0.0` | IMU mounting offset (°) |
 | `pitch_inv` / `roll_inv` | bool | `false` | Axis inversion |
+| `axes_swap` | bool | `false` | Swap pitch/roll axes (IMU mounted rotated 90°) |
 | `ap_ssid` | string | `BoatOpenIO-Setup` | AP name |
 | `ap_pass` | string | `boatopenio` | AP password |
 | `portal_user` | string | `admin` | Portal user |
