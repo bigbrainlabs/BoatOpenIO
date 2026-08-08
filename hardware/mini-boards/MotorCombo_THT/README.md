@@ -72,9 +72,9 @@ Channels 1–5 (`Batt1`, `Batt2`, `Tank1`, `Temp1`, `Oil1`) are **not hardwired 
 |---|---|---|
 | **JP1** | bridge **P2–P3** | bridge **P2–P1** |
 | **JP2** | **bridged** | **open** |
-| **R2** (channel divider resistor) | **leave unfitted** | **fit** |
+| **R2** (channel divider resistor) | **fit a bridge** (0 Ω) | **fit** |
 
-- **Pull-up:** JP1 P2–P3 closed, JP2 closed, R2 unfitted — the pull-up is active and SIG-OUT is passed through.
+- **Pull-up:** JP1 P2–P3 closed, JP2 closed, R2 position populated with a **bridge** (0 Ω) — the pull-up is active and SIG-OUT is passed through. **Important:** do not leave R2 open here. The board has no separate direct GND connection, so the R2 position provides the ground for the smoothing capacitor; left open, the ceramic cap would sit in series in the signal path instead of to ground.
 - **Voltage divider:** JP1 P2–P1 closed, JP2 open, R2 fitted — the divider is formed.
 
 Channel 6 (`RPM1`) is the optocoupler + ESP-01 path and has no mode jumper.
