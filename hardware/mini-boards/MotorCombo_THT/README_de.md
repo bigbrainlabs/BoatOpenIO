@@ -74,7 +74,7 @@ Die Kanäle 1–5 (`Batt1`, `Batt2`, `Tank1`, `Temp1`, `Oil1`) sind **nicht fest
 | **JP2** | **gebrückt** | **offen** |
 | **R2** (Teilerwiderstand des Kanals) | **Brücke einlöten** (0 Ω) | **einlöten** |
 
-- **Pull-up:** JP1 P2–P3 gebrückt, JP2 gebrückt, R2-Position als **Brücke** (0 Ω) bestückt — der Pull-up ist aktiv und SIG-OUT wird durchgereicht. **Wichtig:** R2 hier nicht offen lassen. Die direkte GND-Verbindung fehlt auf der Platine, deshalb stellt die R2-Position die Masse für den Glättungs-Kerko her; bliebe sie offen, läge der Kerko in Reihe im Signalpfad statt gegen Masse.
+- **Pull-up:** JP1 P2–P3 gebrückt, JP2 gebrückt, R2-Position als **Brücke** bestückt (0-Ω-Widerstand im selben Footprint oder Drahtbrücke) — der Pull-up ist aktiv und SIG-OUT wird durchgereicht. **Wichtig:** R2 hier nicht offen lassen. Die direkte GND-Verbindung fehlt auf der Platine, deshalb stellt die R2-Position die Masse für den Glättungs-Kerko her; bliebe sie offen, läge der Kerko in Reihe im Signalpfad statt gegen Masse.
 - **Spannungsteiler:** JP1 P2–P1 gebrückt, JP2 offen, R2 bestückt — der Teiler wird gebildet.
 
 Kanal 6 (`RPM1`) ist der Optokoppler-/ESP-01-Pfad und hat keinen Modus-Jumper.
