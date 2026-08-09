@@ -258,16 +258,20 @@ Der CD74HC4067 routet per 4-Bit-Adresse (S3–S0) einen von 16 Eingängen auf de
 ## MQTT-Topics
 
 ```
-boat/io/batterie1       → 12.43
-boat/io/oeltemperatur   → 87
-boat/io/oeldruck        → 3.2
-boat/io/tank            → 48
-boat/io/drehzahl        → 1450
-boat/io/pitch           → 1.2
-boat/io/roll            → -0.5
-boat/io/impact          → LIGHT
-boatopenio/status       → online
+boat/io/batterie1          → 12.43
+boat/io/oeltemperatur      → 87
+boat/io/oeldruck           → 3.2
+boat/io/tank               → 48
+boat/io/drehzahl           → 1450
+boat/io/pitch              → 1.2        (änderbar)
+boat/io/roll               → -0.5       (änderbar)
+boat/alarm/impact_g        → 2.40       (Impact-Basis änderbar)
+boat/alarm/impact_severity → KRITISCH   (LEICHT / MITTEL / STARK / KRITISCH)
+boat/alarm/impact_active   → true
+boatopenio/status          → online
 ```
+
+> **Kanal-Topics** werden je Kanal gesetzt (`topic`-Feld / Web-UI). **Pitch, Roll und das Impact-Basis-Topic** sind im Web-UI unter **WiFi & MQTT** editierbar (Standard `boat/io/pitch`, `boat/io/roll`, `boat/alarm/impact`; an die Impact-Basis werden `_g` / `_severity` / `_active` angehängt). Im Testmodus werden die Impact-Alarme auf `boat/test/alarm/impact_*` umgeleitet, damit Demo-Impacts keine echten Dashboards auslösen.
 
 ---
 

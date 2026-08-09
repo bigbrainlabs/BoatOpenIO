@@ -55,6 +55,9 @@ MQTT Server     IP or hostname, e.g. 192.168.1.100
 MQTT Port       default 1883
 MQTT User       leave blank if no auth
 MQTT Password   leave blank = keep existing
+Pitch topic     default boat/io/pitch
+Roll topic      default boat/io/roll
+Impact topic    base, default boat/alarm/impact (+ _g / _severity / _active)
 ```
 
 → Saved to NVS. Takes effect after restart.

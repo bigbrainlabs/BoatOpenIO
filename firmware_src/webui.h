@@ -298,6 +298,8 @@ void handleRoot() {
     "h_imu:'IMU Kalibrierung',h_sec:'Sicherheit',h_act:'Aktionen',"
     "l_ssid:'WiFi SSID',l_wpass:'WiFi Passwort',l_mqtt:'MQTT Server',"
     "l_mport:'MQTT Port',l_muser:'MQTT User',l_mpass:'MQTT Passwort',"
+    "l_tpitch:'Topic Pitch',l_troll:'Topic Roll',l_timpact:'Topic Impact (Basis)',"
+    "hint_timpact:'Basis-Topic; angeh\\u00e4ngt werden _g / _severity / _active.',"
     "save_net:'Speichern & Neustart',"
     "th_sensor:'Sensor',th_factor:'Faktor',th_offset:'Offset',th_unit:'Einheit',th_topic:'Topic',th_active:'Aktiv',"
     "save_ch:'Konfiguration speichern',"
@@ -335,6 +337,8 @@ void handleRoot() {
     "h_imu:'IMU Calibration',h_sec:'Security',h_act:'Actions',"
     "l_ssid:'WiFi SSID',l_wpass:'WiFi Password',l_mqtt:'MQTT Server',"
     "l_mport:'MQTT Port',l_muser:'MQTT User',l_mpass:'MQTT Password',"
+    "l_tpitch:'Pitch topic',l_troll:'Roll topic',l_timpact:'Impact topic (base)',"
+    "hint_timpact:'Base topic; _g / _severity / _active are appended.',"
     "save_net:'Save & Restart',"
     "th_sensor:'Sensor',th_factor:'Factor',th_offset:'Offset',th_unit:'Unit',th_topic:'Topic',th_active:'Active',"
     "save_ch:'Save Configuration',"
@@ -521,6 +525,14 @@ void handleRoot() {
     "<input name='muser' value='" + htmlEscape(mqtt_user) + "'>" +
     "<label data-i18n='l_mpass'>MQTT Passwort</label>"
     "<input type='password' name='mpass' placeholder='(unver&auml;ndert lassen)'>" +
+    "<label data-i18n='l_tpitch'>Topic Pitch</label>"
+    "<input name='tpitch' value='" + htmlEscape(topic_pitch) + "'>" +
+    "<label data-i18n='l_troll'>Topic Roll</label>"
+    "<input name='troll' value='" + htmlEscape(topic_roll) + "'>" +
+    "<label data-i18n='l_timpact'>Topic Impact (Basis)</label>"
+    "<input name='timpact' value='" + htmlEscape(topic_impact) + "'>" +
+    "<small style='color:var(--sub);display:block;margin:-4px 0 4px' data-i18n='hint_timpact'>"
+    "Basis-Topic; angeh&auml;ngt werden _g / _severity / _active.</small>" +
     "<button class='bsave' type='submit' style='margin-top:12px' data-i18n='save_net'>Speichern &amp; Neustart</button>"
     "</form></details>"
   );
@@ -934,6 +946,12 @@ void handleSaveNet() {
     safeCopy(mqtt_user,   webServer.arg("muser"), sizeof(mqtt_user));
   if (webServer.hasArg("mpass") && webServer.arg("mpass").length())
     safeCopy(mqtt_pass,   webServer.arg("mpass"), sizeof(mqtt_pass));
+  if (webServer.hasArg("tpitch") && webServer.arg("tpitch").length())
+    safeCopy(topic_pitch,  webServer.arg("tpitch"),  sizeof(topic_pitch));
+  if (webServer.hasArg("troll") && webServer.arg("troll").length())
+    safeCopy(topic_roll,   webServer.arg("troll"),   sizeof(topic_roll));
+  if (webServer.hasArg("timpact") && webServer.arg("timpact").length())
+    safeCopy(topic_impact, webServer.arg("timpact"), sizeof(topic_impact));
   saveNetConfig();
   webServer.send(200, "text/html",
     "<html><head><meta charset='UTF-8'>"

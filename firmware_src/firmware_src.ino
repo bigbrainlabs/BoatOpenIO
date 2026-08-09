@@ -4,7 +4,7 @@
 // github.com/bigbrainlabs/BoatOpenIO
 // ============================================================
 
-#define FIRMWARE_VERSION "2.4"
+#define FIRMWARE_VERSION "2.5"
 
 #include <Wire.h>
 #include <WiFi.h>
@@ -73,6 +73,11 @@ char ap_ssid[32]     = AP_DEFAULT_SSID;
 char ap_pass[32]     = AP_DEFAULT_PASS;
 char portal_user[32] = "admin";
 char portal_pass[64] = "";   // leer = Ersteinrichtung noch nicht abgeschlossen
+// IMU-MQTT-Topics (via Web-UI aenderbar, in NVS gespeichert). topic_impact ist
+// die Basis; angehaengt werden die Suffixe _g / _severity / _active.
+char topic_pitch[64]  = "boat/io/pitch";
+char topic_roll[64]   = "boat/io/roll";
+char topic_impact[64] = "boat/alarm/impact";
 
 // ── OBJEKTE ─────────────────────────────────────────────────
 Adafruit_ADS1115 ads;      // 0x48
@@ -274,8 +279,11 @@ const char* impactSeverity(float g) {
 // damit die zufaelligen Fake-Impacts der Demo NICHT die echten Alarm-Topics
 // (und damit reale Dashboard-Anzeigen an Bord) ausloesen.
 const char* alarmTopic(const char* leaf) {
-  static char t[48];
-  snprintf(t, sizeof(t), "%s%s", testMode ? "boat/test/alarm/" : "boat/alarm/", leaf);
+  static char t[80];
+  // Live: konfigurierbare Basis (topic_impact). Test: fest auf boat/test/alarm/
+  // impact, damit Demo-Impacts nie das echte (evtl. per UI umbenannte) Topic treffen.
+  const char* base = testMode ? "boat/test/alarm/impact" : topic_impact;
+  snprintf(t, sizeof(t), "%s%s", base, leaf);
   return t;
 }
 
@@ -285,9 +293,9 @@ void publishImpact() {
   lastPub = millis();
   char buf[10];
   dtostrf(impactPeakG, 5, 2, buf);
-  mqtt.publish(alarmTopic("impact_g"),        buf, true);
-  mqtt.publish(alarmTopic("impact_severity"), impactSeverity(impactPeakG), true);
-  mqtt.publish(alarmTopic("impact_active"),   "true", true);
+  mqtt.publish(alarmTopic("_g"),        buf, true);
+  mqtt.publish(alarmTopic("_severity"), impactSeverity(impactPeakG), true);
+  mqtt.publish(alarmTopic("_active"),   "true", true);
   Serial.printf("AUFPRALL%s: %.2fg -> %s\n", testMode ? " (TEST)" : "",
                 impactPeakG, impactSeverity(impactPeakG));
 }
@@ -323,9 +331,9 @@ void readIMU() {
   } else if (impactActive && millis() - lastImpactTime > IMPACT_DECAY) {
     impactActive = false;
     impactPeakG  = 0.0f;
-    mqtt.publish(alarmTopic("impact_active"),   "false", true);
-    mqtt.publish(alarmTopic("impact_g"),        "0.00",  true);
-    mqtt.publish(alarmTopic("impact_severity"), "-",     true);
+    mqtt.publish(alarmTopic("_active"),   "false", true);
+    mqtt.publish(alarmTopic("_g"),        "0.00",  true);
+    mqtt.publish(alarmTopic("_severity"), "-",     true);
   }
 }
 
@@ -349,9 +357,9 @@ void fakeIMU() {
   if (impactActive && millis() - lastImpactTime > IMPACT_DECAY) {
     impactActive = false;
     impactPeakG  = 0.0f;
-    mqtt.publish(alarmTopic("impact_active"),   "false", true);
-    mqtt.publish(alarmTopic("impact_g"),        "0.00",  true);
-    mqtt.publish(alarmTopic("impact_severity"), "-",     true);
+    mqtt.publish(alarmTopic("_active"),   "false", true);
+    mqtt.publish(alarmTopic("_g"),        "0.00",  true);
+    mqtt.publish(alarmTopic("_severity"), "-",     true);
   }
 }
 
@@ -478,6 +486,9 @@ void loadNetConfig() {
   String app  = preferences.getString("ap_pass",    AP_DEFAULT_PASS);
   String pu   = preferences.getString("portal_user","admin");
   String pp   = preferences.getString("portal_pass","");
+  String tp   = preferences.getString("topic_pitch", "boat/io/pitch");
+  String tr   = preferences.getString("topic_roll",  "boat/io/roll");
+  String ti   = preferences.getString("topic_impact","boat/alarm/impact");
   preferences.end();
   ss.toCharArray(wifi_ssid,   sizeof(wifi_ssid));
   sp.toCharArray(wifi_pass,   sizeof(wifi_pass));
@@ -489,6 +500,9 @@ void loadNetConfig() {
   app.toCharArray(ap_pass,     sizeof(ap_pass));
   pu.toCharArray(portal_user,  sizeof(portal_user));
   pp.toCharArray(portal_pass,  sizeof(portal_pass));
+  tp.toCharArray(topic_pitch,  sizeof(topic_pitch));
+  tr.toCharArray(topic_roll,   sizeof(topic_roll));
+  ti.toCharArray(topic_impact, sizeof(topic_impact));
 }
 
 void saveNetConfig() {
@@ -509,6 +523,9 @@ void saveNetConfig() {
   preferences.putString("ap_pass",     ap_pass);
   preferences.putString("portal_user", portal_user);
   preferences.putString("portal_pass", portal_pass);
+  preferences.putString("topic_pitch",  topic_pitch);
+  preferences.putString("topic_roll",   topic_roll);
+  preferences.putString("topic_impact", topic_impact);
   preferences.end();
 }
 
@@ -605,9 +622,9 @@ void reconnectMQTT() {
     // sonst auf jedem Dashboard dauerhaft ein Alarm stehen. Beim Start ist
     // impactActive=false / impactPeakG=0.
     if (!impactActive) {
-      mqtt.publish(alarmTopic("impact_active"),   "false", true);
-      mqtt.publish(alarmTopic("impact_g"),        "0.00",  true);
-      mqtt.publish(alarmTopic("impact_severity"), "-",     true);
+      mqtt.publish(alarmTopic("_active"),   "false", true);
+      mqtt.publish(alarmTopic("_g"),        "0.00",  true);
+      mqtt.publish(alarmTopic("_severity"), "-",     true);
     }
     mqtt.subscribe("boatopenio/config");
     backoff = 5000;   // nach Erfolg wieder schnell reagieren
@@ -866,8 +883,8 @@ void loop() {
     lastIMUPublish = now;
     if (mqtt.connected()) {
       char buf[10];
-      dtostrf(pitchCorrected(), 5, 1, buf); mqtt.publish("boat/io/pitch", buf, true);
-      dtostrf(rollCorrected(),  5, 1, buf); mqtt.publish("boat/io/roll",  buf, true);
+      dtostrf(pitchCorrected(), 5, 1, buf); mqtt.publish(topic_pitch, buf, true);
+      dtostrf(rollCorrected(),  5, 1, buf); mqtt.publish(topic_roll,  buf, true);
     }
   }
 

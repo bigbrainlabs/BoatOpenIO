@@ -258,16 +258,20 @@ The CD74HC4067 routes one of 16 inputs onto the shared ADS pin A0 via a 4-bit ad
 ## MQTT Topics
 
 ```
-boat/io/battery1       → 12.43
-boat/io/oil_temp       → 87
-boat/io/oil_pressure   → 3.2
-boat/io/tank           → 48
-boat/io/rpm            → 1450
-boat/io/pitch          → 1.2
-boat/io/roll           → -0.5
-boat/io/impact         → LIGHT
-boatopenio/status      → online
+boat/io/battery1          → 12.43
+boat/io/oil_temp          → 87
+boat/io/oil_pressure      → 3.2
+boat/io/tank              → 48
+boat/io/rpm               → 1450
+boat/io/pitch             → 1.2        (configurable)
+boat/io/roll              → -0.5       (configurable)
+boat/alarm/impact_g       → 2.40       (impact base configurable)
+boat/alarm/impact_severity → KRITISCH  (LEICHT / MITTEL / STARK / KRITISCH)
+boat/alarm/impact_active  → true
+boatopenio/status         → online
 ```
+
+> **Channel topics** are set per channel (`topic` field / web UI). **Pitch, roll and the impact base topic** are editable under **WiFi & MQTT** in the web UI (defaults `boat/io/pitch`, `boat/io/roll`, `boat/alarm/impact`; the impact base gets `_g` / `_severity` / `_active` appended). In test mode the impact alarms are redirected to `boat/test/alarm/impact_*` so demo impacts never trigger real dashboards.
 
 ---
 

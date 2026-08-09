@@ -131,17 +131,18 @@ Only channels marked **active** are read and published, every **2 s** (`READ_INT
 | Topic | Payload | Retained | Interval |
 |-------|---------|:--------:|----------|
 | `boat/io/<sensor>` or custom `topic` | float value | no | 2 s |
-| `boat/io/pitch` | float °, corrected | yes | 1 s |
-| `boat/io/roll` | float °, corrected | yes | 1 s |
+| `boat/io/pitch` ² | float °, corrected | yes | 1 s |
+| `boat/io/roll` ² | float °, corrected | yes | 1 s |
 | `boatopenio/status` | `online` / `offline` | yes | 10 s + LWT |
 | `boatopenio/uptime` | seconds since boot | no | 10 s |
 | `boatopenio/rssi` | WiFi signal (dBm) | no | 10 s |
 | `boatopenio/mode` | `TEST` / `LIVE` | yes | 10 s |
-| `boat/alarm/impact_g` ¹ | peak g value | yes | on event |
-| `boat/alarm/impact_severity` ¹ | `LEICHT`/`MITTEL`/`STARK`/`KRITISCH` | yes | on event |
-| `boat/alarm/impact_active` ¹ | `true` / `false` | yes | on event |
+| `boat/alarm/impact_g` ¹ ² | peak g value | yes | on event |
+| `boat/alarm/impact_severity` ¹ ² | `LEICHT`/`MITTEL`/`STARK`/`KRITISCH` | yes | on event |
+| `boat/alarm/impact_active` ¹ ² | `true` / `false` | yes | on event |
 
-¹ In **TEST** mode the prefix is `boat/test/alarm/` instead of `boat/alarm/`.
+¹ In **TEST** mode the impact base is `boat/test/alarm/impact` instead of the configured live base.
+² Editable in the web UI (**WiFi & MQTT**): `topic_pitch`, `topic_roll`, and the impact base `topic_impact` (gets `_g` / `_severity` / `_active` appended). Defaults shown.
 
 ### 5.3 Subscribed topics (broker → ESP32)
 
@@ -273,6 +274,8 @@ Survives firmware updates. Only changeable via the portal or clearable by a fact
 | `pitch_off` / `roll_off` | float | `0.0` | IMU mounting offset (°) |
 | `pitch_inv` / `roll_inv` | bool | `false` | Axis inversion |
 | `axes_swap` | bool | `false` | Swap pitch/roll axes (IMU mounted rotated 90°) |
+| `topic_pitch` / `topic_roll` | string | `boat/io/pitch` / `boat/io/roll` | IMU attitude topics |
+| `topic_impact` | string | `boat/alarm/impact` | Impact base topic (`_g`/`_severity`/`_active` appended) |
 | `ap_ssid` | string | `BoatOpenIO-Setup` | AP name |
 | `ap_pass` | string | `boatopenio` | AP password |
 | `portal_user` | string | `admin` | Portal user |

@@ -55,6 +55,9 @@ MQTT Server     IP oder Hostname, z.B. 192.168.1.100
 MQTT Port       Standard: 1883
 MQTT User       Leer wenn keine Authentifizierung nötig
 MQTT Passwort   Leer = bestehendes Passwort beibehalten
+Topic Pitch     Standard: boat/io/pitch
+Topic Roll      Standard: boat/io/roll
+Topic Impact    Basis, Standard: boat/alarm/impact (+ _g / _severity / _active)
 ```
 
 → In NVS gespeichert. Wirksam nach Neustart.

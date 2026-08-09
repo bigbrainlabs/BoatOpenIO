@@ -137,17 +137,18 @@ Nur als **aktiv** markierte Kanäle werden gelesen und publiziert. Getaktet alle
 | Topic | Payload | Retained | Intervall |
 |-------|---------|:--------:|-----------|
 | `boat/io/<sensor>` oder eigener `topic` | Float-Wert | nein | 2 s |
-| `boat/io/pitch` | Float °, korrigiert | ja | 1 s |
-| `boat/io/roll` | Float °, korrigiert | ja | 1 s |
+| `boat/io/pitch` ² | Float °, korrigiert | ja | 1 s |
+| `boat/io/roll` ² | Float °, korrigiert | ja | 1 s |
 | `boatopenio/status` | `online` / `offline` | ja | 10 s + LWT |
 | `boatopenio/uptime` | Sekunden seit Boot | nein | 10 s |
 | `boatopenio/rssi` | WLAN-Signal (dBm) | nein | 10 s |
 | `boatopenio/mode` | `TEST` / `LIVE` | ja | 10 s |
-| `boat/alarm/impact_g` ¹ | Peak-G-Wert | ja | bei Ereignis |
-| `boat/alarm/impact_severity` ¹ | `LEICHT`/`MITTEL`/`STARK`/`KRITISCH` | ja | bei Ereignis |
-| `boat/alarm/impact_active` ¹ | `true` / `false` | ja | bei Ereignis |
+| `boat/alarm/impact_g` ¹ ² | Peak-G-Wert | ja | bei Ereignis |
+| `boat/alarm/impact_severity` ¹ ² | `LEICHT`/`MITTEL`/`STARK`/`KRITISCH` | ja | bei Ereignis |
+| `boat/alarm/impact_active` ¹ ² | `true` / `false` | ja | bei Ereignis |
 
-¹ Im **TEST**-Modus lautet das Präfix `boat/test/alarm/` statt `boat/alarm/`.
+¹ Im **TEST**-Modus lautet die Impact-Basis `boat/test/alarm/impact` statt der konfigurierten Live-Basis.
+² Im Web-UI editierbar (**WiFi & MQTT**): `topic_pitch`, `topic_roll` und die Impact-Basis `topic_impact` (bekommt `_g` / `_severity` / `_active` angehängt). Standardwerte gezeigt.
 
 ### 5.3 Abonnierte Topics (Broker → ESP32)
 
@@ -281,6 +282,8 @@ Im Ω-Modus liefert „A0 lesen" den zurückgerechneten Widerstand.
 | `pitch_off` / `roll_off` | float | `0.0` | IMU-Montage-Offset (°) |
 | `pitch_inv` / `roll_inv` | bool | `false` | Achsen-Invertierung |
 | `axes_swap` | bool | `false` | Pitch/Roll tauschen (IMU um 90° gedreht montiert) |
+| `topic_pitch` / `topic_roll` | string | `boat/io/pitch` / `boat/io/roll` | IMU-Lage-Topics |
+| `topic_impact` | string | `boat/alarm/impact` | Impact-Basis-Topic (`_g`/`_severity`/`_active` angehängt) |
 | `ap_ssid` | string | `BoatOpenIO-Setup` | AP-Name |
 | `ap_pass` | string | `boatopenio` | AP-Passwort |
 | `portal_user` | string | `admin` | Portal-Benutzer |
