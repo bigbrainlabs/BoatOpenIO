@@ -2,7 +2,7 @@
 
 ## Voraussetzungen
 
-**Hardware** — das v2-Platinen-Set (Eingang, Main, ESP32-Adapter, VCC). Entweder die Gerber-Dateien aus `hardware/v2/*/gerber/` selbst bei einem Platinenhersteller bestellen, oder das fertige Set bei [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) kaufen (nackte Platinen — Bauteile laut Stückliste in der [README](../README_de.md)).
+**Hardware** — das v2-Platinen-Set (Eingang, Main, ESP32-Adapter, VCC). Die Gerber-Dateien aus `hardware/v2/*/gerber/` bei einem Platinenhersteller bestellen, oder direkt über die [PCBWay-Projektseite](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44) (nackte Platinen — Bauteile laut Stückliste in der [README](../README_de.md)).
 
 **Software**
 

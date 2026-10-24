@@ -23,9 +23,9 @@ Wer das Projekt nützlich findet und unterstützen möchte: Die Bücher kaufen i
 
 **[👉 Logbuch ohne Pose auf Amazon](https://amzn.to/4e5swN6)**
 
-Keine Lust, selbst bei einem Platinenhersteller zu bestellen? Das gefertigte Platinen-Set gibt es fertig bei Tindie — dasselbe Design wie die Gerber-Dateien in diesem Repo, die weiterhin frei herunterladbar und selbst bestellbar bleiben.
-
-**[👉 BoatOpenIO v2 PCB-Set (4 Platinen) bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)**
+> **Hinweis:** Das fertige Platinen-Set wird nicht mehr über Tindie verkauft. Durch die neue EU-Verordnung zum Versand ins Ausland ist der Aufwand für mich als Privatperson nicht mehr verhältnismäßig. Die Gerber-Dateien in diesem Repo bleiben frei herunterladbar.
+>
+> **Die Platinen können direkt bei PCBWay erworben werden** — ich habe sie dort als Projekte hinterlegt, du musst also nichts selbst hochladen: **[👉 BoatOpenIO-Projekte bei PCBWay](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
 
 ### 🏭 Platinen gesponsert von PCBWay
 
@@ -85,7 +85,7 @@ Vier separate Platinen, verbunden über IDC-Flachbandkabel: **Eingangsboard**, *
 
 ![Der nackte v2-Platinensatz: Eingangsboard, Mainboard, ESP32-Adapterboard und VCC-Verteiler](images/v2-pcb-set.jpg)
 
-> 🛒 **Nicht selbst beim Platinenhersteller bestellen?** Das gefertigte Set aller vier Platinen gibt es fertig: **[BoatOpenIO v2 PCB-Set bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)** — nackte Platinen, Bauteile nicht enthalten (siehe Stückliste weiter unten).
+> 🛒 **Platinen bestellen:** Alle vier Platinen sind als Projekte bei PCBWay hinterlegt und können dort direkt erworben werden: **[PCBWay-Projektseite](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)** — oder die Gerber-Dateien bei einem Platinenhersteller deiner Wahl hochladen. Nackte Platinen, Bauteile siehe Stückliste weiter unten.
 
 ```
 Eingangsboard ──20-pol Flachband──> Mainboard <──16-pol Flachband── ESP32-Adapterboard
@@ -334,13 +334,13 @@ boatopenio/status          → online
 | 17 | Flachbandkabel + IDC 16-pol | Mainboard ↔ ESP32-Adapterboard | [Amazon](https://amzn.to/3SuZ3DQ) |  |
 | 18 | Pfostenbuchse 2×05 (10-pol) | SIG-OUT Vorbereitung Mainboard | — |  |
 | 19 | JST 3-Pin Stecker | VCC-Board ↔ Mainboard | [Amazon](https://amzn.to/4ush82N) |  |
-| 20 | PCB Set (4 Platinen) | Gerber in `hardware/v2/` selbst bestellen, oder fertiges Set kaufen | [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) |  |
+| 20 | PCB Set (4 Platinen) | Gerber in `hardware/v2/` selbst bestellen | [PCBWay](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44) |  |
 
 > Amazon: schnelle Lieferung. AliExpress-Links folgen.
 >
 > **Position 10 kommt von Conrad**, nicht von Amazon: dasselbe Bourns-Bauteil kostet dort rund 1,30 € statt etwa 10 €. Bei den benötigten 2 Stück spart das knapp 18 €. Der Amazon-Link daneben ist nur die Ausweichquelle.
 >
-> Das Tindie-Set deckt nur Position 20 ab — die nackten Platinen. Die Positionen 1–19 sind die Bauteile, die du zusätzlich brauchst.
+> Position 20 sind nur die nackten Platinen. Die Positionen 1–19 sind die Bauteile, die du zusätzlich brauchst.
 
 ---
 
@@ -408,4 +408,4 @@ Frei nutzbar, veränderbar und verteilbar – abgeleitete Werke müssen ebenfall
 
 > *„Selbstgemacht ist wissen was drin ist und bezahlbar."*
 
-📖 [Buchreihe auf Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO) · 🛒 [PCB-Set bei Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)
+📖 [Buchreihe auf Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO)

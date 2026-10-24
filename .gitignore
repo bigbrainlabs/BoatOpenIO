@@ -7,3 +7,4 @@ laboratory/
 # KiCad Sperr-/Autosave-Dateien und benutzerspezifischer UI-Zustand
 **/~*.lck
 **/#auto_saved_files#
+**/.history/

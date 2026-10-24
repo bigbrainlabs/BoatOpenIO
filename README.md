@@ -23,9 +23,9 @@ If you find this project useful and want to support it: buying the books is the 
 
 **[👉 Logbook Without Posing on Amazon](https://amzn.to/4e5swN6)**
 
-Prefer not to deal with a PCB fab? The manufactured board set is available on Tindie — same design as the Gerbers in this repo, which stay free to download and order yourself.
-
-**[👉 BoatOpenIO v2 PCB Set (4 boards) on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)**
+> **Note:** The ready-made board set is no longer sold on Tindie. Due to the new EU regulation on shipping abroad, the effort is no longer proportionate for me as a private individual. The Gerber files in this repo remain free to download.
+>
+> **The boards can be purchased directly from PCBWay** — I've set them up there as projects, so there's nothing to upload yourself: **[👉 BoatOpenIO projects on PCBWay](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)**
 
 ### 🏭 Boards sponsored by PCBWay
 
@@ -85,7 +85,7 @@ Four separate boards, connected via IDC ribbon cables: **input board**, **main b
 
 ![The bare v2 board set: input board, main board, ESP32 adapter board and VCC distributor](images/v2-pcb-set.jpg)
 
-> 🛒 **Don't want to order at a PCB fab?** The fabricated set of all four boards is available ready-made: **[BoatOpenIO v2 PCB Set on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)** — bare PCBs, components not included (see the parts list below).
+> 🛒 **Ordering the boards:** All four boards are set up as projects on PCBWay and can be purchased there directly: **[PCBWay project page](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44)** — or upload the Gerbers to a PCB fab of your choice. Bare PCBs, components per the parts list below.
 
 ```
 Input Board ──20-pin ribbon──> Main Board <──16-pin ribbon── ESP32 Adapter Board
@@ -334,13 +334,13 @@ boatopenio/status         → online
 | 17 | Ribbon cable + IDC 16-pin | Main board ↔ ESP32 adapter board | [Amazon](https://amzn.to/3SuZ3DQ) |  |
 | 18 | Pin socket 2×05 (10-pin) | SIG-OUT prep on main board | — |  |
 | 19 | JST 3-pin connector | VCC board ↔ main board | [Amazon](https://amzn.to/4ush82N) |  |
-| 20 | PCB set (4 boards) | Order the Gerbers in `hardware/v2/` yourself, or get the ready-made set | [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) |  |
+| 20 | PCB set (4 boards) | Order the Gerbers in `hardware/v2/` yourself | [PCBWay](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44) |  |
 
 > Amazon: faster delivery. AliExpress links to follow.
 >
 > **Item 10 comes from Conrad**, not Amazon: the same Bourns part is around €1.30 there versus roughly €10. For the 2 pieces needed that saves nearly €18. The Amazon link beside it is just the fallback source.
 >
-> The Tindie set covers item 20 only — bare boards. Items 1–19 are the components you still need.
+> Item 20 is the bare boards only. Items 1–19 are the components you still need.
 
 ---
 
@@ -408,4 +408,4 @@ Free to use, modify, distribute — derivative works must also be GPL-3.0. See [
 
 > *"Build it yourself and you know what's in it — and what it cost."*
 
-📖 [Book series on Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO) · 🛒 [PCB set on Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/)
+📖 [Book series on Amazon](https://amzn.to/4e5swN6) · 🔧 [BoatOS](https://github.com/bigbrainlabs/BoatOS) · ⚡ [BoatOpenIO](https://github.com/bigbrainlabs/BoatOpenIO)

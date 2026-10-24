@@ -2,7 +2,7 @@
 
 ## Requirements
 
-**Hardware** — the v2 board set (input, main, ESP32 adapter, VCC). Either order the Gerbers in `hardware/v2/*/gerber/` at a PCB fab yourself, or get the ready-made set on [Tindie](https://www.tindie.com/products/bigbrainlabs/boatopenio-v2-pcb-set-4-boards/) (bare boards — components per the parts list in the [README](../README.md)).
+**Hardware** — the v2 board set (input, main, ESP32 adapter, VCC). Order the Gerbers in `hardware/v2/*/gerber/` at a PCB fab, or directly via the [PCBWay project page](https://www.pcbway.com/project/member/?bmbno=0EDF2E80-7ABD-44) (bare boards — components per the parts list in the [README](../README.md)).
 
 **Software**
 
